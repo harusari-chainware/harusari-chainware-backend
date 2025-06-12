@@ -5,6 +5,7 @@ spring:
 
   jackson:
     time-zone: Asia/Seoul
+    date-format: yyyy-MM-dd HH:mm:ss
 
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
