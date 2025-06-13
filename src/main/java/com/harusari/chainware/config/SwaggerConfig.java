@@ -1,4 +1,4 @@
-package com.harusari.chainware.common.config;
+package com.harusari.chainware.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
