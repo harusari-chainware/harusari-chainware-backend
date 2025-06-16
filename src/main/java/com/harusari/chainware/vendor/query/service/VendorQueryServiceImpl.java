@@ -5,6 +5,7 @@ import com.harusari.chainware.vendor.query.dto.*;
 import com.harusari.chainware.vendor.query.mapper.VendorQueryMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,6 +15,8 @@ public class VendorQueryServiceImpl implements VendorQueryService {
 
     private final VendorQueryMapper vendorMapper;
 
+    @Override
+    @Transactional
     public VendorListResponse getVendors(VendorSearchRequestDto request) {
         List<VendorListDto> vendors = vendorMapper.findVendors(request);
         long totalCount = vendorMapper.countVendors(request);
@@ -29,6 +32,8 @@ public class VendorQueryServiceImpl implements VendorQueryService {
                 .build();
     }
 
+    @Override
+    @Transactional
     public VendorDetailResponse getVendorDetail(Long vendorId) {
         VendorDetailDto vendorDetail = vendorMapper.findVendorDetailById(vendorId);
         return VendorDetailResponse.builder()

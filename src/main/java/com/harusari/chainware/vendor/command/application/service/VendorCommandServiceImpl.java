@@ -35,6 +35,7 @@ public class VendorCommandServiceImpl implements VendorCommandService {
         return vendorRepository.save(vendor).getVendorId();
     }
 
+    @Override
     @Transactional
     public void updateVendor(Long vendorId, VendorUpdateRequestDto dto) {
         Vendor vendor = vendorRepository.findById(vendorId)
@@ -54,6 +55,7 @@ public class VendorCommandServiceImpl implements VendorCommandService {
         );
     }
 
+    @Override
     @Transactional
     public void changeVendorStatus(Long vendorId, VendorStatusChangeRequestDto dto) {
         Vendor vendor = vendorRepository.findById(vendorId)

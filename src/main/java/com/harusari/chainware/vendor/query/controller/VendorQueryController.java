@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/vendors")
+@RequestMapping("/api/v1/vendors")
 @RequiredArgsConstructor
 public class VendorQueryController {
 
@@ -20,7 +20,7 @@ public class VendorQueryController {
     }
 
     @GetMapping("/{vendorId}")
-    public VendorDetailResponse findVendorDetail(@PathVariable Long vendorId) {
+    public VendorDetailResponse getVendorDetail(@PathVariable Long vendorId) {
         return vendorQueryService.getVendorDetail(vendorId);
     }
 }

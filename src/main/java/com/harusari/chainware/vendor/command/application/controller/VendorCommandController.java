@@ -1,7 +1,6 @@
 package com.harusari.chainware.vendor.command.application.controller;
 
 import com.harusari.chainware.common.dto.ApiResponse;
-import com.harusari.chainware.vendor.command.application.dto.VendorCreateRequestDto;
 import com.harusari.chainware.vendor.command.application.dto.VendorStatusChangeRequestDto;
 import com.harusari.chainware.vendor.command.application.dto.VendorUpdateRequestDto;
 import com.harusari.chainware.vendor.command.application.service.VendorCommandService;
@@ -11,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/vendors")
+@RequestMapping("/api/v1/vendors")
 @RequiredArgsConstructor
 public class VendorCommandController {
 
@@ -27,7 +26,7 @@ public class VendorCommandController {
 
     // 거래처 기본 정보 수정
     @PutMapping("/{vendorId}")
-    public ResponseEntity<ApiResponse<Void>> updateVendor(
+    public ResponseEntity<ApiResponse<Void>> modifyVendor(
             @PathVariable Long vendorId,
             @RequestBody @Valid VendorUpdateRequestDto requestDto
     ) {
@@ -37,7 +36,7 @@ public class VendorCommandController {
 
     // 거래처 거래 상태 수정
     @PutMapping("/{vendorId}/status")
-    public ResponseEntity<ApiResponse<Void>> changeVendorStatus(
+    public ResponseEntity<ApiResponse<Void>> modifyVendorStatus(
             @PathVariable Long vendorId,
             @RequestBody @Valid VendorStatusChangeRequestDto dto
     ) {
