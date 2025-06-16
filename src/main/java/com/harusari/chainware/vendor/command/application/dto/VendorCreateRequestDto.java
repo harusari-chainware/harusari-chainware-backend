@@ -1,0 +1,18 @@
+package com.harusari.chainware.vendor.command.application.dto;
+
+import com.harusari.chainware.vendor.command.domain.aggregate.VendorStatus;
+import com.harusari.chainware.vendor.command.domain.aggregate.VendorType;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import java.time.LocalDate;
+
+public record VendorCreateRequestDto(
+        @NotNull Long memberId, @NotBlank String vendorName,
+        @NotBlank String vendorContact, @NotNull VendorType vendorType,
+        @NotBlank String vendorAddress, @NotBlank String vendorTaxId,
+        @NotBlank String vendorMemo, @NotNull VendorStatus vendorStatus,
+        @NotBlank String agreement, @NotNull LocalDate vendorStartDate,
+        @NotNull LocalDate vendorEndDate
+) {
+}
