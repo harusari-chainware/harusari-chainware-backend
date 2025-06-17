@@ -11,7 +11,6 @@ public class VendorListDto {
 
     private Long vendorId;
     private String vendorName;
-    private String vendorContact;
     private VendorType vendorType;
     private String vendorAddress;
     private VendorStatus vendorStatus;

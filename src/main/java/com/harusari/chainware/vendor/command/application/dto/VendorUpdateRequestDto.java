@@ -8,10 +8,10 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 public record VendorUpdateRequestDto (
-        @NotBlank String vendorName, @NotBlank String vendorContact,
-        @NotNull VendorType vendorType, @NotBlank String vendorAddress,
-        @NotBlank String vendorTaxId, @NotBlank String vendorMemo,
-        @NotNull VendorStatus vendorStatus, @NotBlank String agreement,
-        @NotNull LocalDate vendorStartDate, @NotNull LocalDate vendorEndDate
+        @NotBlank String vendorName, @NotNull VendorType vendorType,
+        @NotBlank String vendorAddress, @NotBlank String vendorTaxId,
+        @NotBlank String vendorMemo, @NotNull VendorStatus vendorStatus,
+        @NotBlank String agreement, @NotNull LocalDate vendorStartDate,
+        @NotNull LocalDate vendorEndDate
 ) {
 }

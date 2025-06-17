@@ -9,10 +9,9 @@ import java.time.LocalDate;
 
 public record VendorCreateRequestDto(
         @NotNull Long memberId, @NotBlank String vendorName,
-        @NotBlank String vendorContact, @NotNull VendorType vendorType,
-        @NotBlank String vendorAddress, @NotBlank String vendorTaxId,
-        @NotBlank String vendorMemo, @NotNull VendorStatus vendorStatus,
-        @NotBlank String agreement, @NotNull LocalDate vendorStartDate,
-        @NotNull LocalDate vendorEndDate
+        @NotNull VendorType vendorType, @NotBlank String vendorAddress,
+        @NotBlank String vendorTaxId, @NotBlank String vendorMemo,
+        @NotNull VendorStatus vendorStatus, @NotBlank String agreement,
+        @NotNull LocalDate vendorStartDate, @NotNull LocalDate vendorEndDate
 ) {
 }

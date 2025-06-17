@@ -8,10 +8,10 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
+@Getter
 @Entity
 @Table(name = "vendor")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Getter
 public class Vendor {
 
     @Id
@@ -25,12 +25,11 @@ public class Vendor {
     @Column(name = "vendor_name")
     private String vendorName;
 
-    @Column(name = "vendor_contact")
-    private String vendorContact;
-
     @Enumerated(EnumType.STRING)
-    @Column(name = "vendor_type", nullable = false,
-            columnDefinition = "ENUM('SUPPLIER', 'TRUST_CONTRACTOR', 'LOGISTICS', 'AGENCY') COMMENT '업체 유형'")
+    @Column(
+            name = "vendor_type",
+            columnDefinition = "ENUM('SUPPLIER', 'TRUST_CONTRACTOR', 'LOGISTICS', 'AGENCY') COMMENT '업체 유형'"
+    )
     private VendorType vendorType;
 
     @Column(name = "vendor_address")
@@ -43,8 +42,10 @@ public class Vendor {
     private String vendorMemo;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "vendor_status", nullable = false,
-            columnDefinition = "ENUM('ACTIVE', 'EXPIRED') COMMENT '계약 상태'")
+    @Column(
+            name = "vendor_status",
+            columnDefinition = "ENUM('ACTIVE', 'EXPIRED') COMMENT '계약 상태'"
+    )
     private VendorStatus vendorStatus;
 
     @Column(name = "agreement")
@@ -58,13 +59,12 @@ public class Vendor {
 
     @Builder
     public Vendor(
-            Long memberId, String vendorName, String vendorContact, VendorType vendorType,
-            String vendorAddress, String vendorTaxId, String vendorMemo, VendorStatus vendorStatus,
+            Long memberId, String vendorName, VendorType vendorType, String vendorAddress,
+            String vendorTaxId, String vendorMemo, VendorStatus vendorStatus,
             String agreement, LocalDate vendorStartDate, LocalDate vendorEndDate
     ){
         this.memberId = memberId;
         this.vendorName = vendorName;
-        this.vendorContact = vendorContact;
         this.vendorType = vendorType;
         this.vendorAddress = vendorAddress;
         this.vendorTaxId = vendorTaxId;
@@ -73,15 +73,14 @@ public class Vendor {
         this.agreement = agreement;
         this.vendorStartDate = vendorStartDate;
         this.vendorEndDate = vendorEndDate;
-
     }
+
     public void update(
-            String vendorName, String vendorContact, VendorType vendorType, String vendorAddress,
+            String vendorName, VendorType vendorType, String vendorAddress,
             String vendorTaxId, String vendorMemo, VendorStatus vendorStatus,
             String agreement, LocalDate vendorStartDate, LocalDate vendorEndDate
     ) {
         this.vendorName = vendorName;
-        this.vendorContact = vendorContact;
         this.vendorType = vendorType;
         this.vendorAddress = vendorAddress;
         this.vendorTaxId = vendorTaxId;
@@ -95,4 +94,5 @@ public class Vendor {
     public void changeStatus(VendorStatus newStatus) {
         this.vendorStatus = newStatus;
     }
+
 }
