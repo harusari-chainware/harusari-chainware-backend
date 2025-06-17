@@ -14,7 +14,6 @@ public class VendorDetailDto {
     private String name;
     private String phoneNumber;
     private String vendorName;
-    private String vendorContact;
     private VendorType vendorType;
     private String vendorAddress;
     private String vendorTaxId;

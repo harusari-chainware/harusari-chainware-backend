@@ -21,7 +21,6 @@ public class VendorCommandServiceImpl implements VendorCommandService {
         Vendor vendor = Vendor.builder()
                 .memberId(dto.memberId())
                 .vendorName(dto.vendorName())
-                .vendorContact(dto.vendorContact())
                 .vendorType(dto.vendorType())
                 .vendorAddress(dto.vendorAddress())
                 .vendorTaxId(dto.vendorTaxId())
@@ -43,7 +42,6 @@ public class VendorCommandServiceImpl implements VendorCommandService {
 
         vendor.update(
                 dto.vendorName(),
-                dto.vendorContact(),
                 dto.vendorType(),
                 dto.vendorAddress(),
                 dto.vendorTaxId(),
