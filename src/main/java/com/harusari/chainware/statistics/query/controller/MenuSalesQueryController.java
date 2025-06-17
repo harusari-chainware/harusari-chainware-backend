@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/statistics/menu-sales")
+@RequestMapping("/api/v1/statistics/menu-sales")
 @RequiredArgsConstructor
 public class MenuSalesQueryController {
 
@@ -27,4 +27,13 @@ public class MenuSalesQueryController {
     ) {
         return menuSalesQueryService.getMenuSalesByPeriod(franchiseId, periodType, targetDate);
     }
+
+    @GetMapping("/headquarters")
+    public List<MenuSalesResponse> getMenuSalesForHQ(
+            @RequestParam String periodType,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
+    ) {
+        return menuSalesQueryService.getMenuSalesForHeadquarters(periodType, targetDate);
+    }
+
 }

@@ -14,4 +14,9 @@ public interface MenuSalesMapper {
             @Param("periodType") String periodType,
             @Param("targetDate") LocalDate targetDate
     );
+
+    List<MenuSalesResponse> selectMenuSalesForHeadquarters(
+            @Param("periodType") String periodType,
+            @Param("targetDate") LocalDate targetDate
+    );
 }
