@@ -48,7 +48,7 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-  mapper-locations: mappers/**/*.xml
+  mapper-locations: classpath:/mappers/**/*.xml
   type-aliases-package: com.harusari.chainware
 
 jwt:
