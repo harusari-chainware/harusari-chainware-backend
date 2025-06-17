@@ -76,10 +76,23 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
 
+	// mapstruct
+	implementation 'org.mapstruct:mapstruct:1.6.3'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+	testAnnotationProcessor "org.mapstruct:mapstruct-processor:1.6.3"
+
 	// junit
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// test container
+	testImplementation 'org.testcontainers:testcontainers'
+	testImplementation 'org.testcontainers:junit-jupiter'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+tasks.withType(JavaCompile) {
+	options.compilerArgs += ['-Amapstruct.defaultComponentModel=spring']
 }
