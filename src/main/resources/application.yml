@@ -63,10 +63,6 @@ server:
       enabled: true
       force: true
 
-logging:
-  level:
-    org.hibernate.SQL: debug
-
 springdoc:
   default-consumes-media-type: application/json;charset=UTF-8
   default-produces-media-type: application/json;charset=UTF-8
