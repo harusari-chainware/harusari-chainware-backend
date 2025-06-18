@@ -7,6 +7,7 @@ import com.harusari.chainware.requisition.query.dto.response.RequisitionSummaryR
 import com.harusari.chainware.requisition.query.mapper.RequisitionQueryMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,11 +18,13 @@ public class RequisitionQueryServiceImpl implements RequisitionQueryService {
     private final RequisitionQueryMapper requisitionQueryMapper;
 
     @Override
+    @Transactional
     public List<RequisitionSummaryResponse> getMyRequisitions(Long memberId, RequisitionSearchCondition condition) {
         return requisitionQueryMapper.findMyRequisitions(memberId, condition);
     }
 
     @Override
+    @Transactional
     public RequisitionDetailResponse getRequisitionDetail(Long memberId, Long requisitionId) {
         RequisitionDetailResponse detail = requisitionQueryMapper.findRequisitionById(requisitionId, memberId);
         if (detail == null) {

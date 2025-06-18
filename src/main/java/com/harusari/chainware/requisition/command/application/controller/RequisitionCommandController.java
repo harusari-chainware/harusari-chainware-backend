@@ -32,7 +32,7 @@ public class RequisitionCommandController {
 
     @Operation(summary = "품의서 상신", description = "로그인한 사용자가 작성한 임시 저장 품의서를 상신한다.")
     @ApiResponse(responseCode = "200", description = "상신 완료")
-    @PatchMapping("/{requisitionId}/submit")
+    @PutMapping("/{requisitionId}/submit")
     public ResponseEntity<Void> submitRequisition(
             @AuthenticationPrincipal CustomUserDetails userDetail,
             @PathVariable @NotNull Long requisitionId
@@ -43,7 +43,7 @@ public class RequisitionCommandController {
     }
 
     @Operation(summary = "품의서 승인", description = "결재자로 입력된 책임 관리자가 품의서를 승인한다.")
-    @PatchMapping("/{id}/approve")
+    @PutMapping("/{id}/approve")
     public ResponseEntity<Void> approveRequisition(
             @AuthenticationPrincipal CustomUserDetails userDetail,
             @PathVariable Long id
@@ -53,7 +53,7 @@ public class RequisitionCommandController {
     }
 
     @Operation(summary = "품의서 반려", description = "결재자로 입력된 책임 관리자가 품의서를 반려한다.")
-    @PatchMapping("/{id}/reject")
+    @PutMapping("/{id}/reject")
     public ResponseEntity<Void> rejectRequisition(
             @AuthenticationPrincipal CustomUserDetails userDetail,
             @PathVariable Long id,
@@ -83,7 +83,7 @@ public class RequisitionCommandController {
         return ResponseEntity.ok(id);
     }
 
-    @PatchMapping("/{requisitionId}/submit/test")
+    @PutMapping("/{requisitionId}/submit/test")
     public ResponseEntity<Void> submitRequisition(
             @PathVariable Long requisitionId,
             @RequestParam(name = "memberId", defaultValue = "1") Long memberId
@@ -93,7 +93,7 @@ public class RequisitionCommandController {
     }
 
     // 테스트 - 승인
-    @PatchMapping("/{requisitionId}/approve/test")
+    @PutMapping("/{requisitionId}/approve/test")
     public ResponseEntity<Void> approveRequisitionTest(
             @PathVariable Long requisitionId,
             @RequestParam(name = "memberId", defaultValue = "2") Long memberId
@@ -103,7 +103,7 @@ public class RequisitionCommandController {
     }
 
     // 테스트 - 반려
-    @PatchMapping("/{requisitionId}/reject/test")
+    @PutMapping("/{requisitionId}/reject/test")
     public ResponseEntity<Void> rejectRequisitionTest(
             @PathVariable Long requisitionId,
             @RequestParam(name = "memberId", defaultValue = "2") Long memberId,
