@@ -16,7 +16,7 @@ public class RequisitionQueryController {
 
     private final RequisitionQueryService requisitionQueryService;
 
-/*    // 🔍 내 품의서 목록 조회
+/*  // 내 품의서 목록 조회
     @GetMapping("/my")
     public List<RequisitionSummaryResponse> getMyRequisitions(
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -25,7 +25,7 @@ public class RequisitionQueryController {
         return requisitionQueryService.getMyRequisitions(memberId, condition);
     }
 
-    // 📄 품의서 상세 조회
+    // 품의서 상세 조회
     @GetMapping("/{id}")
     public RequisitionDetailResponse getRequisitionDetail(
             @AuthenticationPrincipal CustomUserDetails userDetails

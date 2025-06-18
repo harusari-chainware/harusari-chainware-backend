@@ -5,26 +5,7 @@
 
 <mapper namespace="com.harusari.chainware.requisition.query.mapper.RequisitionQueryMapper">
 
-    <!-- 🔍 내 품의서 목록 조회 -->
-<!--    <select id="findMyRequisitions" resultType="com.harusari.chainware.requisition.query.dto.response.RequisitionSummaryResponse">
-        SELECT
-        r.requisition_id,
-        r.requisition_code,
-        r.requisition_status,
-        r.product_count,
-        r.total_quantity,
-        r.total_price,
-        r.created_at
-        FROM requisition r
-        WHERE
-        (r.created_member_id = #{memberId} OR r.approved_member_id = #{memberId})
-        <if test="condition.status != null">
-            AND r.requisition_status = #{condition.status}
-        </if>
-        ORDER BY r.created_at DESC
-        LIMIT #{condition.size}
-        OFFSET #{condition.offset}
-    </select>-->
+
     <select id="findMyRequisitions" resultType="com.harusari.chainware.requisition.query.dto.response.RequisitionSummaryResponse">
         SELECT
         r.requisition_id,
@@ -52,7 +33,7 @@
         OFFSET #{condition.offset}
     </select>
 
-    <!-- 📄 품의서 단건 조회 -->
+    <!-- 품의서 단건 조회 -->
     <select id="findRequisitionById" resultType="com.harusari.chainware.requisition.query.dto.response.RequisitionDetailResponse">
         SELECT
             r.requisition_id,
@@ -73,7 +54,7 @@
           AND (r.created_member_id = #{memberId} OR r.approved_member_id = #{memberId})
     </select>
 
-    <!-- 📦 품의서 상세 아이템 목록 -->
+    <!-- 품의서 상세 아이템 목록 -->
     <select id="findItemsByRequisitionId" resultType="com.harusari.chainware.requisition.query.dto.response.RequisitionItemResponse">
         SELECT
             rd.requisition_detail_id,
