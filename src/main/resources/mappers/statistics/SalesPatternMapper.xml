@@ -25,4 +25,90 @@
         ORDER BY hour
     </select>
 
+    <select id="selectWeekdaySalesByFranchise" resultType="com.harusari.chainware.statistics.query.dto.WeekdaySalesResponse">
+        SELECT
+        CASE DAYOFWEEK(s.sold_at)
+        WHEN 1 THEN '일'
+        WHEN 2 THEN '월'
+        WHEN 3 THEN '화'
+        WHEN 4 THEN '수'
+        WHEN 5 THEN '목'
+        WHEN 6 THEN '금'
+        WHEN 7 THEN '토'
+        END AS weekday,
+        COUNT(DISTINCT DATE(s.sold_at)) AS dayCount,
+        SUM(s.total_amount) AS totalAmount,
+        ROUND(SUM(s.total_amount) / COUNT(DISTINCT DATE(s.sold_at))) AS avgAmount
+        FROM sales s
+        WHERE s.franchise_id = #{franchiseId}
+        AND s.sold_at BETWEEN DATE_SUB(#{targetDate}, INTERVAL 30 DAY)
+        AND DATE_SUB(#{targetDate}, INTERVAL 1 DAY)
+        GROUP BY DAYOFWEEK(s.sold_at)
+        ORDER BY DAYOFWEEK(s.sold_at)
+    </select>
+
+    <!-- 본사 -->
+    <select id="selectWeekdaySalesForHeadquarters" resultType="com.harusari.chainware.statistics.query.dto.WeekdaySalesResponse">
+        SELECT
+        CASE DAYOFWEEK(s.sold_at)
+        WHEN 1 THEN '일'
+        WHEN 2 THEN '월'
+        WHEN 3 THEN '화'
+        WHEN 4 THEN '수'
+        WHEN 5 THEN '목'
+        WHEN 6 THEN '금'
+        WHEN 7 THEN '토'
+        END AS weekday,
+        COUNT(DISTINCT DATE(s.sold_at)) AS dayCount,
+        SUM(s.total_amount) AS totalAmount,
+        ROUND(SUM(s.total_amount) / COUNT(DISTINCT DATE(s.sold_at))) AS avgAmount
+        FROM sales s
+        WHERE s.sold_at BETWEEN DATE_SUB(#{targetDate}, INTERVAL 30 DAY)
+        AND DATE_SUB(#{targetDate}, INTERVAL 1 DAY)
+        GROUP BY DAYOFWEEK(s.sold_at)
+        ORDER BY DAYOFWEEK(s.sold_at)
+    </select>
+
+    <select id="selectDailySalesByFranchise" resultType="com.harusari.chainware.statistics.query.dto.DailySalesResponse">
+        SELECT
+        d.generated_date AS date,
+        COALESCE(SUM(s.total_amount), 0) AS totalAmount
+        FROM (
+        SELECT DATE_SUB(#{targetDate}, INTERVAL seq.seq DAY) AS generated_date
+        FROM (
+        SELECT 0 AS seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL
+        SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL
+        SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12 UNION ALL SELECT 13 UNION ALL SELECT 14 UNION ALL
+        SELECT 15 UNION ALL SELECT 16 UNION ALL SELECT 17 UNION ALL SELECT 18 UNION ALL SELECT 19 UNION ALL
+        SELECT 20 UNION ALL SELECT 21 UNION ALL SELECT 22 UNION ALL SELECT 23 UNION ALL SELECT 24 UNION ALL
+        SELECT 25 UNION ALL SELECT 26 UNION ALL SELECT 27 UNION ALL SELECT 28 UNION ALL SELECT 29
+        ) AS seq
+        ) AS d
+        LEFT JOIN sales s ON DATE(s.sold_at) = d.generated_date AND s.franchise_id = #{franchiseId}
+        WHERE s.sold_at IS NULL OR (s.sold_at BETWEEN DATE_SUB(#{targetDate}, INTERVAL 29 DAY) AND #{targetDate})
+        GROUP BY d.generated_date
+        ORDER BY d.generated_date
+    </select>
+
+    <select id="selectDailySalesForHeadquarters" resultType="com.harusari.chainware.statistics.query.dto.DailySalesResponse">
+        SELECT
+        d.generated_date AS date,
+        COALESCE(SUM(s.total_amount), 0) AS totalAmount
+        FROM (
+        SELECT DATE_SUB(#{targetDate}, INTERVAL seq.seq DAY) AS generated_date
+        FROM (
+        SELECT 0 AS seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL
+        SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL
+        SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12 UNION ALL SELECT 13 UNION ALL SELECT 14 UNION ALL
+        SELECT 15 UNION ALL SELECT 16 UNION ALL SELECT 17 UNION ALL SELECT 18 UNION ALL SELECT 19 UNION ALL
+        SELECT 20 UNION ALL SELECT 21 UNION ALL SELECT 22 UNION ALL SELECT 23 UNION ALL SELECT 24 UNION ALL
+        SELECT 25 UNION ALL SELECT 26 UNION ALL SELECT 27 UNION ALL SELECT 28 UNION ALL SELECT 29
+        ) AS seq
+        ) AS d
+        LEFT JOIN sales s ON DATE(s.sold_at) = d.generated_date
+        WHERE s.sold_at IS NULL OR (s.sold_at BETWEEN DATE_SUB(#{targetDate}, INTERVAL 29 DAY) AND #{targetDate})
+        GROUP BY d.generated_date
+        ORDER BY d.generated_date
+    </select>
+
 </mapper>

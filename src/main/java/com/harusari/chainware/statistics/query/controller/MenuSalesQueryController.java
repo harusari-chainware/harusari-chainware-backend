@@ -26,7 +26,7 @@ public class MenuSalesQueryController {
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
     ) {
-        LocalDate date = (targetDate != null) ? targetDate : LocalDate.now();
+        LocalDate date = (targetDate != null) ? targetDate : LocalDate.now().minusDays(1);
 
         if (franchiseId != null) {
             // 가맹점용
@@ -36,6 +36,4 @@ public class MenuSalesQueryController {
             return menuSalesQueryService.getMenuSalesForHeadquarters(periodType, date);
         }
     }
-
-
 }

@@ -1,6 +1,8 @@
 package com.harusari.chainware.statistics.query.mapper;
 
+import com.harusari.chainware.statistics.query.dto.DailySalesResponse;
 import com.harusari.chainware.statistics.query.dto.HourlySalesResponse;
+import com.harusari.chainware.statistics.query.dto.WeekdaySalesResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -14,8 +16,25 @@ public interface SalesPatternMapper {
             @Param("franchiseId") Long franchiseId,
             @Param("targetDate") LocalDate targetDate
     );
-
     List<HourlySalesResponse> selectHourlySalesForHeadquarters(
+            @Param("targetDate") LocalDate targetDate
+    );
+
+
+    List<WeekdaySalesResponse> selectWeekdaySalesByFranchise(
+            @Param("franchiseId") Long franchiseId,
+            @Param("targetDate") LocalDate targetDate
+    );
+    List<WeekdaySalesResponse> selectWeekdaySalesForHeadquarters(
+            @Param("targetDate") LocalDate targetDate
+    );
+
+
+    List<DailySalesResponse> selectDailySalesByFranchise(
+            @Param("franchiseId") Long franchiseId,
+            @Param("targetDate") LocalDate targetDate
+    );
+    List<DailySalesResponse> selectDailySalesForHeadquarters(
             @Param("targetDate") LocalDate targetDate
     );
 }
