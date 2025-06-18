@@ -6,9 +6,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class OrderCreateRequest {
     private Long franchiseId;
     private Long memberId;

@@ -202,6 +202,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
                 .build();
     }
 
+    // 주문 승인
     @Override
     public OrderCommandResponse approveOrder(Long orderId) {
 
@@ -227,6 +228,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
                 .build();
     }
 
+    // 주문 반려
     @Override
     public OrderCommandResponse rejectOrder(Long orderId, OrderRejectRequest request) {
 
@@ -253,6 +255,5 @@ public class OrderCommandServiceImpl implements OrderCommandService {
                 .createdAt(order.getCreatedAt())
                 .build();
     }
-
 
 }
