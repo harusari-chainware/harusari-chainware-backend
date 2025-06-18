@@ -21,9 +21,18 @@ public class SalesPatternQueryController {
 
     @GetMapping("/hourly")
     public List<HourlySalesResponse> getHourlySales(
-            @RequestParam Long franchiseId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
+            @RequestParam(required = false) Long franchiseId,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
     ) {
-        return salesPatternQueryService.getHourlySalesByFranchise(franchiseId, targetDate);
+        LocalDate date = (targetDate != null) ? targetDate : LocalDate.now();
+
+        if (franchiseId != null) {
+            // 가맹점 단위
+            return salesPatternQueryService.getHourlySalesByFranchise(franchiseId, date);
+        } else {
+            // 본사 전체 가맹점 기준
+            return salesPatternQueryService.getHourlySalesForHeadquarters(date);
+        }
     }
 }

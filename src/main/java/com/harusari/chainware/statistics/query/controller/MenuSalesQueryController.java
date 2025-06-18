@@ -20,20 +20,22 @@ public class MenuSalesQueryController {
     private final MenuSalesQueryService menuSalesQueryService;
 
     @GetMapping
-    public List<MenuSalesResponse> getMenuSalesByPeriod(
-            @RequestParam Long franchiseId,
-            @RequestParam String periodType,  // DAILY, WEEKLY, MONTHLY
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
+    public List<MenuSalesResponse> getMenuSales(
+            @RequestParam(required = false) Long franchiseId,
+            @RequestParam(defaultValue = "DAILY") String periodType,    // DAILY, WEEKLY, MONTHLY
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
     ) {
-        return menuSalesQueryService.getMenuSalesByPeriod(franchiseId, periodType, targetDate);
+        LocalDate date = (targetDate != null) ? targetDate : LocalDate.now();
+
+        if (franchiseId != null) {
+            // 가맹점용
+            return menuSalesQueryService.getMenuSalesByPeriod(franchiseId, periodType, date);
+        } else {
+            // 본사용
+            return menuSalesQueryService.getMenuSalesForHeadquarters(periodType, date);
+        }
     }
 
-    @GetMapping("/headquarters")
-    public List<MenuSalesResponse> getMenuSalesForHQ(
-            @RequestParam String periodType,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
-    ) {
-        return menuSalesQueryService.getMenuSalesForHeadquarters(periodType, targetDate);
-    }
 
 }

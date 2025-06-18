@@ -14,4 +14,8 @@ public interface SalesPatternMapper {
             @Param("franchiseId") Long franchiseId,
             @Param("targetDate") LocalDate targetDate
     );
+
+    List<HourlySalesResponse> selectHourlySalesForHeadquarters(
+            @Param("targetDate") LocalDate targetDate
+    );
 }

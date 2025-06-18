@@ -20,4 +20,10 @@ public class SalesPatternQueryServiceImpl implements SalesPatternQueryService {
     public List<HourlySalesResponse> getHourlySalesByFranchise(Long franchiseId, LocalDate targetDate) {
         return salesPatternMapper.selectHourlySalesByFranchise(franchiseId, targetDate);
     }
+
+    @Override
+    @Transactional
+    public List<HourlySalesResponse> getHourlySalesForHeadquarters(LocalDate targetDate) {
+        return salesPatternMapper.selectHourlySalesForHeadquarters(targetDate);
+    }
 }

@@ -15,4 +15,14 @@
         ORDER BY hour
     </select>
 
+    <select id="selectHourlySalesForHeadquarters" resultType="com.harusari.chainware.statistics.query.dto.HourlySalesResponse">
+        SELECT
+        HOUR(s.sold_at) AS hour,
+        SUM(s.total_amount) AS totalAmount
+        FROM sales s
+        WHERE DATE(s.sold_at) = #{targetDate}
+        GROUP BY hour
+        ORDER BY hour
+    </select>
+
 </mapper>

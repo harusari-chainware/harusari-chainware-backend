@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface SalesPatternQueryService {
     List<HourlySalesResponse> getHourlySalesByFranchise(Long franchiseId, LocalDate targetDate);
+    List<HourlySalesResponse> getHourlySalesForHeadquarters(LocalDate targetDate);
 }
