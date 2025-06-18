@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface MenuSalesQueryService {
     List<MenuSalesResponse> getMenuSalesByPeriod(Long franchiseId, String periodType, LocalDate targetDate);
+    List<MenuSalesResponse> getMenuSalesForHeadquarters(String periodType, LocalDate targetDate);
+
 }

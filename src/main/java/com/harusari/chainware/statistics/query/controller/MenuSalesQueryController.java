@@ -13,18 +13,27 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/statistics/menu-sales")
+@RequestMapping("/api/v1/statistics/menu-sales")
 @RequiredArgsConstructor
 public class MenuSalesQueryController {
 
     private final MenuSalesQueryService menuSalesQueryService;
 
     @GetMapping
-    public List<MenuSalesResponse> getMenuSalesByPeriod(
-            @RequestParam Long franchiseId,
-            @RequestParam String periodType,  // DAILY, WEEKLY, MONTHLY
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
+    public List<MenuSalesResponse> getMenuSales(
+            @RequestParam(required = false) Long franchiseId,
+            @RequestParam(defaultValue = "DAILY") String periodType,    // DAILY, WEEKLY, MONTHLY
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
     ) {
-        return menuSalesQueryService.getMenuSalesByPeriod(franchiseId, periodType, targetDate);
+        LocalDate date = (targetDate != null) ? targetDate : LocalDate.now().minusDays(1);
+
+        if (franchiseId != null) {
+            // 가맹점용
+            return menuSalesQueryService.getMenuSalesByPeriod(franchiseId, periodType, date);
+        } else {
+            // 본사용
+            return menuSalesQueryService.getMenuSalesForHeadquarters(periodType, date);
+        }
     }
 }
