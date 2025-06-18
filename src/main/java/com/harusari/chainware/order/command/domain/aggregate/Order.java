@@ -54,4 +54,12 @@ public class Order {
     @Column(name = "modified_at")
     private LocalDateTime modifiedAt;
 
+    public void update(int productCount, int totalQuantity, long totalPrice, LocalDateTime modifiedAt) {
+        this.productCount = productCount;
+        this.totalQuantity = totalQuantity;
+        this.totalPrice = totalPrice;
+        this.modifiedAt = modifiedAt;
+    }
+
+
 }

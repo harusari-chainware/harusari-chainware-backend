@@ -2,6 +2,7 @@ package com.harusari.chainware.order.command.application.service;
 
 import com.harusari.chainware.order.command.application.dto.request.OrderCreateRequest;
 import com.harusari.chainware.order.command.application.dto.request.OrderDetailCreateRequest;
+import com.harusari.chainware.order.command.application.dto.request.OrderDetailUpdateRequest;
 import com.harusari.chainware.order.command.application.dto.request.OrderUpdateRequest;
 import com.harusari.chainware.order.command.application.dto.response.OrderCommandResponse;
 import com.harusari.chainware.order.command.domain.aggregate.Order;
@@ -125,25 +126,53 @@ public class OrderCommandServiceImpl implements OrderCommandService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID));
 
-        // 2. 상태 검증
-        if (OrderStatus.REQUESTED.equals(order.getOrderStatus())) {
+        // 2. 상태 검증 (REQUESTED 상태일 때만 수정 가능)
+        if (!OrderStatus.REQUESTED.equals(order.getOrderStatus())) {
             throw new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID);
         }
 
         // 3. 기존 주문 상세 삭제
-        orderDetailRepository.deleteAllByOrderId(order.getOrderId());
+        orderDetailRepository.deleteAllByOrderId(orderId);
 
-        // 4. 새로운 주문 상세 생성 및 저장
-        List<OrderDetail> details = request.getOrderDetails().stream()
-                .map(d -> OrderDetail.builder()
-                        .orderId(order.getOrderId())
-                        .productId(d.getProductId())
-                        .quantity(d.getQuantity())
-                        .build())
-                .toList();
+        // 4. 가격 계산용 변수
+        int productCount = request.getOrderDetails().size();
+        int totalQuantity = 0;
+        long totalPrice = 0L;
+
+        List<OrderDetail> details = new ArrayList<>();
+
+        for (OrderDetailUpdateRequest d : request.getOrderDetails()) {
+            // TODO: productService 등으로 상품 가격 조회
+//            int unitPrice = getProductPrice(d.getProductId()); // 임시 함수
+            int unitPrice = 1500;
+            int quantity = d.getQuantity();
+            long itemTotalPrice = (long) unitPrice * quantity;
+
+            totalQuantity += quantity;
+            totalPrice += itemTotalPrice;
+
+            details.add(OrderDetail.builder()
+                    .orderId(orderId)
+                    .productId(d.getProductId())
+                    .quantity(quantity)
+                    .unitPrice(unitPrice)
+                    .totalPrice(itemTotalPrice)
+                    .createdAt(LocalDateTime.now())
+                    .build());
+        }
+
+        // 5. 주문 본문 내용 갱신
+        order.update(
+                productCount,
+                totalQuantity,
+                totalPrice,
+                LocalDateTime.now()
+        );
+
+        // 6. 저장
         orderDetailRepository.saveAll(details);
 
-        // 5. 응답
+        // 7. 응답
         return OrderCommandResponse.builder()
                 .orderId(order.getOrderId())
                 .franchiseId(order.getFranchiseId())
