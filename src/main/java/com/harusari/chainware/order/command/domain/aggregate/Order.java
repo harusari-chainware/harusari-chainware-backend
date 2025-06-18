@@ -61,5 +61,10 @@ public class Order {
         this.modifiedAt = modifiedAt;
     }
 
+    public void changeStatus(OrderStatus status, String rejectReason, LocalDateTime modifiedAt) {
+        this.orderStatus = status;
+        this.rejectReason = rejectReason;
+        this.modifiedAt = modifiedAt;
+    }
 
 }

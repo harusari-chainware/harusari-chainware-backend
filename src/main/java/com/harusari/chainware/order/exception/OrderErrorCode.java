@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 public enum OrderErrorCode {
 
     ORDER_UPDATE_INVALID("10001", "수정 가능한 상태가 아닙니다.", HttpStatus.BAD_REQUEST),
+    REJECT_REASON_REQUIRED("10002", "반려 사유가 필요합니다.", HttpStatus.BAD_REQUEST),
     METHOD_ARG_NOT_VALID("10999", "@Valid 검증 오류입니다.", HttpStatus.BAD_REQUEST);
 
     private final String errorCode;

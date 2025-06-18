@@ -1,9 +1,6 @@
 package com.harusari.chainware.order.command.application.service;
 
-import com.harusari.chainware.order.command.application.dto.request.OrderCreateRequest;
-import com.harusari.chainware.order.command.application.dto.request.OrderDetailCreateRequest;
-import com.harusari.chainware.order.command.application.dto.request.OrderDetailUpdateRequest;
-import com.harusari.chainware.order.command.application.dto.request.OrderUpdateRequest;
+import com.harusari.chainware.order.command.application.dto.request.*;
 import com.harusari.chainware.order.command.application.dto.response.OrderCommandResponse;
 import com.harusari.chainware.order.command.domain.aggregate.Order;
 import com.harusari.chainware.order.command.domain.aggregate.OrderDetail;
@@ -180,5 +177,82 @@ public class OrderCommandServiceImpl implements OrderCommandService {
                 .createdAt(order.getCreatedAt())
                 .build();
     }
+
+    // 주문 취소
+    @Override
+    public OrderCommandResponse cancelOrder(Long orderId) {
+
+        // 1. 주문 조회
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID));
+
+        // 2. 상태 검증
+        if (!OrderStatus.REQUESTED.equals(order.getOrderStatus())) {
+            throw new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID);
+        }
+
+        // 3. 상태 변경
+        order.changeStatus(OrderStatus.CANCELLED, null, LocalDateTime.now());
+
+        return OrderCommandResponse.builder()
+                .orderId(order.getOrderId())
+                .franchiseId(order.getFranchiseId())
+                .orderStatus(order.getOrderStatus())
+                .createdAt(order.getCreatedAt())
+                .build();
+    }
+
+    @Override
+    public OrderCommandResponse approveOrder(Long orderId) {
+
+        // 1. 주문 조회
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID));
+
+        // 2. 상태 검증
+        if (!OrderStatus.REQUESTED.equals(order.getOrderStatus())) {
+            throw new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID);
+        }
+
+        // 3. 상태 변경
+        order.changeStatus(OrderStatus.APPROVED, null, LocalDateTime.now());
+
+        // TODO: 배송 생성
+
+        return OrderCommandResponse.builder()
+                .orderId(order.getOrderId())
+                .franchiseId(order.getFranchiseId())
+                .orderStatus(order.getOrderStatus())
+                .createdAt(order.getCreatedAt())
+                .build();
+    }
+
+    @Override
+    public OrderCommandResponse rejectOrder(Long orderId, OrderRejectRequest request) {
+
+        // 1. 주문 조회
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID));
+
+        // 2. 검증 (주문 상태, 반려 사유)
+        if (!OrderStatus.REQUESTED.equals(order.getOrderStatus())) {
+            throw new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID);
+        }
+
+        if (request.getRejectReason() == null || request.getRejectReason().isBlank()) {
+            throw new OrderUpdateInvalidException(OrderErrorCode.REJECT_REASON_REQUIRED);
+        }
+
+        // 3. 상태 변경
+        order.changeStatus(OrderStatus.REJECTED, request.getRejectReason(), LocalDateTime.now());
+
+        return OrderCommandResponse.builder()
+                .orderId(order.getOrderId())
+                .franchiseId(order.getFranchiseId())
+                .orderStatus(order.getOrderStatus())
+                .createdAt(order.getCreatedAt())
+                .build();
+    }
+
 
 }
