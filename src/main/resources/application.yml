@@ -48,7 +48,7 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-  mapper-locations: mappers/**/*.xml
+  mapper-locations: classpath:/mappers/**/*.xml
   type-aliases-package: com.harusari.chainware
 
 jwt:
@@ -62,10 +62,6 @@ server:
       charset: UTF-8
       enabled: true
       force: true
-
-logging:
-  level:
-    org.hibernate.SQL: debug
 
 springdoc:
   default-consumes-media-type: application/json;charset=UTF-8

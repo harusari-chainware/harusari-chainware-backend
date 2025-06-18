@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.harusari.chainware.vendor.query.mapper.VendorQueryMapper">
+
+    <select id="findVendors" resultType="com.harusari.chainware.vendor.query.dto.VendorListDto"
+            parameterType="com.harusari.chainware.vendor.query.dto.VendorSearchRequestDto">
+        SELECT
+        vendor_id AS vendorId,
+        vendor_name AS vendorName,
+        vendor_type AS vendorType,
+        vendor_address AS vendorAddress,
+        vendor_status AS vendorStatus,
+        vendor_end_date AS vendorEndDate
+        FROM vendor
+        WHERE 1=1
+        <if test="vendorName != null and vendorName != ''">
+            AND vendor_name LIKE CONCAT('%', #{vendorName}, '%')
+        </if>
+        <if test="vendorAddress != null and vendorAddress != ''">
+            AND vendor_address LIKE CONCAT('%', #{vendorAddress}, '%')
+        </if>
+        <if test="vendorType != null">
+            AND vendor_type = #{vendorType}
+        </if>
+        <if test="vendorStatus != null">
+            AND vendor_status = #{vendorStatus}
+        </if>
+        <if test="baseDate != null">
+            <![CDATA[
+            AND (
+                (vendor_start_date IS NULL OR vendor_start_date <= #{baseDate})
+                AND (vendor_end_date IS NULL OR vendor_end_date >= #{baseDate})
+            )
+            ]]>
+        </if>
+        ORDER BY vendor_id DESC
+        LIMIT #{limit}
+        OFFSET #{offset}
+    </select>
+
+    <select id="countVendors" resultType="long"
+            parameterType="com.harusari.chainware.vendor.query.dto.VendorSearchRequestDto">
+        SELECT COUNT(*)
+        FROM vendor
+        WHERE 1=1
+        <if test="vendorName != null and vendorName != ''">
+            AND vendor_name LIKE CONCAT('%', #{vendorName}, '%')
+        </if>
+        <if test="vendorAddress != null and vendorAddress != ''">
+            AND vendor_address LIKE CONCAT('%', #{vendorAddress}, '%')
+        </if>
+        <if test="vendorType != null">
+            AND vendor_type = #{vendorType}
+        </if>
+        <if test="vendorStatus != null">
+            AND vendor_status = #{vendorStatus}
+        </if>
+        <if test="baseDate != null">
+            <![CDATA[
+            AND (
+                (vendor_start_date IS NULL OR vendor_start_date <= #{baseDate})
+                AND (vendor_end_date IS NULL OR vendor_end_date >= #{baseDate})
+            )
+            ]]>
+        </if>
+    </select>
+
+    <resultMap id="VendorDetailResultMap" type="com.harusari.chainware.vendor.query.dto.VendorDetailDto">
+        <id property="vendorId" column="vendor_id"/>
+        <result property="name" column="member_name"/>
+        <result property="phoneNumber" column="member_phone"/>
+        <result property="vendorName" column="vendor_name"/>
+        <result property="vendorType" column="vendor_type" javaType="com.harusari.chainware.vendor.command.domain.aggregate.VendorType"/>
+        <result property="vendorAddress" column="vendor_address"/>
+        <result property="vendorTaxId" column="vendor_tax_id"/>
+        <result property="vendorMemo" column="vendor_memo"/>
+        <result property="vendorStatus" column="vendor_status" javaType="com.harusari.chainware.vendor.command.domain.aggregate.VendorStatus"/>
+        <result property="agreement" column="agreement"/>
+        <result property="vendorStartDate" column="vendor_start_date"/>
+        <result property="vendorEndDate" column="vendor_end_date"/>
+    </resultMap>
+
+    <select id="findVendorDetailById" resultMap="VendorDetailResultMap">
+        SELECT
+        v.vendor_id,
+        m.name AS member_name,
+        m.phone_number AS member_phone,
+        v.vendor_name,
+        v.vendor_contact,
+        v.vendor_type,
+        v.vendor_address,
+        v.vendor_tax_id,
+        v.vendor_memo,
+        v.vendor_status,
+        v.agreement,
+        v.vendor_start_date,
+        v.vendor_end_date
+        FROM vendor v
+        JOIN member m ON v.member_id = m.member_id
+        WHERE v.vendor_id = #{vendorId}
+    </select>
+
+</mapper>
