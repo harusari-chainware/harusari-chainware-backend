@@ -1,11 +1,14 @@
 package com.harusari.chainware.order.command.application.service;
 
 import com.harusari.chainware.order.command.application.dto.request.OrderCreateRequest;
+import com.harusari.chainware.order.command.application.dto.request.OrderUpdateRequest;
 import com.harusari.chainware.order.command.application.dto.response.OrderCommandResponse;
 import com.harusari.chainware.order.command.domain.aggregate.Order;
 import com.harusari.chainware.order.command.domain.aggregate.OrderDetail;
 import com.harusari.chainware.order.command.domain.repository.OrderDetailRepository;
 import com.harusari.chainware.order.command.domain.repository.OrderRepository;
+import com.harusari.chainware.order.exception.OrderErrorCode;
+import com.harusari.chainware.order.exception.OrderUpdateInvalidException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +54,40 @@ public class OrderCommandServiceImpl implements OrderCommandService {
                 .storeId(savedOrder.getStoreId())
                 .orderStatus(savedOrder.getOrderStatus())
                 .orderedAt(savedOrder.getOrderedAt())
+                .build();
+    }
+
+    @Override
+    public OrderCommandResponse updateOrder(Long orderId, OrderUpdateRequest request) {
+
+        // 1. 주문 조회
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID));
+
+        // 2. 상태 검증
+        if (!"REQUESTED".equals(order.getOrderStatus())) {
+            throw new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID);
+        }
+
+        // 3. 기존 주문 상세 삭제
+        orderDetailRepository.deleteAllByOrderId(order.getOrderId());
+
+        // 4. 새로운 주문 상세 생성 및 저장
+        List<OrderDetail> details = request.getOrderDetails().stream()
+                .map(d -> OrderDetail.builder()
+                        .orderId(order.getOrderId())
+                        .productId(d.getProductId())
+                        .quantity(d.getQuantity())
+                        .build())
+                .toList();
+        orderDetailRepository.saveAll(details);
+
+        // 5. 응답
+        return OrderCommandResponse.builder()
+                .orderId(order.getOrderId())
+                .storeId(order.getStoreId())
+                .orderStatus(order.getOrderStatus())
+                .orderedAt(order.getOrderedAt())
                 .build();
     }
 

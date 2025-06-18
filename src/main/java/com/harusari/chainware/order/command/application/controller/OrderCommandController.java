@@ -2,6 +2,7 @@ package com.harusari.chainware.order.command.application.controller;
 
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.order.command.application.dto.request.OrderCreateRequest;
+import com.harusari.chainware.order.command.application.dto.request.OrderUpdateRequest;
 import com.harusari.chainware.order.command.application.dto.response.OrderCommandResponse;
 import com.harusari.chainware.order.command.application.service.OrderCommandService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,16 @@ public class OrderCommandController {
     @PostMapping("/orders")
     public ResponseEntity<ApiResponse<OrderCommandResponse>> createOrder(@RequestBody OrderCreateRequest request) {
         OrderCommandResponse response = orderCommandService.createOrder(request);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    // 주문 수정
+    @PutMapping("/orders/{orderId}")
+    public ResponseEntity<ApiResponse<OrderCommandResponse>> updateOrder(
+            @PathVariable Long orderId,
+            @RequestBody OrderUpdateRequest request
+    ) {
+        OrderCommandResponse response = orderCommandService.updateOrder(orderId, request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
