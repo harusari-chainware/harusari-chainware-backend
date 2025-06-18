@@ -1,5 +1,6 @@
 package com.harusari.chainware.order.command.application.dto.response;
 
+import com.harusari.chainware.order.command.domain.aggregate.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,8 +14,8 @@ import java.time.LocalDateTime;
 @Builder
 public class OrderCommandResponse {
     private Long orderId;
-    private Long storeId;
-    private String orderStatus;
-    private LocalDateTime orderedAt;
+    private Long franchiseId;
+    private OrderStatus orderStatus;
+    private LocalDateTime createdAt;
 }
 

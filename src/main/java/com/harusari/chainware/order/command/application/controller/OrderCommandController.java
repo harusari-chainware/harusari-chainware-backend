@@ -18,7 +18,9 @@ public class OrderCommandController {
 
     // 주문 등록
     @PostMapping("/orders")
-    public ResponseEntity<ApiResponse<OrderCommandResponse>> createOrder(@RequestBody OrderCreateRequest request) {
+    public ResponseEntity<ApiResponse<OrderCommandResponse>> createOrder(
+            @RequestBody OrderCreateRequest request
+    ) {
         OrderCommandResponse response = orderCommandService.createOrder(request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
@@ -32,5 +34,9 @@ public class OrderCommandController {
         OrderCommandResponse response = orderCommandService.updateOrder(orderId, request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
+
+    // 주문 취소
+
+    // 주문 승인, 반려
 
 }
