@@ -136,7 +136,7 @@ public class RequisitionCommandServiceImpl implements RequisitionCommandService 
             throw new IllegalStateException("삭제 가능한 상태가 아닙니다.");
         }
 
-        requisitionRepository.delete(requisition); // HARD DELETE
+        requisitionRepository.delete(requisition);
     }
 
 
