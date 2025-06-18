@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Entity
@@ -14,8 +15,7 @@ import java.time.LocalDate;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Vendor {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "vendor_id")
     private Long vendorId;
 
@@ -48,8 +48,17 @@ public class Vendor {
     )
     private VendorStatus vendorStatus;
 
-    @Column(name = "agreement")
-    private String agreement;
+    @Column(name = "agreement_file_path")
+    private String agreementFilePath;
+
+    @Column(name = "agreement_original_file_name")
+    private String agreementOriginalFileName;
+
+    @Column(name = "agreement_file_size")
+    private long agreementFileSize;
+
+    @Column(name = "agreement_uploaded_at")
+    private LocalDateTime agreementUploadedAt;
 
     @Column(name = "vendor_start_date")
     private LocalDate vendorStartDate;
@@ -60,9 +69,10 @@ public class Vendor {
     @Builder
     public Vendor(
             Long memberId, String vendorName, VendorType vendorType, String vendorAddress,
-            String vendorTaxId, String vendorMemo, VendorStatus vendorStatus,
-            String agreement, LocalDate vendorStartDate, LocalDate vendorEndDate
-    ){
+            String vendorTaxId, String vendorMemo, VendorStatus vendorStatus, String agreementFilePath,
+            String agreementOriginalFileName, long agreementFileSize, LocalDateTime agreementUploadedAt,
+            LocalDate vendorStartDate, LocalDate vendorEndDate
+    ) {
         this.memberId = memberId;
         this.vendorName = vendorName;
         this.vendorType = vendorType;
@@ -70,29 +80,22 @@ public class Vendor {
         this.vendorTaxId = vendorTaxId;
         this.vendorMemo = vendorMemo;
         this.vendorStatus = vendorStatus;
-        this.agreement = agreement;
+        this.agreementFilePath = agreementFilePath;
+        this.agreementOriginalFileName = agreementOriginalFileName;
+        this.agreementFileSize = agreementFileSize;
+        this.agreementUploadedAt = agreementUploadedAt;
         this.vendorStartDate = vendorStartDate;
         this.vendorEndDate = vendorEndDate;
     }
 
-    public void update(
-            String vendorName, VendorType vendorType, String vendorAddress,
-            String vendorTaxId, String vendorMemo, VendorStatus vendorStatus,
-            String agreement, LocalDate vendorStartDate, LocalDate vendorEndDate
+    public void updateAgreementInfo(
+            String filePath, String originalFilename,
+            long size, LocalDateTime localDateTime
     ) {
-        this.vendorName = vendorName;
-        this.vendorType = vendorType;
-        this.vendorAddress = vendorAddress;
-        this.vendorTaxId = vendorTaxId;
-        this.vendorMemo = vendorMemo;
-        this.vendorStatus = vendorStatus;
-        this.agreement = agreement;
-        this.vendorStartDate = vendorStartDate;
-        this.vendorEndDate = vendorEndDate;
-    }
-
-    public void changeStatus(VendorStatus newStatus) {
-        this.vendorStatus = newStatus;
+        this.agreementFilePath = filePath;
+        this.agreementOriginalFileName = originalFilename;
+        this.agreementFileSize = size;
+        this.agreementUploadedAt = localDateTime;
     }
 
 }
