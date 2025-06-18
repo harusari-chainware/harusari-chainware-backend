@@ -3,7 +3,6 @@ package com.harusari.chainware.requisition.command.domain.aggregate;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "requisition_detail")
@@ -31,19 +30,19 @@ public class RequisitionDetail {
     @Column(nullable = false)
     private int quantity;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal unitPrice;
+    @Column(nullable = false)
+    private Long unitPrice;
 
-    @Column(nullable = false, precision = 20, scale = 2)
-    private BigDecimal totalPrice;
+    @Column(nullable = false)
+    private Long totalPrice;
 
-    public static RequisitionDetail create(Long contractId, Long productId, int quantity, BigDecimal unitPrice) {
+    public static RequisitionDetail create(Long contractId, Long productId, int quantity, Long unitPrice) {
         return RequisitionDetail.builder()
                 .contractId(contractId)
                 .productId(productId)
                 .quantity(quantity)
                 .unitPrice(unitPrice)
-                .totalPrice(unitPrice.multiply(BigDecimal.valueOf(quantity)))
+                .totalPrice(unitPrice * quantity)
                 .build();
     }
 }

@@ -5,6 +5,7 @@ import com.harusari.chainware.requisition.command.application.dto.request.Requis
 import com.harusari.chainware.requisition.command.application.exception.AccessDeniedException;
 import com.harusari.chainware.requisition.command.application.exception.InvalidStatusException;
 import com.harusari.chainware.requisition.command.application.exception.NotFoundException;
+import com.harusari.chainware.requisition.command.domain.aggregate.RejectRequisitionRequest;
 import com.harusari.chainware.requisition.command.domain.aggregate.Requisition;
 import com.harusari.chainware.requisition.command.domain.aggregate.RequisitionDetail;
 import com.harusari.chainware.requisition.command.domain.aggregate.RequisitionStatus;
@@ -15,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
+import java.util.EnumSet;
 import java.util.List;
 
 @Service
@@ -33,9 +34,9 @@ public class RequisitionCommandServiceImpl implements RequisitionCommandService 
 
         int productCount = items.size();
         int totalQuantity = items.stream().mapToInt(RequisitionItemRequest::getQuantity).sum();
-        BigDecimal totalPrice = items.stream()
-                .map(i -> i.getUnitPrice().multiply(BigDecimal.valueOf(i.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        long totalPrice = items.stream()
+                .mapToLong(i -> i.getUnitPrice() * i.getQuantity())
+                .sum();
 
         // 품의서 코드 생성
         String requisitionCode = requisitionCodeGenerator.generate();
@@ -85,4 +86,58 @@ public class RequisitionCommandServiceImpl implements RequisitionCommandService 
 
         requisition.submit(); // 상태 전환 및 submittedAt 갱신
     }
+
+    @Override
+    @Transactional
+    public void approveRequisition(Long requisitionId, Long memberId) {
+        Requisition requisition = requisitionRepository.findById(requisitionId)
+                .orElseThrow(() -> new NotFoundException("품의서를 찾을 수 없습니다."));
+
+        if (!requisition.getApprovedMemberId().equals(memberId)) {
+            throw new AccessDeniedException("해당 품의서의 결재자가 아닙니다.");
+        }
+
+        if (!requisition.getRequisitionStatus().equals(RequisitionStatus.SUBMITTED)) {
+            throw new InvalidStatusException("SUBMITTED 상태의 품의서만 승인할 수 있습니다.");
+        }
+
+        requisition.approve(memberId);
+    }
+
+    @Override
+    @Transactional
+    public void rejectRequisition(Long requisitionId, Long memberId, RejectRequisitionRequest request) {
+        Requisition requisition = requisitionRepository.findById(requisitionId)
+                .orElseThrow(() -> new NotFoundException("품의서를 찾을 수 없습니다."));
+
+        if (!requisition.getApprovedMemberId().equals(memberId)) {
+            throw new AccessDeniedException("해당 품의서의 결재자가 아닙니다.");
+        }
+
+        if (!requisition.getRequisitionStatus().equals(RequisitionStatus.SUBMITTED)) {
+            throw new InvalidStatusException("SUBMITTED 상태의 품의서만 반려할 수 있습니다.");
+        }
+
+        requisition.reject(request.getRejectReason());
+    }
+
+    @Override
+    @Transactional
+    public void deleteRequisition(Long memberId, Long requisitionId) {
+        Requisition requisition = requisitionRepository.findById(requisitionId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 품의서를 찾을 수 없습니다."));
+
+        if (!requisition.getCreatedMemberId().equals(memberId)) {
+            throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
+        }
+
+        if (!EnumSet.of(RequisitionStatus.SAVED, RequisitionStatus.SUBMITTED)
+                .contains(requisition.getRequisitionStatus())) {
+            throw new IllegalStateException("삭제 가능한 상태가 아닙니다.");
+        }
+
+        requisitionRepository.delete(requisition); // HARD DELETE
+    }
+
+
 }

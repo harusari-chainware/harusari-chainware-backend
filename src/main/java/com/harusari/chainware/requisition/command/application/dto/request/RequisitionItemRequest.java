@@ -4,7 +4,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 
-import java.math.BigDecimal;
 
 @Getter
 public class RequisitionItemRequest {
@@ -19,5 +18,5 @@ public class RequisitionItemRequest {
     private int quantity;
 
     @NotNull(message = "단가는 필수입니다.")
-    private BigDecimal unitPrice;
+    private Long unitPrice;
 }

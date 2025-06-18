@@ -3,7 +3,6 @@ package com.harusari.chainware.requisition.command.domain.aggregate;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +38,7 @@ public class Requisition {
     private int totalQuantity;
 
     @Column(name = "total_price", nullable = false)
-    private BigDecimal totalPrice;
+    private Long totalPrice;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "requisition_status", nullable = false)
@@ -70,7 +69,7 @@ public class Requisition {
     }
 
     public static Requisition create(Long createdMemberId, Long approvedMemberId, Long vendorId, String code,
-                                     int productCount, int totalQuantity, BigDecimal totalPrice) {
+                                     int productCount, int totalQuantity, Long totalPrice) {
         return Requisition.builder()
                 .createdMemberId(createdMemberId)
                 .approvedMemberId(approvedMemberId)
@@ -87,5 +86,17 @@ public class Requisition {
     public void submit() {
         this.requisitionStatus = RequisitionStatus.SUBMITTED;
         this.submittedAt = LocalDateTime.now();
+    }
+
+    public void approve(Long approvedMemberId) {
+        this.requisitionStatus = RequisitionStatus.APPROVED;
+        this.approvedMemberId = approvedMemberId;
+        this.modifiedAt = LocalDateTime.now();
+    }
+
+    public void reject(String rejectReason) {
+        this.requisitionStatus = RequisitionStatus.REJECTED;
+        this.rejectReason = rejectReason;
+        this.modifiedAt = LocalDateTime.now();
     }
 }
