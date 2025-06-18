@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.harusari.chainware.statistics.query.mapper.MenuSalesMapper">
+
+    <select id="selectMenuSalesByPeriod" resultType="com.harusari.chainware.statistics.query.dto.MenuSalesResponse">
+        SELECT
+        m.menu_id AS menuId,
+        m.menu_name AS menuName,
+        COALESCE(SUM(
+        CASE
+        <choose>
+            <when test="periodType == 'DAILY'">
+                WHEN DATE(s.sold_at) = #{targetDate} THEN sd.quantity
+            </when>
+            <when test="periodType == 'WEEKLY'">
+                WHEN YEARWEEK(s.sold_at, 1) = YEARWEEK(#{targetDate}, 1) THEN sd.quantity
+            </when>
+            <when test="periodType == 'MONTHLY'">
+                WHEN DATE_FORMAT(s.sold_at, '%Y-%m') = DATE_FORMAT(#{targetDate}, '%Y-%m') THEN sd.quantity
+            </when>
+        </choose>
+        ELSE 0
+        END
+        ), 0) AS totalQuantity,
+        COALESCE(SUM(
+        CASE
+        <choose>
+            <when test="periodType == 'DAILY'">
+                WHEN DATE(s.sold_at) = #{targetDate} THEN sd.amount
+            </when>
+            <when test="periodType == 'WEEKLY'">
+                WHEN YEARWEEK(s.sold_at, 1) = YEARWEEK(#{targetDate}, 1) THEN sd.amount
+            </when>
+            <when test="periodType == 'MONTHLY'">
+                WHEN DATE_FORMAT(s.sold_at, '%Y-%m') = DATE_FORMAT(#{targetDate}, '%Y-%m') THEN sd.amount
+            </when>
+        </choose>
+        ELSE 0
+        END
+        ), 0) AS totalAmount,
+        ROUND(COALESCE(SUM(
+        CASE
+        <choose>
+            <when test="periodType == 'DAILY'">
+                WHEN DATE(s.sold_at) = #{targetDate} THEN sd.amount
+            </when>
+            <when test="periodType == 'WEEKLY'">
+                WHEN YEARWEEK(s.sold_at, 1) = YEARWEEK(#{targetDate}, 1) THEN sd.amount
+            </when>
+            <when test="periodType == 'MONTHLY'">
+                WHEN DATE_FORMAT(s.sold_at, '%Y-%m') = DATE_FORMAT(#{targetDate}, '%Y-%m') THEN sd.amount
+            </when>
+        </choose>
+        ELSE 0
+        END
+        ), 0) / COALESCE(t.total_amount, 1) * 100, 2) AS salesRatio
+        FROM menu m
+        LEFT JOIN sales_detail sd ON m.menu_id = sd.menu_id
+        LEFT JOIN sales s ON s.sales_id = sd.sales_id AND s.franchise_id = #{franchiseId}
+        LEFT JOIN (
+        SELECT SUM(sd.amount) AS total_amount
+        FROM sales s
+        JOIN sales_detail sd ON s.sales_id = sd.sales_id
+        WHERE s.franchise_id = #{franchiseId}
+        <choose>
+            <when test="periodType == 'DAILY'">
+                AND DATE(s.sold_at) = #{targetDate}
+            </when>
+            <when test="periodType == 'WEEKLY'">
+                AND YEARWEEK(s.sold_at, 1) = YEARWEEK(#{targetDate}, 1)
+            </when>
+            <when test="periodType == 'MONTHLY'">
+                AND DATE_FORMAT(s.sold_at, '%Y-%m') = DATE_FORMAT(#{targetDate}, '%Y-%m')
+            </when>
+        </choose>
+        ) t ON 1=1
+        WHERE m.is_deleted = 0
+        GROUP BY m.menu_id, m.menu_name, t.total_amount
+        ORDER BY totalAmount DESC
+    </select>
+
+    <select id="selectMenuSalesForHeadquarters" resultType="com.harusari.chainware.statistics.query.dto.MenuSalesResponse">
+        SELECT
+        m.menu_id AS menuId,
+        m.menu_name AS menuName,
+        COALESCE(SUM(
+        CASE
+        <choose>
+            <when test="periodType == 'DAILY'">
+                WHEN DATE(s.sold_at) = #{targetDate} THEN sd.quantity
+            </when>
+            <when test="periodType == 'WEEKLY'">
+                WHEN YEARWEEK(s.sold_at, 1) = YEARWEEK(#{targetDate}, 1) THEN sd.quantity
+            </when>
+            <when test="periodType == 'MONTHLY'">
+                WHEN DATE_FORMAT(s.sold_at, '%Y-%m') = DATE_FORMAT(#{targetDate}, '%Y-%m') THEN sd.quantity
+            </when>
+        </choose>
+        ELSE 0
+        END
+        ), 0) AS totalQuantity,
+        COALESCE(SUM(
+        CASE
+        <choose>
+            <when test="periodType == 'DAILY'">
+                WHEN DATE(s.sold_at) = #{targetDate} THEN sd.amount
+            </when>
+            <when test="periodType == 'WEEKLY'">
+                WHEN YEARWEEK(s.sold_at, 1) = YEARWEEK(#{targetDate}, 1) THEN sd.amount
+            </when>
+            <when test="periodType == 'MONTHLY'">
+                WHEN DATE_FORMAT(s.sold_at, '%Y-%m') = DATE_FORMAT(#{targetDate}, '%Y-%m') THEN sd.amount
+            </when>
+        </choose>
+        ELSE 0
+        END
+        ), 0) AS totalAmount,
+        ROUND(COALESCE(SUM(
+        CASE
+        <choose>
+            <when test="periodType == 'DAILY'">
+                WHEN DATE(s.sold_at) = #{targetDate} THEN sd.amount
+            </when>
+            <when test="periodType == 'WEEKLY'">
+                WHEN YEARWEEK(s.sold_at, 1) = YEARWEEK(#{targetDate}, 1) THEN sd.amount
+            </when>
+            <when test="periodType == 'MONTHLY'">
+                WHEN DATE_FORMAT(s.sold_at, '%Y-%m') = DATE_FORMAT(#{targetDate}, '%Y-%m') THEN sd.amount
+            </when>
+        </choose>
+        ELSE 0
+        END
+        ), 0) / COALESCE(t.total_amount, 1) * 100, 2) AS salesRatio
+        FROM menu m
+        LEFT JOIN sales_detail sd ON m.menu_id = sd.menu_id
+        LEFT JOIN sales s ON s.sales_id = sd.sales_id
+        LEFT JOIN (
+        SELECT SUM(sd.amount) AS total_amount
+        FROM sales s
+        JOIN sales_detail sd ON s.sales_id = sd.sales_id
+        <where>
+            <choose>
+                <when test="periodType == 'DAILY'">
+                    DATE(s.sold_at) = #{targetDate}
+                </when>
+                <when test="periodType == 'WEEKLY'">
+                    YEARWEEK(s.sold_at, 1) = YEARWEEK(#{targetDate}, 1)
+                </when>
+                <when test="periodType == 'MONTHLY'">
+                    DATE_FORMAT(s.sold_at, '%Y-%m') = DATE_FORMAT(#{targetDate}, '%Y-%m')
+                </when>
+            </choose>
+        </where>
+        ) t ON 1=1
+        WHERE m.is_deleted = 0
+        GROUP BY m.menu_id, m.menu_name, t.total_amount
+        ORDER BY totalAmount DESC
+    </select>
+
+</mapper>

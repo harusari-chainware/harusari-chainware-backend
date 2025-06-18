@@ -9,7 +9,6 @@
         SELECT
         vendor_id AS vendorId,
         vendor_name AS vendorName,
-        vendor_contact AS vendorContact,
         vendor_type AS vendorType,
         vendor_address AS vendorAddress,
         vendor_status AS vendorStatus,
@@ -73,7 +72,6 @@
         <result property="name" column="member_name"/>
         <result property="phoneNumber" column="member_phone"/>
         <result property="vendorName" column="vendor_name"/>
-        <result property="vendorContact" column="vendor_contact"/>
         <result property="vendorType" column="vendor_type" javaType="com.harusari.chainware.vendor.command.domain.aggregate.VendorType"/>
         <result property="vendorAddress" column="vendor_address"/>
         <result property="vendorTaxId" column="vendor_tax_id"/>
