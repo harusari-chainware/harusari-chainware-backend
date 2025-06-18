@@ -3,6 +3,8 @@ package com.harusari.chainware.order.command.domain.aggregate;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Entity
 @Table(name = "store_order_detail")
@@ -24,5 +26,14 @@ public class OrderDetail {
 
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
+
+    @Column(name = "unit_price", nullable = false)
+    private Integer unitPrice;
+
+    @Column(name = "total_price", nullable = false)
+    private Long totalPrice;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
 }
