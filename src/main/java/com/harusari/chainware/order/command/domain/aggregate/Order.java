@@ -10,8 +10,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "store_order")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class Order {
 
     @Id
@@ -53,6 +51,22 @@ public class Order {
 
     @Column(name = "modified_at")
     private LocalDateTime modifiedAt;
+
+    @Builder
+    public Order(Long franchiseId, Long memberId, String orderCode, LocalDate deliveryDueDate,
+                 Integer productCount, Integer totalQuantity, Long totalPrice,
+                 OrderStatus orderStatus, String rejectReason, LocalDateTime createdAt) {
+        this.franchiseId = franchiseId;
+        this.memberId = memberId;
+        this.orderCode = orderCode;
+        this.deliveryDueDate = deliveryDueDate;
+        this.productCount = productCount;
+        this.totalQuantity = totalQuantity;
+        this.totalPrice = totalPrice;
+        this.orderStatus = orderStatus;
+        this.rejectReason = rejectReason;
+        this.createdAt = createdAt;
+    }
 
     public void update(int productCount, int totalQuantity, long totalPrice, LocalDateTime modifiedAt) {
         this.productCount = productCount;

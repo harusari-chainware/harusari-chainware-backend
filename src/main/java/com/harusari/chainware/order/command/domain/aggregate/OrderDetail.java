@@ -9,8 +9,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "store_order_detail")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class OrderDetail {
 
     @Id
@@ -35,5 +33,15 @@ public class OrderDetail {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Builder
+    public OrderDetail(Long orderId, Long productId, Integer quantity, Integer unitPrice, Long totalPrice, LocalDateTime createdAt) {
+        this.orderId = orderId;
+        this.productId = productId;
+        this.quantity = quantity;
+        this.unitPrice = unitPrice;
+        this.totalPrice = totalPrice;
+        this.createdAt = createdAt;
+    }
 
 }
