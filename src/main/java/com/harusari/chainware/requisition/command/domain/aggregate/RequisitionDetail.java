@@ -8,18 +8,14 @@ import lombok.*;
 @Table(name = "requisition_detail")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class RequisitionDetail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long requisitionDetailId;
 
-    @Setter
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "requisition_id", nullable = false)
-    private Requisition requisition;
+    @Column(name = "requisition_id", nullable = false)
+    private Long requisitionId;
 
     @Column(nullable = false)
     private Long contractId;
@@ -36,13 +32,13 @@ public class RequisitionDetail {
     @Column(nullable = false)
     private Long totalPrice;
 
-    public static RequisitionDetail create(Long contractId, Long productId, int quantity, Long unitPrice) {
-        return RequisitionDetail.builder()
-                .contractId(contractId)
-                .productId(productId)
-                .quantity(quantity)
-                .unitPrice(unitPrice)
-                .totalPrice(unitPrice * quantity)
-                .build();
+    @Builder
+    public RequisitionDetail(Long requisitionId, Long contractId, Long productId, int quantity, Long unitPrice) {
+        this.requisitionId = requisitionId;
+        this.contractId = contractId;
+        this.productId = productId;
+        this.quantity = quantity;
+        this.unitPrice = unitPrice;
+        this.totalPrice = unitPrice * quantity;
     }
 }

@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/vi/requisitions")
+@RequestMapping("/api/v1/requisitions")
 @RequiredArgsConstructor
 public class RequisitionCommandController {
 
@@ -37,7 +37,7 @@ public class RequisitionCommandController {
             @AuthenticationPrincipal CustomUserDetails userDetail,
             @PathVariable @NotNull Long requisitionId
     ) {
-        Long memberId = userDetail.getMemberId(); // 추후 구현될 CustomUserDetails에 맞게
+        Long memberId = userDetail.getMemberId();
         requisitionCommandService.submitRequisition(requisitionId, memberId);
         return ResponseEntity.ok().build();
     }

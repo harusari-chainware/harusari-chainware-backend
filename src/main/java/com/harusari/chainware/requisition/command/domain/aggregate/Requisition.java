@@ -4,15 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "requisition")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class Requisition {
 
     @Id
@@ -56,47 +52,36 @@ public class Requisition {
     @Column(name = "modified_at")
     private LocalDateTime modifiedAt;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "requisition", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RequisitionDetail> details = new ArrayList<>();
-
-    public void addDetails(List<RequisitionDetail> detailList) {
-        this.details.clear();
-        for (RequisitionDetail detail : detailList) {
-            detail.setRequisition(this);
-            this.details.add(detail);
-        }
-    }
-
-    public static Requisition create(Long createdMemberId, Long approvedMemberId, Long vendorId, String code,
-                                     int productCount, int totalQuantity, Long totalPrice) {
-        return Requisition.builder()
-                .createdMemberId(createdMemberId)
-                .approvedMemberId(approvedMemberId)
-                .vendorId(vendorId)
-                .requisitionCode(code)
-                .productCount(productCount)
-                .totalQuantity(totalQuantity)
-                .totalPrice(totalPrice)
-                .requisitionStatus(RequisitionStatus.SAVED)
-                .modifiedAt(LocalDateTime.now().withNano(0))
-                .build();
+    @Builder
+    public Requisition(Long createdMemberId, Long approvedMemberId, Long vendorId, String code,
+                       int productCount, int totalQuantity, Long totalPrice) {
+        this.createdMemberId = createdMemberId;
+        this.approvedMemberId = approvedMemberId;
+        this.vendorId = vendorId;
+        this.requisitionCode = code;
+        this.productCount = productCount;
+        this.totalQuantity = totalQuantity;
+        this.totalPrice = totalPrice;
+        this.requisitionStatus = RequisitionStatus.SAVED;
+        this.createdAt = LocalDateTime.now().withNano(0);
+        this.modifiedAt = LocalDateTime.now().withNano(0);
     }
 
     public void submit() {
         this.requisitionStatus = RequisitionStatus.SUBMITTED;
-        this.submittedAt = LocalDateTime.now();
+        this.submittedAt = LocalDateTime.now().withNano(0);
+        this.modifiedAt = LocalDateTime.now().withNano(0);
     }
 
     public void approve(Long approvedMemberId) {
         this.requisitionStatus = RequisitionStatus.APPROVED;
         this.approvedMemberId = approvedMemberId;
-        this.modifiedAt = LocalDateTime.now();
+        this.modifiedAt = LocalDateTime.now().withNano(0);
     }
 
     public void reject(String rejectReason) {
         this.requisitionStatus = RequisitionStatus.REJECTED;
         this.rejectReason = rejectReason;
-        this.modifiedAt = LocalDateTime.now();
+        this.modifiedAt = LocalDateTime.now().withNano(0);
     }
 }

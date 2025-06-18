@@ -41,33 +41,36 @@ public class RequisitionCommandServiceImpl implements RequisitionCommandService 
         // 품의서 코드 생성
         String requisitionCode = requisitionCodeGenerator.generate();
 
-        // Requisition 생성
-        Requisition requisition = Requisition.create(
-                memberId,
-                request.getApprovedMemberId(),
-                request.getVendorId(),
-                requisitionCode,
-                productCount,
-                totalQuantity,
-                totalPrice
-        );
+        // Requisition 직접 생성
+        Requisition requisition = Requisition.builder()
+                .createdMemberId(memberId)
+                .approvedMemberId(request.getApprovedMemberId())
+                .vendorId(request.getVendorId())
+                .code(requisitionCode)
+                .productCount(productCount)
+                .totalQuantity(totalQuantity)
+                .totalPrice(totalPrice)
+                .build();
 
-        // RequisitionDetail 리스트 생성
-        List<RequisitionDetail> details = items.stream()
-                .map(i -> RequisitionDetail.create(
-                        i.getContractId(),
-                        i.getProductId(),
-                        i.getQuantity(),
-                        i.getUnitPrice()
-                ))
-                .toList();
-
-        requisition.addDetails(details); // 연관관계 설정
-
-        // 저장
+        // 저장 (먼저 저장해서 ID 생성)
         requisitionRepository.save(requisition);
 
-        return requisition.getRequisitionId();
+        Long requisitionId = requisition.getRequisitionId();
+
+        // RequisitionDetail 리스트 생성 및 저장
+        List<RequisitionDetail> details = items.stream()
+                .map(i -> RequisitionDetail.builder()
+                        .requisitionId(requisitionId)
+                        .contractId(i.getContractId())
+                        .productId(i.getProductId())
+                        .quantity(i.getQuantity())
+                        .unitPrice(i.getUnitPrice())
+                        .build()
+                ).toList();
+
+        requisitionDetailRepository.saveAll(details);
+
+        return requisitionId;
     }
 
     @Override
@@ -84,7 +87,7 @@ public class RequisitionCommandServiceImpl implements RequisitionCommandService 
             throw new InvalidStatusException("임시 저장된(SAVED) 품의서만 상신할 수 있습니다.");
         }
 
-        requisition.submit(); // 상태 전환 및 submittedAt 갱신
+        requisition.submit();
     }
 
     @Override
@@ -138,6 +141,4 @@ public class RequisitionCommandServiceImpl implements RequisitionCommandService 
 
         requisitionRepository.delete(requisition);
     }
-
-
 }

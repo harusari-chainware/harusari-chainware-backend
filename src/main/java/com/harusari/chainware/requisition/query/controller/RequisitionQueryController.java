@@ -41,7 +41,6 @@ public class RequisitionQueryController {
     ) {
         Long memberId = userDetails.getMemberId();
 
-        // 예: "ROLE_APPROVER"라는 권한이 있는 경우 approverView로 간주
         boolean isApprover = userDetails.hasRole("ROLE_APPROVER");
         condition.setApproverView(isApprover);
 
