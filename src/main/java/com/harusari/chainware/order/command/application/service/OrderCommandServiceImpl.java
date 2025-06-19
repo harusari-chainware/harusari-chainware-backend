@@ -1,5 +1,9 @@
 package com.harusari.chainware.order.command.application.service;
 
+import com.harusari.chainware.delivery.command.domain.aggregate.Delivery;
+import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryMethod;
+import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryStatus;
+import com.harusari.chainware.delivery.command.domain.repository.DeliveryRepository;
 import com.harusari.chainware.order.command.application.dto.request.*;
 import com.harusari.chainware.order.command.application.dto.response.OrderCommandResponse;
 import com.harusari.chainware.order.command.domain.aggregate.Order;
@@ -26,6 +30,8 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
+
+    private final DeliveryRepository deliveryRepository;
 
     // 주문 등록
     @Override
@@ -218,7 +224,16 @@ public class OrderCommandServiceImpl implements OrderCommandService {
         // 3. 상태 변경
         order.changeStatus(OrderStatus.APPROVED, null, LocalDateTime.now());
 
-        // TODO: 배송 생성
+        // 4. 배송 등록
+        Delivery delivery = Delivery.builder()
+                .orderId(order.getOrderId())
+                .deliveryMethod(DeliveryMethod.HEADQUARTERS)
+                .deliveryStatus(DeliveryStatus.REQUESTED)
+                .startedAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        deliveryRepository.save(delivery);
 
         return OrderCommandResponse.builder()
                 .orderId(order.getOrderId())
