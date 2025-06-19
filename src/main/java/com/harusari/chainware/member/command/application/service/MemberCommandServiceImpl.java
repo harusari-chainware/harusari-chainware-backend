@@ -1,4 +1,3 @@
-
 package com.harusari.chainware.member.command.application.service;
 
 import com.harusari.chainware.exception.member.EmailAlreadyExistsException;
@@ -10,7 +9,6 @@ import com.harusari.chainware.member.command.application.dto.request.MemberCreat
 import com.harusari.chainware.member.command.application.dto.request.franchise.MemberWithFranchiseRequest;
 import com.harusari.chainware.member.command.application.dto.request.vendor.MemberWithVendorRequest;
 import com.harusari.chainware.member.command.application.dto.request.warehouse.MemberWithWarehouseRequest;
-import com.harusari.chainware.member.command.application.dto.response.EmailExistsResponse;
 import com.harusari.chainware.member.command.domain.aggregate.Authority;
 import com.harusari.chainware.member.command.domain.aggregate.Member;
 import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
@@ -28,16 +26,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.Duration;
-import java.util.UUID;
+import static com.harusari.chainware.member.common.constants.EmailValidationConstant.EMAIL_VALIDATION_PREFIX;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class MemberCommandServiceImpl implements MemberCommandService {
-
-    private static final String EMAIL_VALIDATION_PREFIX = "email-validation:";
-    private static final Duration EMAIL_VALIDATION_TTL = Duration.ofMinutes(10);
 
     private final MemberMapStruct memberMapStruct;
     private final WarehouseMapStruct warehouseMapStruct;
@@ -51,24 +45,6 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     private final WarehouseRepository warehouseRepository;
 
     private final RedisTemplate<String, String> redisTemplate;
-
-    @Transactional(readOnly = true)
-    @Override
-    public EmailExistsResponse checkEmailDuplicate(String email) {
-        if (memberRepository.existsByEmail(email)) {
-            return EmailExistsResponse.builder()
-                    .exists(true)
-                    .validationToken(null)
-                    .build();
-        }
-
-        String token = generateAndStoreEmailValidationToken(email);
-
-        return EmailExistsResponse.builder()
-                .exists(false)
-                .validationToken(token)
-                .build();
-    }
 
     @Override
     public void registerHeadquartersMember(MemberCreateRequest memberCreateRequest) {
@@ -122,13 +98,6 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         } else {
             throw new InvalidMemberAuthorityException(MemberErrorCode.INVALID_MEMBER_AUTHORITY);
         }
-    }
-
-    private String generateAndStoreEmailValidationToken(String email) {
-        String token = UUID.randomUUID().toString();
-        String redisKey = EMAIL_VALIDATION_PREFIX + token;
-        redisTemplate.opsForValue().set(redisKey, email, EMAIL_VALIDATION_TTL);
-        return token;
     }
 
     private Member registerMember(MemberCreateRequest memberCreateRequest) {
