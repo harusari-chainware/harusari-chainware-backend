@@ -34,6 +34,12 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/v1/requisitions/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/requisitions/**").permitAll()
                                 .requestMatchers(HttpMethod.PUT, "/api/v1/requisitions/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/orders/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/orders/**").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/orders/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/delivery/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/delivery/**").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/delivery/**").permitAll()
                                 .anyRequest().authenticated()
                 ).build();
     }
