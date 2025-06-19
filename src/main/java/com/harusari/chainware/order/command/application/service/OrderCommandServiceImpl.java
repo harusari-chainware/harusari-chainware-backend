@@ -22,7 +22,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @Transactional
@@ -228,9 +227,6 @@ public class OrderCommandServiceImpl implements OrderCommandService {
         // 4. 배송 등록
         Delivery delivery = Delivery.builder()
                 .orderId(order.getOrderId())
-                .takeBackId(null)
-                .trackingNumber(generateTrackingNumber())
-                .carrier("CJ대한통운")
                 .deliveryMethod(DeliveryMethod.HEADQUARTERS)
                 .deliveryStatus(DeliveryStatus.REQUESTED)
                 .startedAt(LocalDateTime.now())
@@ -245,10 +241,6 @@ public class OrderCommandServiceImpl implements OrderCommandService {
                 .orderStatus(order.getOrderStatus())
                 .createdAt(order.getCreatedAt())
                 .build();
-    }
-
-    private String generateTrackingNumber() {
-        return "TRK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
     // 주문 반려

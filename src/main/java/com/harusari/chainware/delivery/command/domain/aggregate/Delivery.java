@@ -25,10 +25,10 @@ public class Delivery {
     @Column(name = "take_back_id")
     private Long takeBackId;
 
-    @Column(name = "tracking_number", nullable = false, length = 50)
+    @Column(name = "tracking_number", length = 50)
     private String trackingNumber;
 
-    @Column(name = "carrier", nullable = false, length = 50)
+    @Column(name = "carrier", length = 50)
     private String carrier;
 
     @Enumerated(EnumType.STRING)
@@ -67,4 +67,19 @@ public class Delivery {
         this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
         this.modifiedAt = modifiedAt;
     }
+
+    public void startDelivery(String trackingNumber, String carrier, LocalDateTime startedAt) {
+        this.trackingNumber = trackingNumber;
+        this.carrier = carrier;
+        this.deliveryStatus = DeliveryStatus.IN_TRANSIT;
+        this.startedAt = startedAt;
+        this.modifiedAt = LocalDateTime.now();
+    }
+
+    public void completeDelivery(LocalDateTime deliveredAt) {
+        this.deliveryStatus = DeliveryStatus.DELIVERED;
+        this.deliveredAt = deliveredAt;
+        this.modifiedAt = LocalDateTime.now();
+    }
+
 }
