@@ -12,8 +12,8 @@ import com.harusari.chainware.member.command.application.dto.request.warehouse.M
 import com.harusari.chainware.member.command.domain.aggregate.Authority;
 import com.harusari.chainware.member.command.domain.aggregate.Member;
 import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
-import com.harusari.chainware.member.command.domain.repository.AuthorityRepository;
-import com.harusari.chainware.member.command.domain.repository.MemberRepository;
+import com.harusari.chainware.member.command.domain.repository.AuthorityCommandRepository;
+import com.harusari.chainware.member.command.domain.repository.MemberCommandRepository;
 import com.harusari.chainware.member.common.mapper.MemberMapStruct;
 import com.harusari.chainware.vendor.command.application.service.VendorCommandService;
 import com.harusari.chainware.warehouse.command.domain.aggregate.Warehouse;
@@ -40,8 +40,8 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     private final FranchiseCommandServiceImpl franchiseCommandService;
     private final VendorCommandService vendorCommandService;
 
-    private final MemberRepository memberRepository;
-    private final AuthorityRepository authorityRepository;
+    private final MemberCommandRepository memberCommandRepository;
+    private final AuthorityCommandRepository authorityCommandRepository;
     private final WarehouseRepository warehouseRepository;
 
     private final RedisTemplate<String, String> redisTemplate;
@@ -103,17 +103,17 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     private Member registerMember(MemberCreateRequest memberCreateRequest) {
         validateEmailVerification(memberCreateRequest.email(), memberCreateRequest.validationToken());
 
-        if (memberRepository.existsByEmail(memberCreateRequest.email())) {
+        if (memberCommandRepository.existsByEmail(memberCreateRequest.email())) {
             throw new EmailAlreadyExistsException(MemberErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         Member member = memberMapStruct.toMember(memberCreateRequest);
         member.updateEncodedPassword(passwordEncoder.encode(memberCreateRequest.password()));
 
-        Authority authority = authorityRepository.findByAuthorityName(memberCreateRequest.authorityName());
+        Authority authority = authorityCommandRepository.findByAuthorityName(memberCreateRequest.authorityName());
         member.updateAuthorityId(authority.getAuthorityId());
 
-        memberRepository.save(member);
+        memberCommandRepository.save(member);
 
         return member;
     }
