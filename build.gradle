@@ -41,6 +41,9 @@ dependencies {
 	// redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
+	// aws sdk s3 v2
+	implementation 'software.amazon.awssdk:s3:2.25.57'
+
 	// spring security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	testImplementation 'org.springframework.security:spring-security-test'

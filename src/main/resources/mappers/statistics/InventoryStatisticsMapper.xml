@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.harusari.chainware.statistics.query.mapper.InventoryStatisticsMapper">
+
+    <!-- 월간 회전율 -->
+    <select id="selectWarehouseTurnoverMonthly"
+            resultType="com.harusari.chainware.statistics.query.dto.InventoryTurnoverResponse">
+        SELECT
+        p.product_id AS productId,
+        p.product_name AS productName,
+        COALESCE(SUM(wob.quantity), 0) AS totalOutboundQty,
+        COALESCE(AVG(wis.quantity), 0) AS averageInventory,
+        ROUND(COALESCE(SUM(wob.quantity), 0) / NULLIF(AVG(wis.quantity), 0), 2) AS turnoverRate
+        FROM product p
+        LEFT JOIN warehouse_outbound wob
+        ON wob.product_id = p.product_id
+        AND DATE(wob.outbounded_at) BETWEEN #{startDate} AND #{endDate}
+        LEFT JOIN warehouse_inventory_snapshot wis
+        ON wis.product_id = p.product_id
+        AND DATE(wis.snapshot_date) BETWEEN #{startDate} AND #{endDate}
+        WHERE p.is_deleted = 0
+        GROUP BY p.product_id, p.product_name
+        ORDER BY turnoverRate DESC
+    </select>
+
+    <!-- 주간 회전율 -->
+    <select id="selectWarehouseTurnoverWeekly"
+            resultType="com.harusari.chainware.statistics.query.dto.InventoryTurnoverResponse">
+        SELECT
+        p.product_id AS productId,
+        p.product_name AS productName,
+        COALESCE(SUM(wob.quantity), 0) AS totalOutboundQty,
+        COALESCE(AVG(wis.quantity), 0) AS averageInventory,
+        ROUND(COALESCE(SUM(wob.quantity), 0) / NULLIF(AVG(wis.quantity), 0), 2) AS turnoverRate
+        FROM product p
+        LEFT JOIN warehouse_outbound wob
+        ON wob.product_id = p.product_id
+        AND DATE(wob.outbounded_at) BETWEEN #{startDate} AND #{endDate}
+        LEFT JOIN warehouse_inventory_snapshot wis
+        ON wis.product_id = p.product_id
+        AND DATE(wis.snapshot_date) BETWEEN #{startDate} AND #{endDate}
+        WHERE p.is_deleted = 0
+        GROUP BY p.product_id, p.product_name
+        ORDER BY turnoverRate DESC
+    </select>
+
+</mapper>

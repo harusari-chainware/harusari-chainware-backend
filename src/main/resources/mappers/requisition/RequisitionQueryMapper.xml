@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.harusari.chainware.requisition.query.mapper.RequisitionQueryMapper">
+
+
+    <select id="findMyRequisitions" resultType="com.harusari.chainware.requisition.query.dto.response.RequisitionSummaryResponse">
+        SELECT
+        r.requisition_id,
+        r.requisition_code,
+        r.requisition_status,
+        r.product_count,
+        r.total_quantity,
+        r.total_price,
+        r.created_at
+        FROM requisition r
+        WHERE
+        <choose>
+            <when test="condition.approverView">
+                r.approved_member_id = #{memberId}
+            </when>
+            <otherwise>
+                r.created_member_id = #{memberId}
+            </otherwise>
+        </choose>
+        <if test="condition.status != null">
+            AND r.requisition_status = #{condition.status}
+        </if>
+        ORDER BY r.created_at DESC
+        LIMIT #{condition.size}
+        OFFSET #{condition.offset}
+    </select>
+
+    <!-- 품의서 단건 조회 -->
+    <select id="findRequisitionById" resultType="com.harusari.chainware.requisition.query.dto.response.RequisitionDetailResponse">
+        SELECT
+            r.requisition_id,
+            r.requisition_code,
+            r.requisition_status,
+            r.created_member_id,
+            r.approved_member_id,
+            r.vendor_id,
+            r.product_count,
+            r.total_quantity,
+            r.total_price,
+            r.reject_reason,
+            r.created_at,
+            r.submitted_at,
+            r.modified_at
+        FROM requisition r
+        WHERE r.requisition_id = #{requisitionId}
+          AND (r.created_member_id = #{memberId} OR r.approved_member_id = #{memberId})
+    </select>
+
+    <!-- 품의서 상세 아이템 목록 -->
+    <select id="findItemsByRequisitionId" resultType="com.harusari.chainware.requisition.query.dto.response.RequisitionItemResponse">
+        SELECT
+            rd.requisition_detail_id,
+            rd.product_id,
+            rd.contract_id,
+            rd.quantity,
+            rd.unit_price,
+            rd.total_price
+        FROM requisition_detail rd
+        WHERE rd.requisition_id = #{requisitionId}
+    </select>
+
+</mapper>
