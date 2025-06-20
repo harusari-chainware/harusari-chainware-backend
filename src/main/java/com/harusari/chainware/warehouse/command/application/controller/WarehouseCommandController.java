@@ -1,6 +1,9 @@
 package com.harusari.chainware.warehouse.command.application.controller;
 
 import com.harusari.chainware.common.dto.ApiResponse;
+import com.harusari.chainware.warehouse.command.application.dto.WarehouseInventoryCommandResponse;
+import com.harusari.chainware.warehouse.command.application.dto.request.WarehouseInventoryCreateRequest;
+import com.harusari.chainware.warehouse.command.application.dto.request.WarehouseInventoryUpdateRequest;
 import com.harusari.chainware.warehouse.command.application.dto.request.WarehouseUpdateRequest;
 import com.harusari.chainware.warehouse.command.application.dto.response.WarehouseCommandResponse;
 import com.harusari.chainware.warehouse.command.application.service.WarehouseCommandService;
@@ -32,12 +35,31 @@ public class WarehouseCommandController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    // 보유재고 등록
+    // 보유 재고 등록
+    @PostMapping("/{warehouseId}/inventory")
+    public ResponseEntity<ApiResponse<WarehouseCommandResponse>> registerInventory(
+            @PathVariable Long warehouseId,
+            @RequestBody WarehouseInventoryCreateRequest request
+    ) {
+        WarehouseCommandResponse response = warehouseCommandService.registerInventory(warehouseId, request);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
 
-    // 보유재고 수정
+    // 보유 재고 수정
+    @PutMapping("/inventory/{inventoryId}")
+    public ResponseEntity<ApiResponse<WarehouseInventoryCommandResponse>> updateInventory(
+            @PathVariable Long inventoryId,
+            @RequestBody WarehouseInventoryUpdateRequest request
+    ) {
+        WarehouseInventoryCommandResponse response = warehouseCommandService.updateInventory(inventoryId, request);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
 
-    // 보유재고 삭제
-
-    // 입고 정보 등록
+    // 보유 재고 삭제
+    @DeleteMapping("/inventory/{inventoryId}")
+    public ResponseEntity<ApiResponse<WarehouseInventoryCommandResponse>> deleteInventory(@PathVariable Long inventoryId) {
+        WarehouseInventoryCommandResponse response = warehouseCommandService.deleteInventory(inventoryId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
 
 }
