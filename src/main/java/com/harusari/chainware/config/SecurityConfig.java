@@ -31,6 +31,19 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers(HttpMethod.POST, "/api/v1/members/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/members/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/requisitions/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/requisitions/**").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/requisitions/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/orders/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/orders/**").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/orders/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/delivery/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/delivery/**").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/delivery/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/warehouse/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/warehouse/**").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/warehouse/**").permitAll()
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/warehouse/**").permitAll()
                                 .anyRequest().authenticated()
                 ).build();
     }

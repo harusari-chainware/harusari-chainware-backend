@@ -5,7 +5,6 @@ import com.harusari.chainware.member.command.application.dto.request.MemberCreat
 import com.harusari.chainware.member.command.application.dto.request.franchise.MemberWithFranchiseRequest;
 import com.harusari.chainware.member.command.application.dto.request.vendor.MemberWithVendorRequest;
 import com.harusari.chainware.member.command.application.dto.request.warehouse.MemberWithWarehouseRequest;
-import com.harusari.chainware.member.command.application.dto.response.EmailExistsResponse;
 import com.harusari.chainware.member.command.application.service.MemberCommandService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,20 +19,9 @@ public class MemberCommandController {
 
     private final MemberCommandService memberCommandService;
 
-    @GetMapping("/members/email-exists")
-    public ResponseEntity<ApiResponse<EmailExistsResponse>> checkEmailDuplicate(
-            @RequestParam(name = "email") String email
-    ) {
-        EmailExistsResponse emailExistsResponse = memberCommandService.checkEmailDuplicate(email);
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponse.success(emailExistsResponse));
-    }
-
     @PostMapping("/members/headquarters")
     public ResponseEntity<ApiResponse<Void>> registerHeadquartersMember(
-        @RequestBody MemberCreateRequest memberCreateRequest
+            @RequestBody MemberCreateRequest memberCreateRequest
     ) {
         memberCommandService.registerHeadquartersMember(memberCreateRequest);
 
