@@ -52,8 +52,18 @@ public class WarehouseInventory {
         this.modifiedAt = modifiedAt;
     }
 
+    public void decreaseQuantity(int delta, LocalDateTime modifiedAt) {
+        this.quantity -= delta;
+        this.modifiedAt = modifiedAt;
+    }
+
     public void increaseReservedQuantity(int delta, LocalDateTime modifiedAt) {
         this.reservedQuantity += delta;
+        this.modifiedAt = modifiedAt;
+    }
+
+    public void decreaseReservedQuantity(int delta, LocalDateTime modifiedAt) {
+        this.reservedQuantity -= delta;
         this.modifiedAt = modifiedAt;
     }
 

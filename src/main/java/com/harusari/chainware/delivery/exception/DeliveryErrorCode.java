@@ -14,7 +14,9 @@ import java.util.stream.Collectors;
 public enum DeliveryErrorCode {
 
     DELIVERY_NOT_FOUND("10001", "존재하지 않는 배송입니다.", HttpStatus.BAD_REQUEST),
-    INVALID_DELIVERY_STATUS("10002", "상태 변경이 불가능한 배송입니다.", HttpStatus.BAD_REQUEST);
+    INVALID_DELIVERY_STATUS("10002", "상태 변경이 불가능한 배송입니다.", HttpStatus.BAD_REQUEST),
+    INVENTORY_NOT_FOUND("10003", "재고가 확인되지 않습니다.", HttpStatus.BAD_REQUEST),
+    INSUFFICIENT_INVENTORY("10002", "충분한 재고가 없습니다.", HttpStatus.BAD_REQUEST);
 
     private final String errorCode;
     private final String errorMessage;
