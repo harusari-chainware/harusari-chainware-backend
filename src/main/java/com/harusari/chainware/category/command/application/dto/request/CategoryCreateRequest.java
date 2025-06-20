@@ -15,6 +15,6 @@ public class CategoryCreateRequest {
     @NotNull(message = "상위 카테고리Id 선택은 필수입니다.")
     private final Long topCategoryId;
 
-    @NotBlank(message = "카테고리 코드를 입력해주세요.")
+    @NotBlank(message = "카테고리 코드는 필수입니다.")
     private final String categoryCode;
 }
