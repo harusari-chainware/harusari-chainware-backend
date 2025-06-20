@@ -44,6 +44,18 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/api/v1/warehouse/**").permitAll()
                                 .requestMatchers(HttpMethod.PUT, "/api/v1/warehouse/**").permitAll()
                                 .requestMatchers(HttpMethod.DELETE, "/api/v1/warehouse/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/category/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/category/**").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/category/**").permitAll()
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/category/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/topcategory/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/topcategory/**").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/topcategory/**").permitAll()
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/topcategory/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/product/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/product/**").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/product/**").permitAll()
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/product/**").permitAll()
                                 .anyRequest().authenticated()
                 ).build();
     }
