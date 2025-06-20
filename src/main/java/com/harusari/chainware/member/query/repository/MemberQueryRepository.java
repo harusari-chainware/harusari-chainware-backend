@@ -1,10 +1,8 @@
 package com.harusari.chainware.member.query.repository;
 
-import org.apache.ibatis.annotations.Mapper;
+import com.harusari.chainware.member.command.domain.aggregate.Member;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-@Mapper
-public interface MemberQueryRepository {
-
-    boolean existsByEmail(String email);
+public interface MemberQueryRepository extends MemberQueryRepositoryCustom, JpaRepository<Member, Long> {
 
 }
