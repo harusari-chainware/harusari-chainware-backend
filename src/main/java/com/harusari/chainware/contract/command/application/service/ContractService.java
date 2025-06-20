@@ -19,4 +19,5 @@ public interface ContractService {
     List<ContractResponse> getContractsByVendor(Long vendorId);
 
     List<ContractResponse> getContractsByProduct(Long productId);
+
 }
