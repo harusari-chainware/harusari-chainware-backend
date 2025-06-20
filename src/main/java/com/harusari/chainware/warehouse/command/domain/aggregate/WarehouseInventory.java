@@ -22,9 +22,6 @@ public class WarehouseInventory {
     @Column(name = "product_id", nullable = false)
     private Long productId;
 
-    @Column(name = "contract_id", nullable = false)
-    private Long contractId;
-
     @Column(name = "warehouse_id", nullable = false)
     private Long warehouseId;
 
@@ -41,20 +38,22 @@ public class WarehouseInventory {
     private LocalDateTime modifiedAt;
 
     @Builder
-    public WarehouseInventory(Long productId, Long contractId, Long warehouseId,
-                              Integer quantity, Integer reservedQuantity,
-                              LocalDateTime createdAt, LocalDateTime modifiedAt) {
+    public WarehouseInventory(Long productId, Long warehouseId,
+                              Integer quantity, Integer reservedQuantity) {
         this.productId = productId;
-        this.contractId = contractId;
         this.warehouseId = warehouseId;
         this.quantity = quantity;
         this.reservedQuantity = reservedQuantity;
-        this.createdAt = createdAt != null ? createdAt : LocalDateTime.now().withNano(0);
-        this.modifiedAt = modifiedAt;
+        this.createdAt = LocalDateTime.now().withNano(0);
     }
 
     public void updateQuantity(int newQuantity, LocalDateTime modifiedAt) {
         this.quantity = newQuantity;
+        this.modifiedAt = modifiedAt;
+    }
+
+    public void increaseReservedQuantity(int delta, LocalDateTime modifiedAt) {
+        this.reservedQuantity += delta;
         this.modifiedAt = modifiedAt;
     }
 

@@ -15,6 +15,8 @@ public enum OrderErrorCode {
 
     ORDER_UPDATE_INVALID("10001", "수정 가능한 상태가 아닙니다.", HttpStatus.BAD_REQUEST),
     REJECT_REASON_REQUIRED("10002", "반려 사유가 필요합니다.", HttpStatus.BAD_REQUEST),
+    PRODUCT_INVENTORY_NOT_FOUND("10003", "창고에 보유 재고가 없는 제품입니다.", HttpStatus.BAD_REQUEST),
+    INSUFFICIENT_AVAILABLE_QUANTITY("10004", "주문 가능 재고를 초과하는 주문은 불가능합니다.", HttpStatus.BAD_REQUEST),
     METHOD_ARG_NOT_VALID("10999", "@Valid 검증 오류입니다.", HttpStatus.BAD_REQUEST);
 
     private final String errorCode;
