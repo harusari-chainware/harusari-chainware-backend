@@ -20,6 +20,8 @@ public enum ProductErrorCode {
 
     PRODUCT_ALREADY_DELETED("30006", "이미 삭제된 상품입니다.", HttpStatus.BAD_REQUEST),
 
+    DUPLICATE_PRODUCT_NAME("30007", "이미 존재하는 상품명입니다.", HttpStatus.CONFLICT);
+
     ;
 
     private final String errorCode;
