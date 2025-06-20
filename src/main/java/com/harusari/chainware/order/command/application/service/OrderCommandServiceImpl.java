@@ -13,6 +13,8 @@ import com.harusari.chainware.order.command.domain.repository.OrderDetailReposit
 import com.harusari.chainware.order.command.domain.repository.OrderRepository;
 import com.harusari.chainware.order.exception.OrderErrorCode;
 import com.harusari.chainware.order.exception.OrderUpdateInvalidException;
+import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInventory;
+import com.harusari.chainware.warehouse.command.infrastructure.repository.JpaWarehouseInventoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +34,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     private final OrderDetailRepository orderDetailRepository;
 
     private final DeliveryRepository deliveryRepository;
+    private final JpaWarehouseInventoryRepository jpaWarehouseInventoryRepository;
 
     // 주문 등록
     @Override
@@ -51,6 +54,15 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
             int quantity = d.getQuantity();
             long itemTotalPrice = (long) unitPrice * quantity;
+
+            // 주문 가능 수량 검증
+            WarehouseInventory inventory = jpaWarehouseInventoryRepository.findByProductId(d.getProductId())
+                    .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.PRODUCT_INVENTORY_NOT_FOUND));
+
+            int availableQuantity = inventory.getQuantity() - inventory.getReservedQuantity();
+            if (availableQuantity < quantity) {
+                throw new OrderUpdateInvalidException(OrderErrorCode.INSUFFICIENT_AVAILABLE_QUANTITY);
+            }
 
             totalQuantity += quantity;
             totalPrice += itemTotalPrice;
@@ -151,6 +163,13 @@ public class OrderCommandServiceImpl implements OrderCommandService {
             int quantity = d.getQuantity();
             long itemTotalPrice = (long) unitPrice * quantity;
 
+            WarehouseInventory inventory = jpaWarehouseInventoryRepository.findByProductId(d.getProductId())
+                    .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.PRODUCT_INVENTORY_NOT_FOUND));
+            int availableQuantity = inventory.getQuantity() - inventory.getReservedQuantity();
+            if (availableQuantity < quantity) {
+                throw new OrderUpdateInvalidException(OrderErrorCode.INSUFFICIENT_AVAILABLE_QUANTITY);
+            }
+
             totalQuantity += quantity;
             totalPrice += itemTotalPrice;
 
@@ -223,6 +242,13 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
         // 3. 상태 변경
         order.changeStatus(OrderStatus.APPROVED, null, LocalDateTime.now());
+
+        List<OrderDetail> details = orderDetailRepository.findByOrderId(orderId);
+        for (OrderDetail detail : details) {
+            WarehouseInventory inventory = jpaWarehouseInventoryRepository.findByProductId(detail.getProductId())
+                    .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.PRODUCT_INVENTORY_NOT_FOUND));
+            inventory.increaseReservedQuantity(detail.getQuantity(), LocalDateTime.now());
+        }
 
         // 4. 배송 등록
         Delivery delivery = Delivery.builder()

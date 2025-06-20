@@ -74,10 +74,8 @@ public class WarehouseCommandServiceImpl implements WarehouseCommandService{
                 WarehouseInventory.builder()
                         .warehouseId(warehouseId)
                         .productId(item.getProductId())
-                        .contractId(item.getContractId())
                         .quantity(item.getQuantity())
                         .reservedQuantity(0)
-                        .createdAt(LocalDateTime.now())
                         .build()
         ).toList();
 
@@ -126,7 +124,6 @@ public class WarehouseCommandServiceImpl implements WarehouseCommandService{
         return WarehouseInventoryCommandResponse.builder()
                 .inventoryId(inventory.getWarehouseInventoryId())
                 .productId(inventory.getProductId())
-                .contractId(inventory.getContractId())
                 .quantity(inventory.getQuantity())
                 .build();
     }

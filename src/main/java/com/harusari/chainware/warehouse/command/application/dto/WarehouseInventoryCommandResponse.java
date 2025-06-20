@@ -8,6 +8,5 @@ import lombok.Getter;
 public class WarehouseInventoryCommandResponse {
     private Long inventoryId;
     private Long productId;
-    private Long contractId;
     private int quantity;
 }
