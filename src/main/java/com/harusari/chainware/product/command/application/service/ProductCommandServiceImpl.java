@@ -1,7 +1,6 @@
 package com.harusari.chainware.product.command.application.service;
 
 import com.harusari.chainware.exception.product.InvalidProductStatusException;
-import com.harusari.chainware.exception.product.ProductAlreadyDeletedException;
 import com.harusari.chainware.exception.product.ProductErrorCode;
 import com.harusari.chainware.exception.product.ProductNotFoundException;
 import com.harusari.chainware.product.command.application.dto.request.ProductCreateRequest;
@@ -25,6 +24,11 @@ public class ProductCommandServiceImpl implements ProductCommandService {
     /* 상품 등록 */
     @Transactional
     public ProductCommandResponse createProduct(ProductCreateRequest request) {
+
+        if (productRepository.existsByProductName(request.getProductName())) {
+            throw new InvalidProductStatusException(ProductErrorCode.DUPLICATE_PRODUCT_NAME);
+        }
+
         String productCode = generateProductCode(request.getCategoryCode());
 
         Product newProduct = productMapper.toEntity(request);
@@ -73,6 +77,13 @@ public class ProductCommandServiceImpl implements ProductCommandService {
             throw new InvalidProductStatusException(ProductErrorCode.INVALID_PRODUCT_STATUS);
         }
 
+        String requestedName = request.getProductName();
+        if (requestedName != null && !requestedName.equals(product.getProductName())) {
+            if (productRepository.existsByProductName(requestedName)) {
+                throw new InvalidProductStatusException(ProductErrorCode.DUPLICATE_PRODUCT_NAME);
+            }
+        }
+
         // 기존 값 유지하면서 null 아닌 항목만 덮어쓰기
         String updatedName = request.getProductName() != null ? request.getProductName() : product.getProductName();
         Integer updatedPrice = request.getBasePrice() != null ? request.getBasePrice() : product.getBasePrice();
@@ -97,9 +108,6 @@ public class ProductCommandServiceImpl implements ProductCommandService {
         );
 
         product.changeStatus(updatedStatus);
-
-        // 저장 후 product 엔티티가 최신 상태임
-        // 필요하면 repository.save(product) 호출 가능 (영속성 컨텍스트 자동 반영되면 생략 가능)
 
         // 응답 DTO 생성 후 반환
         return ProductCommandResponse.builder()

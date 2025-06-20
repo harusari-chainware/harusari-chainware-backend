@@ -10,9 +10,10 @@ public interface ProductRepository {
 
     Optional<Product> findById(Long productId);
 
-    void deleteById(Long productId);
-
     boolean existsByCategoryId(Long categoryId);
 
     Integer findMaxNumberByCategoryCode(String prefix);
+
+    boolean existsByProductName(String productName);
+
 }

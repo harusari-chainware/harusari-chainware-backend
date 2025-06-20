@@ -50,4 +50,12 @@ public class ProductExceptionHandler {
         ApiResponse<Void> response = ApiResponse.failure(errorCode.getErrorCode(), errorCode.getErrorMessage());
         return new ResponseEntity<>(response, errorCode.getHttpStatus());
     }
+
+    @ExceptionHandler(DuplicateProductNameException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateProductNameException(DuplicateProductNameException e) {
+        ProductErrorCode errorCode = e.getErrorCode();
+        ApiResponse<Void> response = ApiResponse.failure(errorCode.getErrorCode(), errorCode.getErrorMessage());
+        return new ResponseEntity<>(response, errorCode.getHttpStatus());
+    }
+
 }
