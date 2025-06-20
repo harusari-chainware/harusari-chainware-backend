@@ -28,6 +28,9 @@ public class WarehouseInventory {
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
+    @Column(name = "safety_quantity", nullable = false)
+    private Integer safetyQuantity;
+
     @Column(name = "reserved_quantity", nullable = false)
     private Integer reservedQuantity;
 
@@ -39,10 +42,11 @@ public class WarehouseInventory {
 
     @Builder
     public WarehouseInventory(Long productId, Long warehouseId,
-                              Integer quantity, Integer reservedQuantity) {
+                              Integer quantity, Integer safetyQuantity, Integer reservedQuantity) {
         this.productId = productId;
         this.warehouseId = warehouseId;
         this.quantity = quantity;
+        this.safetyQuantity = safetyQuantity;
         this.reservedQuantity = reservedQuantity;
         this.createdAt = LocalDateTime.now().withNano(0);
     }
