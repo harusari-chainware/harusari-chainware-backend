@@ -25,6 +25,7 @@ public class TopCategoryCommandServiceImpl implements TopCategoryCommandService 
 
     /** 상위 카테고리 생성 */
     @Transactional
+    @Override
     public TopCategoryCommandResponse createTopCategory(TopCategoryCreateRequest request) {
         // 중복 이름 체크
         if (jpaTopCategoryRepository.existsByTopCategoryName(request.topCategoryName())) {
@@ -42,6 +43,7 @@ public class TopCategoryCommandServiceImpl implements TopCategoryCommandService 
 
     /** 상위 카테고리 이름 수정 */
     @Transactional
+    @Override
     public TopCategoryCommandResponse updateTopCategory(Long topCategoryId, TopCategoryUpdateRequest request) {
         TopCategory topCategory = topCategoryRepository.findByTopCategoryId(topCategoryId)
                 .orElseThrow(() -> new TopCategoryNotFoundException(CategoryErrorCode.TOP_CATEGORY_NOT_FOUND));
@@ -61,6 +63,7 @@ public class TopCategoryCommandServiceImpl implements TopCategoryCommandService 
 
     /** 상위 카테고리 이름 삭제 */
     @Transactional
+    @Override
     public void deleteTopCategory(Long topCategoryId) {
         TopCategory topCategory = topCategoryRepository.findByTopCategoryId(topCategoryId)
                 .orElseThrow(() -> new TopCategoryNotFoundException(CategoryErrorCode.TOP_CATEGORY_NOT_FOUND));

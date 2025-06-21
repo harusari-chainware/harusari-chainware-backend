@@ -24,7 +24,6 @@ public class TopCategory {
     @Column(name = "top_category_id")
     private Long topCategoryId;
 
-    @NotBlank
     @Column(name = "top_category_name")
     private String topCategoryName;
 

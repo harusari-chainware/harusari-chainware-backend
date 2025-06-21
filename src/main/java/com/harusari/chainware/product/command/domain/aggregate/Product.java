@@ -34,19 +34,15 @@ public class Product {
     @Column(name = "category_id")
     private Long categoryId;
 
-    @NotBlank
     @Column(name = "product_name")
     private String productName;
 
-    @NotBlank
     @Column(name = "product_code")
     private String productCode;
 
-    @NotBlank
     @Column(name = "unit_quantity")
     private String unitQuantity;
 
-    @NotBlank
     @Column(name = "unit_spec")
     private String unitSpec;
 
@@ -62,7 +58,6 @@ public class Product {
     @Column(name = "safety_stock")
     private Integer safetyStock;
 
-    @NotBlank
     @Column(name = "origin")
     private String origin;
 

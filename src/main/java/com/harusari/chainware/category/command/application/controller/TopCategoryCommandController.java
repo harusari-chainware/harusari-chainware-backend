@@ -22,7 +22,7 @@ public class TopCategoryCommandController {
     }
 
     @PutMapping("/{topCategoryId}")
-    public ResponseEntity<TopCategoryCommandResponse> update(@PathVariable Long topCategoryId,                                                             @RequestBody @Valid TopCategoryUpdateRequest request) {
+    public ResponseEntity<TopCategoryCommandResponse> update(@PathVariable Long topCategoryId, @RequestBody @Valid TopCategoryUpdateRequest request) {
         TopCategoryCommandResponse response = topCategoryCommandService.updateTopCategory(topCategoryId, request);
         return ResponseEntity.ok(response);
     }

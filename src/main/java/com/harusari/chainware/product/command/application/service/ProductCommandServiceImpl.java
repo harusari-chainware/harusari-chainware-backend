@@ -23,6 +23,7 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
     /* 상품 등록 */
     @Transactional
+    @Override
     public ProductCommandResponse createProduct(ProductCreateRequest request) {
 
         if (productRepository.existsByProductName(request.getProductName())) {
@@ -67,8 +68,8 @@ public class ProductCommandServiceImpl implements ProductCommandService {
     }
 
     /* 상품 수정 */
-    @Override
     @Transactional
+    @Override
     public ProductCommandResponse updateProduct(Long productId, ProductUpdateRequest request) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException(ProductErrorCode.PRODUCT_NOT_FOUND));
@@ -128,6 +129,7 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
     /* 상품 삭제 (soft delete + 상태 비활성화) */
     @Transactional
+    @Override
     public void deleteProduct(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException(ProductErrorCode.PRODUCT_NOT_FOUND));

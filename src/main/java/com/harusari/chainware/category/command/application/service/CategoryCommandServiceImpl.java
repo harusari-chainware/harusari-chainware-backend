@@ -35,6 +35,7 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
 
     /** 카테고리 생성 */
     @Transactional
+    @Override
     public CategoryCommandResponse createCategory(CategoryCreateRequest request) {
         validateTopCategoryExists(request.getTopCategoryId());
         validateDuplicateCategoryName(request.getTopCategoryId(), request.getCategoryName());
@@ -57,6 +58,7 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
 
     /** 카테고리 수정 */
     @Transactional
+    @Override
     public CategoryCommandResponse updateCategory(Long categoryId, CategoryCreateRequest request) {
         Category category = jpaCategoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CategoryNotFoundException(CategoryErrorCode.CATEGORY_NOT_FOUND));
@@ -85,6 +87,7 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
 
     /** 카테고리 삭제 */
     @Transactional
+    @Override
     public void deleteCategory(Long categoryId) {
         if (productRepository.existsByCategoryId(categoryId)) {
             throw new CategoryCannotDeleteHasProductsException(CategoryErrorCode.CATEGORY_CANNOT_DELETE_HAS_PRODUCTS);

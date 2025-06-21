@@ -27,11 +27,9 @@ public class Category {
     @Column(name = "top_category_id")
     private Long topCategoryId;
 
-    @NotBlank
     @Column(name = "category_name")
     private String categoryName;
 
-    @NotBlank
     @Column(name = "category_code")
     private String categoryCode;
 
