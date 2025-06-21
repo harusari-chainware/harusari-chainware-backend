@@ -47,4 +47,41 @@
         ORDER BY turnoverRate DESC
     </select>
 
+    <!-- 가맹점 월간 회전율 -->
+    <select id="selectFranchiseTurnoverWithBom"
+            resultType="com.harusari.chainware.statistics.query.dto.InventoryTurnoverResponse">
+        SELECT
+        p.product_id AS productId,
+        p.product_name AS productName,
+        COALESCE(SUM(sd.quantity *
+        CASE
+        WHEN LOWER(bom.unit) = 'ml' AND LOWER(p.unit_spec) = 'l' THEN bom.quantity / 1000.0
+        WHEN LOWER(bom.unit) = 'g' AND LOWER(p.unit_spec) = 'kg' THEN bom.quantity / 1000.0
+        ELSE bom.quantity
+        END
+        ), 0) AS totalOutboundQty,
+        fi.unit_quantity AS averageInventory,
+        ROUND(
+        COALESCE(SUM(sd.quantity *
+        CASE
+        WHEN LOWER(bom.unit) = 'ml' AND LOWER(p.unit_spec) = 'l' THEN bom.quantity / 1000.0
+        WHEN LOWER(bom.unit) = 'g' AND LOWER(p.unit_spec) = 'kg' THEN bom.quantity / 1000.0
+        ELSE bom.quantity
+        END
+        ), 0) / NULLIF(fi.unit_quantity, 0),
+        2
+        ) AS turnoverRate
+        FROM sales_detail sd
+        JOIN sales s ON s.sales_id = sd.sales_id
+        JOIN menu m ON sd.menu_id = m.menu_id
+        JOIN bill_of_material bom ON m.menu_id = bom.menu_id
+        JOIN product p ON bom.product_id = p.product_id
+        LEFT JOIN franchise_inventory fi ON fi.product_id = p.product_id
+        AND fi.franchise_id = #{franchiseId}
+        WHERE s.franchise_id = #{franchiseId}
+        AND DATE(s.sold_at) BETWEEN #{startDate} AND #{endDate}
+        GROUP BY p.product_id, p.product_name, fi.unit_quantity
+        ORDER BY turnoverRate DESC
+    </select>
+
 </mapper>

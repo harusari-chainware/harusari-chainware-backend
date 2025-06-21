@@ -62,4 +62,24 @@ public class InventoryStatisticsQueryServiceImpl implements InventoryStatisticsQ
 
         return inventoryStatisticsMapper.selectWarehouseTurnoverWeekly(targetWeekStart, targetWeekEnd);
     }
+
+    @Override
+    @Transactional
+    public List<InventoryTurnoverResponse> getFranchiseMonthlyTurnover(Long franchiseId, LocalDate targetDate) {
+        if (franchiseId == null) {
+            throw new IllegalArgumentException("franchiseId는 필수입니다.");
+        }
+
+        LocalDate now = LocalDate.now();
+        YearMonth yearMonth = (targetDate != null) ? YearMonth.from(targetDate) : YearMonth.from(now.minusMonths(1));
+
+        if (yearMonth.equals(YearMonth.from(now))) {
+            throw new IllegalArgumentException("해당 월은 아직 종료되지 않아 회전율 통계를 조회할 수 없습니다.");
+        }
+
+        LocalDate start = yearMonth.atDay(1);
+        LocalDate end = yearMonth.atEndOfMonth();
+
+        return inventoryStatisticsMapper.selectFranchiseTurnoverWithBom(franchiseId, start, end);
+    }
 }

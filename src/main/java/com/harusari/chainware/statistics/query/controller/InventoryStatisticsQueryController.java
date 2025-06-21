@@ -34,4 +34,13 @@ public class InventoryStatisticsQueryController {
     ) {
         return inventoryStatisticsQueryService.getWeeklyTurnover(targetDate);
     }
+
+    @GetMapping("/monthly/franchise")
+    public List<InventoryTurnoverResponse> getFranchiseTurnover(
+            @RequestParam Long franchiseId,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
+    ) {
+        return inventoryStatisticsQueryService.getFranchiseMonthlyTurnover(franchiseId, targetDate);
+    }
 }

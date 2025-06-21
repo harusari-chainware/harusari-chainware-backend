@@ -19,4 +19,11 @@ public interface InventoryStatisticsMapper {
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
+
+    List<InventoryTurnoverResponse> selectFranchiseTurnoverWithBom(
+            @Param("franchiseId") Long franchiseId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
 }
