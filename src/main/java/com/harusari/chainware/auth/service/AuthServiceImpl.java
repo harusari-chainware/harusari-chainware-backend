@@ -73,7 +73,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private Member findMemberByEmail(String email) {
-        return memberQueryRepository.findByEmail(email)
+        return memberQueryRepository.findActiveMemberByEmail(email)
                 .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND_EXCEPTION));
     }
 
