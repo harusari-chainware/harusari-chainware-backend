@@ -7,4 +7,6 @@ public interface AuthorityCommandRepository {
 
     Authority findByAuthorityName(MemberAuthorityType authorityName);
 
+    Authority findByAuthorityId(Integer authorityId);
+
 }
