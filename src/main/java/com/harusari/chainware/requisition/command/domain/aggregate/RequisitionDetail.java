@@ -17,19 +17,19 @@ public class RequisitionDetail {
     @Column(name = "requisition_id", nullable = false)
     private Long requisitionId;
 
-    @Column(nullable = false)
+    @Column(name = "contract_id", nullable = false)
     private Long contractId;
 
-    @Column(nullable = false)
+    @Column(name = "product_id", nullable = false)
     private Long productId;
 
-    @Column(nullable = false)
+    @Column(name = "quantity", nullable = false)
     private int quantity;
 
-    @Column(nullable = false)
+    @Column(name = "unit_price", nullable = false)
     private Long unitPrice;
 
-    @Column(nullable = false)
+    @Column(name = "total_price", nullable = false)
     private Long totalPrice;
 
     @Builder

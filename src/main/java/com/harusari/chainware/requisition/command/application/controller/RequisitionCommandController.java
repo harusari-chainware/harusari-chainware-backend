@@ -1,5 +1,6 @@
 package com.harusari.chainware.requisition.command.application.controller;
 
+import com.harusari.chainware.purchase.command.application.service.PurchaseOrderCommandService;
 import com.harusari.chainware.requisition.command.application.dto.request.CreateRequisitionRequest;
 import com.harusari.chainware.requisition.command.application.service.RequisitionCommandService;
 import com.harusari.chainware.requisition.command.domain.aggregate.RejectRequisitionRequest;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class RequisitionCommandController {
 
     private final RequisitionCommandService requisitionCommandService;
+    private final PurchaseOrderCommandService purchaseOrderCommandService;
 
 /*
     @Operation(summary = "품의서 저장 (임시)", description = "품의서를 저장합니다. 결재자는 필수이며, 품목 리스트는 최소 1개 이상이어야 합니다.")
@@ -99,6 +101,8 @@ public class RequisitionCommandController {
             @RequestParam(name = "memberId", defaultValue = "2") Long memberId
     ) {
         requisitionCommandService.approveRequisition(requisitionId, memberId);
+
+        purchaseOrderCommandService.createFromRequisition(requisitionId, memberId);
         return ResponseEntity.ok().build();
     }
 
