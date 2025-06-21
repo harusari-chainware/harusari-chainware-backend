@@ -17,7 +17,10 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepositoryCustom {
         return queryFactory
                 .selectOne()
                 .from(member)
-                .where(member.email.eq(email))
+                .where(
+                        member.email.eq(email),
+                        member.isDeleted.eq(false)
+                )
                 .fetchFirst() != null;
     }
 
