@@ -1,0 +1,39 @@
+package com.harusari.chainware.purchase.query.service;
+
+import com.harusari.chainware.purchase.query.dto.request.PurchaseOrderSearchCondition;
+import com.harusari.chainware.purchase.query.dto.response.PurchaseOrderDetailResponse;
+import com.harusari.chainware.purchase.query.dto.response.PurchaseOrderSummaryResponse;
+import com.harusari.chainware.purchase.query.mapper.PurchaseOrderQueryMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class PurchaseOrderQueryServiceImpl implements PurchaseOrderQueryService {
+
+    private final PurchaseOrderQueryMapper mapper;
+
+    @Override
+    public List<PurchaseOrderSummaryResponse> getPurchaseOrders(PurchaseOrderSearchCondition condition) {
+        return mapper.findPurchaseOrders(condition);
+    }
+
+    @Override
+    public PurchaseOrderDetailResponse getPurchaseOrderDetail(Long purchaseOrderId) {
+        var order = mapper.findPurchaseOrderById(purchaseOrderId);
+        var products = mapper.findProductsByPurchaseOrderId(purchaseOrderId);
+
+        PurchaseOrderDetailResponse response = new PurchaseOrderDetailResponse();
+        response.setPurchaseOrderId(order.getPurchaseOrderId());
+        response.setPurchaseOrderCode(order.getPurchaseOrderCode());
+        response.setVendorName(order.getVendorName());
+        response.setStatus(order.getStatus());
+        response.setTotalAmount(order.getTotalAmount());
+        response.setCreatedAt(order.getCreatedAt());
+        response.setProducts(products);
+
+        return response;
+    }
+}
