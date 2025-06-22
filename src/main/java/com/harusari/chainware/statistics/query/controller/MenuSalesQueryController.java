@@ -1,5 +1,6 @@
 package com.harusari.chainware.statistics.query.controller;
 
+import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.statistics.query.dto.MenuSalesResponse;
 import com.harusari.chainware.statistics.query.service.MenuSalesQueryService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ public class MenuSalesQueryController {
     private final MenuSalesQueryService menuSalesQueryService;
 
     @GetMapping
-    public List<MenuSalesResponse> getMenuSales(
+    public ApiResponse<List<MenuSalesResponse>> getMenuSales(
             @RequestParam(required = false) Long franchiseId,
             @RequestParam(defaultValue = "DAILY") String periodType,    // DAILY, WEEKLY, MONTHLY
             @RequestParam(required = false)
@@ -28,12 +29,15 @@ public class MenuSalesQueryController {
     ) {
         LocalDate date = (targetDate != null) ? targetDate : LocalDate.now().minusDays(1);
 
+        List<MenuSalesResponse> result;
         if (franchiseId != null) {
             // 가맹점용
-            return menuSalesQueryService.getMenuSalesByPeriod(franchiseId, periodType, date);
+            result = menuSalesQueryService.getMenuSalesByPeriod(franchiseId, periodType, date);
         } else {
             // 본사용
-            return menuSalesQueryService.getMenuSalesForHeadquarters(periodType, date);
+            result = menuSalesQueryService.getMenuSalesForHeadquarters(periodType, date);
         }
+
+        return ApiResponse.success(result);
     }
 }

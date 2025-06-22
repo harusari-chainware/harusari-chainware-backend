@@ -1,5 +1,6 @@
 package com.harusari.chainware.statistics.query.controller;
 
+import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.statistics.query.dto.StoreOrderStatisticsResponseBase;
 import com.harusari.chainware.statistics.query.service.StoreOrderStatisticsQueryService;
 import lombok.RequiredArgsConstructor;
@@ -20,14 +21,17 @@ public class StoreOrderStatisticsQueryController {
     private final StoreOrderStatisticsQueryService storeOrderStatisticsQueryService;
 
     @GetMapping
-    public List<? extends StoreOrderStatisticsResponseBase> getStoreOrderStatistics(
+    public ApiResponse<List<? extends StoreOrderStatisticsResponseBase>> getStoreOrderStatistics(
             @RequestParam String period,
             @RequestParam(required = false) Long franchiseId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate,
             @RequestParam(defaultValue = "false") boolean includeProduct
     ) {
-        return storeOrderStatisticsQueryService.getStatistics(
-                period.toUpperCase(), franchiseId, targetDate, includeProduct
-        );
+        List<? extends StoreOrderStatisticsResponseBase> result =
+                storeOrderStatisticsQueryService.getStatistics(
+                        period.toUpperCase(), franchiseId, targetDate, includeProduct
+                );
+
+        return ApiResponse.success(result);
     }
 }
