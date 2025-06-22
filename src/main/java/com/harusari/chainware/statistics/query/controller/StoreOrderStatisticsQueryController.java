@@ -1,6 +1,5 @@
 package com.harusari.chainware.statistics.query.controller;
 
-import com.harusari.chainware.statistics.query.dto.StoreOrderStatisticsResponse;
 import com.harusari.chainware.statistics.query.dto.StoreOrderStatisticsResponseBase;
 import com.harusari.chainware.statistics.query.service.StoreOrderStatisticsQueryService;
 import lombok.RequiredArgsConstructor;

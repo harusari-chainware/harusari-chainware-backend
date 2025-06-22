@@ -1,7 +1,5 @@
 package com.harusari.chainware.statistics.query.service;
 
-import com.harusari.chainware.statistics.query.dto.InventoryTurnoverResponse;
-import com.harusari.chainware.statistics.query.dto.StoreOrderStatisticsResponse;
 import com.harusari.chainware.statistics.query.dto.StoreOrderStatisticsResponseBase;
 
 import java.time.LocalDate;

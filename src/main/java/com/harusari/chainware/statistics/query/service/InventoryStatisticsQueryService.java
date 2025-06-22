@@ -1,7 +1,6 @@
 package com.harusari.chainware.statistics.query.service;
 
 import com.harusari.chainware.statistics.query.dto.InventoryTurnoverResponse;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
