@@ -67,6 +67,7 @@ public class Member {
 
     public void updateEncodedPassword(String encodedPassword) {
         this.password = encodedPassword;
+        this.modifiedAt = LocalDateTime.now().withNano(0);
     }
 
     public void updateAuthorityId(Integer authorityId) {
