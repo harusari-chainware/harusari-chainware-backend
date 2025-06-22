@@ -1,8 +1,7 @@
 package com.harusari.chainware.statistics.query.service;
 
-import com.harusari.chainware.statistics.query.dto.StoreOrderStatisticsResponse;
-import com.harusari.chainware.statistics.query.dto.StoreOrderStatisticsResponseBase;
-import com.harusari.chainware.statistics.query.mapper.StoreOrderStatisticsQueryMapper;
+import com.harusari.chainware.statistics.query.dto.PurchaseOrderStatisticsResponseBase;
+import com.harusari.chainware.statistics.query.mapper.PurchaseOrderStatisticsQueryMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,14 +12,14 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class StoreOrderStatisticsQueryServiceImpl implements StoreOrderStatisticsQueryService {
+public class PurchaseOrderStatisticsQueryServiceImpl implements PurchaseOrderStatisticsQueryService {
 
-    private final StoreOrderStatisticsQueryMapper mapper;
+    private final PurchaseOrderStatisticsQueryMapper mapper;
 
     @Override
     @Transactional
-    public List<? extends StoreOrderStatisticsResponseBase> getStatistics(
-            String period, Long franchiseId, LocalDate targetDate, boolean includeProduct) {
+    public List<? extends PurchaseOrderStatisticsResponseBase> getStatistics(
+            String period, Long vendorId, LocalDate targetDate, boolean includeProduct) {
 
         LocalDate baseDate = (targetDate != null) ? targetDate : LocalDate.now().minusDays(1);
         LocalDate today = LocalDate.now();
@@ -46,7 +45,7 @@ public class StoreOrderStatisticsQueryServiceImpl implements StoreOrderStatistic
         }
 
         return includeProduct
-                ? mapper.getProductLevelStatistics(franchiseId, startDate, endDate)
-                : mapper.getFranchiseLevelStatistics(franchiseId, startDate, endDate);
+                ? mapper.getProductLevelStatistics(vendorId, startDate, endDate)
+                : mapper.getVendorLevelStatistics(vendorId, startDate, endDate);
     }
 }
