@@ -39,29 +39,32 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
 
         // 2. 상태 검증
         if (!DeliveryStatus.REQUESTED.equals(delivery.getDeliveryStatus())) {
-            throw new DeliveryException(DeliveryErrorCode.INVALID_DELIVERY_STATUS);
+            throw new DeliveryException(DeliveryErrorCode.DELIVERY_STATUS_NOT_REQUESTED);
         }
 
-        // 3. 상태 변경
-        delivery.startDelivery(request.getTrackingNumber(), request.getCarrier(), LocalDateTime.now());
-
-        // 4. 재고 차감 로직 실행
+        // 3. 주문 상세 정보 조회
         Long orderId = delivery.getOrderId();
         List<OrderDetail> details = orderDetailRepository.findByOrderId(orderId);
+        if (details.isEmpty()) {
+            throw new DeliveryException(DeliveryErrorCode.ORDER_DETAIL_NOT_FOUND_FOR_DELIVERY);
+        }
 
+        // 4. 예약 재고 차감
         for (OrderDetail detail : details) {
             WarehouseInventory inventory = jpaWarehouseInventoryRepository.findByProductId(detail.getProductId())
-                    .orElseThrow(() -> new DeliveryException(DeliveryErrorCode.INVENTORY_NOT_FOUND));
+                    .orElseThrow(() -> new DeliveryException(DeliveryErrorCode.PRODUCT_INVENTORY_NOT_FOUND_FOR_DELIVERY));
 
-            // 수량 차감 처리
             int quantity = detail.getQuantity();
             if (inventory.getQuantity() < quantity || inventory.getReservedQuantity() < quantity) {
-                throw new DeliveryException(DeliveryErrorCode.INSUFFICIENT_INVENTORY);
+                throw new DeliveryException(DeliveryErrorCode.INSUFFICIENT_INVENTORY_FOR_DELIVERY);
             }
 
             inventory.decreaseQuantity(quantity, LocalDateTime.now());
             inventory.decreaseReservedQuantity(quantity, LocalDateTime.now());
         }
+
+        // 5. 배송 상태 변경
+        delivery.startDelivery(request.getTrackingNumber(), request.getCarrier(), LocalDateTime.now());
 
         return DeliveryCommandResponse.builder()
                 .deliveryId(delivery.getDeliveryId())
@@ -75,13 +78,16 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
 
     @Override
     public DeliveryCommandResponse completeDelivery(Long deliveryId) {
+        // 1. 배송 조회
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new DeliveryException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
 
+        // 2. 배송 상태 검증
         if (!DeliveryStatus.IN_TRANSIT.equals(delivery.getDeliveryStatus())) {
-            throw new DeliveryException(DeliveryErrorCode.INVALID_DELIVERY_STATUS);
+            throw new DeliveryException(DeliveryErrorCode.DELIVERY_STATUS_NOT_IN_TRANSIT);
         }
 
+        // 3. 배송 완료 처리
         delivery.completeDelivery(LocalDateTime.now());
 
         return DeliveryCommandResponse.builder()
