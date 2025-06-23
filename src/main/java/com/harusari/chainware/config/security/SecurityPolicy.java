@@ -20,11 +20,21 @@ public class SecurityPolicy {
     };
 
     protected static final String[] GENERAL_MANAGER_URLS = {
-
+            "/api/v1/requisitions/create",
+            "/api/v1/requisitions/{requisitionId}/submit",
+            "/api/v1/requisitions",
+            "/api/v1/requisitions/{requisitionID}",
+            "/api/v1/purchases",
+            "/api/v1/purchases/{purchaseOrderId}"
     };
 
     protected static final String[] SENIOR_MANAGER_URLS = {
-
+            "/api/v1/requisitions/{requisitionId}/approve",
+            "/api/v1/requisitions/{requisitionId}/reject",
+            "/api/v1/requisitions",
+            "/api/v1/requisitions/{requisitionID}",
+            "/api/v1/purchases",
+            "/api/v1/purchases/{purchaseOrderId}"
     };
 
     protected static final String[] WAREHOUSE_MANAGER_URLS = {

@@ -16,14 +16,14 @@ public class PurchaseOrderQueryServiceImpl implements PurchaseOrderQueryService 
     private final PurchaseOrderQueryMapper mapper;
 
     @Override
-    public List<PurchaseOrderSummaryResponse> getPurchaseOrders(PurchaseOrderSearchCondition condition) {
-        return mapper.findPurchaseOrders(condition);
+    public List<PurchaseOrderSummaryResponse> getPurchaseOrders(Long memberId, PurchaseOrderSearchCondition condition) {
+        return mapper.findPurchaseOrders(memberId, condition);
     }
 
     @Override
-    public PurchaseOrderDetailResponse getPurchaseOrderDetail(Long purchaseOrderId) {
-        var order = mapper.findPurchaseOrderById(purchaseOrderId);
-        var products = mapper.findProductsByPurchaseOrderId(purchaseOrderId);
+    public PurchaseOrderDetailResponse getPurchaseOrderDetail(Long memberId, Long purchaseOrderId) {
+        var order = mapper.findPurchaseOrderById(memberId, purchaseOrderId);
+        var products = mapper.findProductsByPurchaseOrderId(memberId, purchaseOrderId);
 
         PurchaseOrderDetailResponse response = new PurchaseOrderDetailResponse();
         response.setPurchaseOrderId(order.getPurchaseOrderId());

@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface PurchaseOrderQueryService {
 
-    PurchaseOrderDetailResponse getPurchaseOrderDetail(Long purchaseOrderId);
+    PurchaseOrderDetailResponse getPurchaseOrderDetail(Long memberId, Long purchaseOrderId);
 
-    List<PurchaseOrderSummaryResponse> getPurchaseOrders(PurchaseOrderSearchCondition condition);
+    List<PurchaseOrderSummaryResponse> getPurchaseOrders(Long memberId, PurchaseOrderSearchCondition condition);
 }

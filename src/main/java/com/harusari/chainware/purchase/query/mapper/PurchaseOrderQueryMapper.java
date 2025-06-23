@@ -12,9 +12,9 @@ import java.util.List;
 @Mapper
 public interface PurchaseOrderQueryMapper {
 
-    PurchaseOrderDetailResponse findPurchaseOrderById(@Param("purchaseOrderId") Long purchaseOrderId);
+    PurchaseOrderDetailResponse findPurchaseOrderById(@Param("purchaseOrderId") Long memberId, Long purchaseOrderId);
 
-    List<PurchaseOrderProductResponse> findProductsByPurchaseOrderId(@Param("purchaseOrderId") Long purchaseOrderId);
+    List<PurchaseOrderProductResponse> findProductsByPurchaseOrderId(@Param("purchaseOrderId") Long memberId, Long purchaseOrderId);
 
-    List<PurchaseOrderSummaryResponse> findPurchaseOrders(@Param("condition") PurchaseOrderSearchCondition condition);
+    List<PurchaseOrderSummaryResponse> findPurchaseOrders(@Param("condition") Long memberId, PurchaseOrderSearchCondition condition);
 }
