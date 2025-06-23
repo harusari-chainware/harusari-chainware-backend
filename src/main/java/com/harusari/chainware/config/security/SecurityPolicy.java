@@ -21,6 +21,8 @@ public class SecurityPolicy {
     };
 
     protected static final String[] GENERAL_MANAGER_URLS = {
+            "/api/v1/orders/{orderId}/approve",
+            "/api/v1/orders/{orderId}/reject",
             "/api/v1/requisitions/create",
             "/api/v1/requisitions/{requisitionId}/submit",
             "/api/v1/requisitions",
@@ -31,6 +33,8 @@ public class SecurityPolicy {
     };
 
     protected static final String[] SENIOR_MANAGER_URLS = {
+            "/api/v1/orders/{orderId}/approve",
+            "/api/v1/orders/{orderId}/reject",
             "/api/v1/requisitions/{requisitionId}/approve",
             "/api/v1/requisitions/{requisitionId}/reject",
             "/api/v1/requisitions",
@@ -44,7 +48,9 @@ public class SecurityPolicy {
     };
 
     protected static final String[] FRANCHISE_MANAGER_URLS = {
-
+            "/api/v1/orders",
+            "/api/v1/orders/{orderId}",
+            "/api/v1/orders/{orderId}/cancel"
     };
 
     protected static final String[] VENDOR_MANAGER_URLS = {
@@ -55,7 +61,6 @@ public class SecurityPolicy {
             "/api/v1/auth/logout",
             "/api/v1/members/password",
             "/api/v1/requisitions/**",
-            "/api/v1/orders/**",
             "/api/v1/delivery/**",
             "/api/v1/warehouse/**",
     };

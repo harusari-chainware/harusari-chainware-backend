@@ -7,14 +7,10 @@ import com.harusari.chainware.order.command.application.dto.response.OrderComman
 
 public interface OrderCommandService {
 
-    OrderCommandResponse createOrder(OrderCreateRequest request);
-
-    OrderCommandResponse updateOrder(Long orderId, OrderUpdateRequest request);
-
-    OrderCommandResponse cancelOrder(Long orderId);
-
-    OrderCommandResponse approveOrder(Long orderId);
-
-    OrderCommandResponse rejectOrder(Long orderId, OrderRejectRequest request);
+    OrderCommandResponse createOrder(OrderCreateRequest request, Long memberId);
+    OrderCommandResponse updateOrder(Long orderId, OrderUpdateRequest request, Long memberId);
+    OrderCommandResponse cancelOrder(Long orderId, Long memberId);
+    OrderCommandResponse approveOrder(Long orderId, Long memberId);
+    OrderCommandResponse rejectOrder(Long orderId, OrderRejectRequest request, Long memberId);
 
 }
