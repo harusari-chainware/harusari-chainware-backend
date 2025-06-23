@@ -18,4 +18,8 @@ public enum StatisticsErrorCode {
     private final String errorCode;
     private final String errorMessage;
     private final HttpStatus httpStatus;
+
+    public String getMessage() {
+        return this.errorMessage;
+    }
 }
