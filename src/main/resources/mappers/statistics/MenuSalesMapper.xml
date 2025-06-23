@@ -4,7 +4,7 @@
 
 <mapper namespace="com.harusari.chainware.statistics.query.mapper.MenuSalesMapper">
 
-    <select id="selectMenuSalesByPeriod" resultType="com.harusari.chainware.statistics.query.dto.MenuSalesResponse">
+    <select id="selectMenuSalesByPeriod" resultType="com.harusari.chainware.statistics.query.dto.menuSales.MenuSalesResponse">
         SELECT
         m.menu_id AS menuId,
         m.menu_name AS menuName,
@@ -81,7 +81,7 @@
         ORDER BY totalAmount DESC
     </select>
 
-    <select id="selectMenuSalesForHeadquarters" resultType="com.harusari.chainware.statistics.query.dto.MenuSalesResponse">
+    <select id="selectMenuSalesForHeadquarters" resultType="com.harusari.chainware.statistics.query.dto.menuSales.MenuSalesResponse">
         SELECT
         m.menu_id AS menuId,
         m.menu_name AS menuName,

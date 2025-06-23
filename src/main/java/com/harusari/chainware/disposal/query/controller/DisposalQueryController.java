@@ -1,5 +1,6 @@
 package com.harusari.chainware.disposal.query.controller;
 
+import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.disposal.query.dto.DisposalListResponseDto;
 import com.harusari.chainware.disposal.query.dto.DisposalSearchRequestDto;
@@ -21,25 +22,14 @@ import java.util.List;
 public class DisposalQueryController {
 
     private final DisposalQueryService disposalQueryService;
-/*
+
     @GetMapping
     public ResponseEntity<ApiResponse<DisposalListResponseDto>> getDisposals(
             @ModelAttribute DisposalSearchRequestDto request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long memberId = userDetails.getMemberId();
-        MemberAuthorityType authorityType = userDetails.getAuthorityType();
-
-        DisposalListResponseDto result = disposalQueryService.getDisposals(request, memberId, authorityType);
-        return ResponseEntity.ok(ApiResponse.success(result));
-    }
-*/
-    @GetMapping
-    public ResponseEntity<ApiResponse<DisposalListResponseDto>> getDisposals(
-            @ModelAttribute DisposalSearchRequestDto request
-    ) {
-        Long memberId = 1L;
-        MemberAuthorityType authorityType = MemberAuthorityType.GENERAL_MANAGER;
+        MemberAuthorityType authorityType = userDetails.getMemberAuthorityType();
 
         DisposalListResponseDto result = disposalQueryService.getDisposals(request, memberId, authorityType);
         return ResponseEntity.ok(ApiResponse.success(result));
