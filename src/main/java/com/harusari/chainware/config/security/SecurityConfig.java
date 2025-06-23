@@ -61,6 +61,7 @@ public class SecurityConfig {
 
 
 
+
                         // Public (permitAll)
                         .requestMatchers(HttpMethod.POST, SecurityPolicy.PUBLIC_URLS).permitAll()
 
