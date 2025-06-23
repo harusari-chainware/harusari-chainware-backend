@@ -10,24 +10,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/topcategory")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class TopCategoryCommandController {
 
     private final TopCategoryCommandService topCategoryCommandService;
 
-    @PostMapping
+    @PostMapping("/topcategory/headquarters")
     public ResponseEntity<TopCategoryCommandResponse> create(@RequestBody @Valid TopCategoryCreateRequest request) {
         return ResponseEntity.ok(topCategoryCommandService.createTopCategory(request));
     }
 
-    @PutMapping("/{topCategoryId}")
+    @PutMapping("/topcategory/headquarters/{topCategoryId}")
     public ResponseEntity<TopCategoryCommandResponse> update(@PathVariable Long topCategoryId, @RequestBody @Valid TopCategoryUpdateRequest request) {
         TopCategoryCommandResponse response = topCategoryCommandService.updateTopCategory(topCategoryId, request);
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{topCategoryId}")
+    @DeleteMapping("/topcategory/headquarters/{topCategoryId}")
     public ResponseEntity<Void> delete(@PathVariable Long topCategoryId) {
         topCategoryCommandService.deleteTopCategory(topCategoryId);
         return ResponseEntity.noContent().build();

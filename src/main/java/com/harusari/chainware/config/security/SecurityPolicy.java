@@ -19,11 +19,29 @@ public class SecurityPolicy {
     };
 
     protected static final String[] GENERAL_MANAGER_URLS = {
-
+            "/api/v1/category/headquarters",
+            "/api/v1/category/headquarters/*",
+            "/api/v1/topcategory/headquarters",
+            "/api/v1/topcategory/headquarters/*",
+            "/api/v1/product/headquarters",
+            "/api/v1/product/headquarters/*",
+            "/api/v1/product/headquarters/*/*",
+            "/api/v1/contract/headquarters",
+            "/api/v1/contract/headquarters/*",
+            "/api/v1/contract/headquarters/*/*",
     };
 
     protected static final String[] SENIOR_MANAGER_URLS = {
-
+            "/api/v1/category/headquarters",
+            "/api/v1/category/headquarters/*",
+            "/api/v1/topcategory/headquarters",
+            "/api/v1/topcategory/headquarters/*",
+            "/api/v1/product/headquarters",
+            "/api/v1/product/headquarters/*",
+            "/api/v1/product/headquarters/*/*",
+            "/api/v1/contract/headquarters",
+            "/api/v1/contract/headquarters/*",
+            "/api/v1/contract/headquarters/*/*",
     };
 
     protected static final String[] WAREHOUSE_MANAGER_URLS = {

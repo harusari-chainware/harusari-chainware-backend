@@ -139,11 +139,11 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
     /**
      * productCode 자동 생성 메서드
-     * 형식: pd-(categoryCode)-(숫자)
+     * 형식: PD-(categoryCode)-(숫자)
      * 숫자는 categoryCode에 해당하는 기존 최대 숫자 + 1
      */
     private String generateProductCode(String categoryCode) {
-        String prefix = "pd-" + categoryCode + "-";
+        String prefix = "PD-" + categoryCode + "-";
         Integer maxNumber = productRepository.findMaxNumberByCategoryCode(prefix);
         int nextNumber = (maxNumber == null) ? 1 : maxNumber + 1;
 

@@ -9,14 +9,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/category")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class CategoryCommandController {
 
     private final CategoryCommandService categoryCommandService;
 
     /* 카테고리 생성 */
-    @PostMapping
+    @PostMapping("/category/headquarters")
     public ResponseEntity<CategoryCommandResponse> createCategory(
             @RequestBody @Valid CategoryCreateRequest request) {
         CategoryCommandResponse response = categoryCommandService.createCategory(request);
@@ -24,7 +24,7 @@ public class CategoryCommandController {
     }
 
     /* 카테고리 수정 */
-    @PutMapping("/{categoryId}")
+    @PutMapping("/category/headquarters/{categoryId}")
     public ResponseEntity<CategoryCommandResponse> updateCategory(
             @PathVariable Long categoryId,
             @RequestBody @Valid CategoryCreateRequest request) {
@@ -33,7 +33,7 @@ public class CategoryCommandController {
     }
 
     /* 카테고리 삭제 */
-    @DeleteMapping("/{categoryId}")
+    @DeleteMapping("/category/headquarters/{categoryId}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long categoryId) {
         categoryCommandService.deleteCategory(categoryId);
         return ResponseEntity.noContent().build();
