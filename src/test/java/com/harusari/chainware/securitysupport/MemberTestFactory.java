@@ -9,36 +9,35 @@ import java.time.LocalDateTime;
 public class MemberTestFactory {
 
     public static Member testMaster(Long id) {
-        return createMember(id, 1, "master@domain.com", "MASTER");
+        return createMember(id, "master@domain.com", "MASTER");
     }
 
     public static Member testGeneralManager(Long id) {
-        return createMember(id, 2, "general@domain.com", "GENERAL_MANAGER");
+        return createMember(id, "general@domain.com", "GENERAL_MANAGER");
     }
 
     public static Member testSeniorManager(Long id) {
-        return createMember(id, 3, "senior@domain.com", "SENIOR_MANAGER");
+        return createMember(id, "senior@domain.com", "SENIOR_MANAGER");
     }
 
     public static Member testWarehouseManager(Long id) {
-        return createMember(id, 4, "warehouse@domain.com", "WAREHOUSE_MANAGER");
+        return createMember(id, "warehouse@domain.com", "WAREHOUSE_MANAGER");
     }
 
     public static Member testFranchiseManager(Long id) {
-        return createMember(id, 5, "franchise@domain.com", "FRANCHISE_MANAGER");
+        return createMember(id, "franchise@domain.com", "FRANCHISE_MANAGER");
     }
 
     public static Member testVendorManager(Long id) {
-        return createMember(id, 6, "vendor@domain.com", "VENDOR_MANAGER");
+        return createMember(id, "vendor@domain.com", "VENDOR_MANAGER");
     }
 
     public static Member testSystem(Long id) {
-        return createMember(id, 99, "system@domain.com", "SYSTEM");
+        return createMember(id, "system@domain.com", "SYSTEM");
     }
 
-    private static Member createMember(Long id, int authorityId, String email, String position) {
+    private static Member createMember(Long id, String email, String position) {
         Member member = Member.builder()
-                .authorityId(authorityId)
                 .email(email)
                 .password("encodedPassword")
                 .name("테스트 유저")

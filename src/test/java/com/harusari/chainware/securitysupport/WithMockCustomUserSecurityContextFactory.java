@@ -19,7 +19,7 @@ public class WithMockCustomUserSecurityContextFactory implements WithSecurityCon
         CustomUserDetails principal = new CustomUserDetails(
                 member.getMemberId(),
                 member.getEmail(),
-                MemberAuthorityType.of(member.getAuthorityId())
+                MemberAuthorityType.valueOf(member.getPosition())
         );
 
 
