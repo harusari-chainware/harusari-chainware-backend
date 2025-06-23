@@ -5,4 +5,5 @@ public interface PurchaseOrderCommandService {
 
     Long createFromRequisition(Long requisitionId, Long memberId);
 
+    void approve(Long purchaseOrderId, Long approverId);
 }

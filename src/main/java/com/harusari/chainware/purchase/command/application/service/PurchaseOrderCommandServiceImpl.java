@@ -6,6 +6,8 @@ import com.harusari.chainware.purchase.command.domain.aggregate.PurchaseOrderSta
 import com.harusari.chainware.purchase.command.domain.repository.PurchaseOrderDetailRepository;
 import com.harusari.chainware.purchase.command.domain.repository.PurchaseOrderRepository;
 import com.harusari.chainware.purchase.command.infrastructure.PurchaseOrderCodeGenerator;
+import com.harusari.chainware.requisition.command.application.exception.InvalidStatusException;
+import com.harusari.chainware.requisition.command.application.exception.NotFoundException;
 import com.harusari.chainware.requisition.query.dto.response.RequisitionDetailResponse;
 import com.harusari.chainware.requisition.query.dto.response.RequisitionItemResponse;
 import com.harusari.chainware.requisition.query.mapper.RequisitionQueryMapper;
@@ -75,5 +77,18 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
         purchaseOrderDetailRepository.saveAll(poDetails);
 
         return order.getPurchaseOrderId();
+    }
+
+    @Override
+    @Transactional
+    public void approve(Long purchaseOrderId, Long memberId) {
+        PurchaseOrder order = purchaseOrderRepository.findById(purchaseOrderId)
+                .orElseThrow(() -> new NotFoundException("발주를 찾을 수 없습니다."));
+
+        if (!order.getPurchaseOrderStatus().equals(PurchaseOrderStatus.REQUESTED)) {
+            throw new InvalidStatusException("요청 상태의 발주만 승인할 수 있습니다.");
+        }
+
+        order.approve();
     }
 }

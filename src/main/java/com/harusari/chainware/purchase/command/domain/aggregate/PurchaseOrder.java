@@ -1,5 +1,6 @@
 package com.harusari.chainware.purchase.command.domain.aggregate;
 
+import com.harusari.chainware.requisition.command.application.exception.InvalidStatusException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -63,5 +64,15 @@ public class PurchaseOrder {
         this.rejectReason = rejectReason;
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
+    }
+
+
+    public void approve() {
+        if (this.getPurchaseOrderStatus() != PurchaseOrderStatus.REQUESTED) {
+            throw new InvalidStatusException("발주는 REQUESTED 상태일 때만 승인할 수 있습니다.");
+        }
+
+        this.purchaseOrderStatus = PurchaseOrderStatus.APPROVED;
+        this.modifiedAt = LocalDateTime.now();
     }
 }

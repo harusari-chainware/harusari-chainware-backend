@@ -65,10 +65,16 @@ public class SecurityConfig {
 
 
                         // SENIOR MANAGER
-                        .requestMatchers(HttpMethod.GET, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
-                        .requestMatchers(HttpMethod.POST, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
-                        .requestMatchers(HttpMethod.PUT, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
-                        .requestMatchers(HttpMethod.DELETE, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
+                        .requestMatchers(HttpMethod.GET, SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
+                        .requestMatchers(HttpMethod.POST, SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
+                        .requestMatchers(HttpMethod.PUT, SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
+                        .requestMatchers(HttpMethod.DELETE, SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
+
+                        // VENDOR MANAGER
+                        .requestMatchers(HttpMethod.GET, VENDOR_MANAGER_URLS).hasAuthority(VENDOR_MANAGER.name())
+                        .requestMatchers(HttpMethod.POST, VENDOR_MANAGER_URLS).hasAuthority(VENDOR_MANAGER.name())
+                        .requestMatchers(HttpMethod.PUT, VENDOR_MANAGER_URLS).hasAuthority(VENDOR_MANAGER.name())
+                        .requestMatchers(HttpMethod.DELETE, VENDOR_MANAGER_URLS).hasAuthority(VENDOR_MANAGER.name())
 
 
                         // 그 외 모든 요청 및 HTTP method 차단

@@ -48,7 +48,7 @@ public class SecurityPolicy {
     };
 
     protected static final String[] VENDOR_MANAGER_URLS = {
-
+            "/api/v1/purchases/{purchaseOrderId}/approve"
     };
 
     protected static final String[] AUTHENTICATED_URLS = {
