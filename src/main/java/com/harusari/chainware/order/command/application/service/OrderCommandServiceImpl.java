@@ -18,6 +18,8 @@ import com.harusari.chainware.order.exception.OrderUpdateInvalidException;
 import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInventory;
 import com.harusari.chainware.warehouse.command.infrastructure.repository.JpaWarehouseInventoryRepository;
 import lombok.RequiredArgsConstructor;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 @Service
@@ -39,85 +42,96 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     private final DeliveryRepository deliveryRepository;
     private final JpaWarehouseInventoryRepository jpaWarehouseInventoryRepository;
 
-    private final JpaMemberCommandRepository memberCommandRepository;
-    private final JpaAuthorityCommandRepository authorityCommandRepository;
-
+    private final RedissonClient redissonClient;
 
     // 주문 등록
     @Override
     public OrderCommandResponse createOrder(OrderCreateRequest request, Long memberId) {
-        // 1. 가격 계산
-        int productCount = request.getOrderDetails().size();
-        int totalQuantity = 0;
-        long totalPrice = 0L;
-
-        List<OrderDetail> details = new ArrayList<>();
-
-        for (OrderDetailCreateRequest d : request.getOrderDetails()) {
-            // TODO: productService 등으로 상품 가격 조회
-            // int unitPrice = getProductPrice(d.getProductId());
-            int unitPrice = 1500;
-
-            int quantity = d.getQuantity();
-            long itemTotalPrice = (long) unitPrice * quantity;
-
-            // 주문 가능 수량 검증
-            WarehouseInventory inventory = jpaWarehouseInventoryRepository.findByProductId(d.getProductId())
-                    .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.PRODUCT_INVENTORY_NOT_FOUND));
-
-            int availableQuantity = inventory.getQuantity() - inventory.getReservedQuantity();
-            if (availableQuantity < quantity) {
-                throw new OrderUpdateInvalidException(OrderErrorCode.INSUFFICIENT_AVAILABLE_QUANTITY);
+        // 0. Redission 분산락 적용
+        RLock lock = redissonClient.getLock("inventory_lock");
+        try {
+            // 0. 락 상태 검증
+            if (!lock.tryLock(3, 10, TimeUnit.SECONDS)) {
+                throw new IllegalStateException("다른 주문 처리 중입니다. 잠시 후 다시 시도해주세요.");
             }
 
-            totalQuantity += quantity;
-            totalPrice += itemTotalPrice;
+            // 1. 가격 계산
+            int productCount = request.getOrderDetails().size();
+            int totalQuantity = 0;
+            long totalPrice = 0L;
 
-            details.add(OrderDetail.builder()
-                    .orderId(null) // 일단 비워두고 나중에 채움
-                    .productId(d.getProductId())
-                    .quantity(quantity)
-                    .unitPrice(unitPrice)
-                    .totalPrice(itemTotalPrice)
+            List<OrderDetail> details = new ArrayList<>();
+
+            for (OrderDetailCreateRequest d : request.getOrderDetails()) {
+                // TODO: productService 등으로 상품 가격 조회
+                // int unitPrice = getProductPrice(d.getProductId());
+                int unitPrice = 1500;
+
+                int quantity = d.getQuantity();
+                long itemTotalPrice = (long) unitPrice * quantity;
+
+                // 비관적 락 적용 -> 주문 가능 수량 검증
+                WarehouseInventory inventory = jpaWarehouseInventoryRepository.findByProductIdForUpdate(d.getProductId())
+                        .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.PRODUCT_INVENTORY_NOT_FOUND));
+
+                int availableQuantity = inventory.getQuantity() - inventory.getReservedQuantity();
+                if (availableQuantity < quantity) {
+                    throw new OrderUpdateInvalidException(OrderErrorCode.INSUFFICIENT_AVAILABLE_QUANTITY);
+                }
+
+                totalQuantity += quantity;
+                totalPrice += itemTotalPrice;
+
+                details.add(OrderDetail.builder()
+                        .orderId(null) // 일단 비워두고 나중에 채움
+                        .productId(d.getProductId())
+                        .quantity(quantity)
+                        .unitPrice(unitPrice)
+                        .totalPrice(itemTotalPrice)
+                        .createdAt(LocalDateTime.now())
+                        .build());
+            }
+
+            // 2. 주문 엔티티 생성 및 저장
+            Order order = Order.builder()
+                    .franchiseId(request.getFranchiseId())
+                    .memberId(memberId)
+                    .orderCode(generateOrderCode())
+                    .deliveryDueDate(request.getDeliveryDueDate())
+                    .productCount(productCount)
+                    .totalQuantity(totalQuantity)
+                    .totalPrice(totalPrice)
+                    .orderStatus(OrderStatus.REQUESTED)
                     .createdAt(LocalDateTime.now())
-                    .build());
+                    .build();
+
+            Order savedOrder = orderRepository.save(order);
+
+            // 3. 주문 ID 반영해서 상세 저장
+            List<OrderDetail> finalDetails = details.stream()
+                    .map(detail -> OrderDetail.builder()
+                            .orderId(savedOrder.getOrderId())
+                            .productId(detail.getProductId())
+                            .quantity(detail.getQuantity())
+                            .unitPrice(detail.getUnitPrice())
+                            .totalPrice(detail.getTotalPrice())
+                            .createdAt(detail.getCreatedAt())
+                            .build())
+                    .toList();
+
+            orderDetailRepository.saveAll(finalDetails);
+
+            return OrderCommandResponse.builder()
+                    .orderId(savedOrder.getOrderId())
+                    .franchiseId(savedOrder.getFranchiseId())
+                    .orderStatus(savedOrder.getOrderStatus())
+                    .createdAt(savedOrder.getCreatedAt())
+                    .build();
+        } catch (InterruptedException e) {
+            throw new RuntimeException("분산 락 획득 중 인터럽트 발생", e);
+        } finally {
+            lock.unlock();
         }
-
-        // 2. 주문 엔티티 생성 및 저장
-        Order order = Order.builder()
-                .franchiseId(request.getFranchiseId())
-                .memberId(memberId)
-                .orderCode(generateOrderCode())
-                .deliveryDueDate(request.getDeliveryDueDate())
-                .productCount(productCount)
-                .totalQuantity(totalQuantity)
-                .totalPrice(totalPrice)
-                .orderStatus(OrderStatus.REQUESTED)
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        Order savedOrder = orderRepository.save(order);
-
-        // 3. 주문 ID 반영해서 상세 저장
-        List<OrderDetail> finalDetails = details.stream()
-                .map(detail -> OrderDetail.builder()
-                        .orderId(savedOrder.getOrderId())
-                        .productId(detail.getProductId())
-                        .quantity(detail.getQuantity())
-                        .unitPrice(detail.getUnitPrice())
-                        .totalPrice(detail.getTotalPrice())
-                        .createdAt(detail.getCreatedAt())
-                        .build())
-                .toList();
-
-        orderDetailRepository.saveAll(finalDetails);
-
-        return OrderCommandResponse.builder()
-                .orderId(savedOrder.getOrderId())
-                .franchiseId(savedOrder.getFranchiseId())
-                .orderStatus(savedOrder.getOrderStatus())
-                .createdAt(savedOrder.getCreatedAt())
-                .build();
     }
 
     // 주문 수정
@@ -150,7 +164,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
             int quantity = d.getQuantity();
             long itemTotalPrice = (long) unitPrice * quantity;
 
-            WarehouseInventory inventory = jpaWarehouseInventoryRepository.findByProductId(d.getProductId())
+            WarehouseInventory inventory = jpaWarehouseInventoryRepository.findByProductIdForUpdate(d.getProductId())
                     .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.PRODUCT_INVENTORY_NOT_FOUND));
             int availableQuantity = inventory.getQuantity() - inventory.getReservedQuantity();
             if (availableQuantity < quantity) {
@@ -230,7 +244,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
         List<OrderDetail> details = orderDetailRepository.findByOrderId(orderId);
         for (OrderDetail detail : details) {
-            WarehouseInventory inventory = jpaWarehouseInventoryRepository.findByProductId(detail.getProductId())
+            WarehouseInventory inventory = jpaWarehouseInventoryRepository.findByProductIdForUpdate(detail.getProductId())
                     .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.PRODUCT_INVENTORY_NOT_FOUND));
             inventory.increaseReservedQuantity(detail.getQuantity(), LocalDateTime.now());
         }
