@@ -12,13 +12,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/product")
 @RequiredArgsConstructor
 public class ProductCommandController {
 
     private final ProductCommandService productCommandService;
 
-    @PostMapping("/product/headquarters")
+    @PostMapping
     public ResponseEntity<ApiResponse<ProductCommandResponse>> createProduct(
             @RequestBody @Validated ProductCreateRequest productCreateRequest
     ) {
@@ -29,7 +29,7 @@ public class ProductCommandController {
                 .body(ApiResponse.success(response));
     }
 
-    @PutMapping("/product/headquarters/{productId}")
+    @PutMapping("/{productId}")
     public ResponseEntity<ApiResponse<ProductCommandResponse>> updateProduct(
             @PathVariable Long productId,
             @RequestBody @Validated ProductUpdateRequest productUpdateRequest
@@ -39,7 +39,7 @@ public class ProductCommandController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @PutMapping("/product/headquarters/{productId}/delete")
+    @PutMapping("/{productId}/delete")
     public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long productId) {
 
         productCommandService.deleteProduct(productId);

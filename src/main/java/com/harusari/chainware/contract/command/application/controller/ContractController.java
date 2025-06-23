@@ -10,14 +10,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/contract")
 @RequiredArgsConstructor
 public class ContractController {
 
     private final ContractService contractService;
 
     // 계약 생성
-    @PostMapping("/contract/headquarters")
+    @PostMapping
     public ResponseEntity<ContractResponse> createContract(
             @RequestBody @Valid ContractCreateRequest request) {
         ContractResponse response = contractService.createContract(request);
@@ -25,7 +25,7 @@ public class ContractController {
     }
 
     // 계약 수정
-    @PutMapping("/contract/headquarters/{contractId}")
+    @PutMapping("/{contractId}")
     public ResponseEntity<ContractResponse> updateContract(
             @PathVariable Long contractId,
             @RequestBody @Valid ContractUpdateRequest request) {
@@ -34,7 +34,7 @@ public class ContractController {
     }
 
     // 계약 삭제 (soft delete)
-    @PutMapping("/contract/headquarters/{contractId}/delete")
+    @PutMapping("/{contractId}/delete")
     public ResponseEntity<Void> deleteContract(@PathVariable Long contractId) {
         contractService.deleteContract(contractId);
         return ResponseEntity.noContent().build();
