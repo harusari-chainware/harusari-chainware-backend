@@ -4,8 +4,6 @@ import com.harusari.chainware.delivery.command.domain.aggregate.Delivery;
 import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryMethod;
 import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryStatus;
 import com.harusari.chainware.delivery.command.domain.repository.DeliveryRepository;
-import com.harusari.chainware.member.command.infrastructure.repository.JpaAuthorityCommandRepository;
-import com.harusari.chainware.member.command.infrastructure.repository.JpaMemberCommandRepository;
 import com.harusari.chainware.order.command.application.dto.request.*;
 import com.harusari.chainware.order.command.application.dto.response.OrderCommandResponse;
 import com.harusari.chainware.order.command.domain.aggregate.Order;
@@ -14,12 +12,13 @@ import com.harusari.chainware.order.command.domain.aggregate.OrderStatus;
 import com.harusari.chainware.order.command.domain.repository.OrderDetailRepository;
 import com.harusari.chainware.order.command.domain.repository.OrderRepository;
 import com.harusari.chainware.order.exception.OrderErrorCode;
-import com.harusari.chainware.order.exception.OrderUpdateInvalidException;
+import com.harusari.chainware.order.exception.OrderException;
 import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInventory;
 import com.harusari.chainware.warehouse.command.infrastructure.repository.JpaWarehouseInventoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,9 +49,13 @@ public class OrderCommandServiceImpl implements OrderCommandService {
         // 0. Redission 분산락 적용
         RLock lock = redissonClient.getLock("inventory_lock");
         try {
-            // 0. 락 상태 검증
+            // 0-1. 락 획득 시도 : 최대 3초 대기, 10초 후 자동 해제
             if (!lock.tryLock(3, 10, TimeUnit.SECONDS)) {
-                throw new IllegalStateException("다른 주문 처리 중입니다. 잠시 후 다시 시도해주세요.");
+                throw new OrderException(OrderErrorCode.INVENTORY_LOCK_TIMEOUT);
+            }
+            // 0-2. 주문 상세가 비어있는 경우 예외 처리
+            if (request.getOrderDetails() == null || request.getOrderDetails().isEmpty()) {
+                throw new OrderException(OrderErrorCode.EMPTY_ORDER_DETAIL);
             }
 
             // 1. 가격 계산
@@ -63,25 +66,29 @@ public class OrderCommandServiceImpl implements OrderCommandService {
             List<OrderDetail> details = new ArrayList<>();
 
             for (OrderDetailCreateRequest d : request.getOrderDetails()) {
+                // 1-1. 비관적 락 적용 -> 재고 정보 조회
+                WarehouseInventory inventory = jpaWarehouseInventoryRepository.findByProductIdForUpdate(d.getProductId())
+                        .orElseThrow(() -> new OrderException(OrderErrorCode.PRODUCT_INVENTORY_NOT_FOUND));
+                int quantity = d.getQuantity();
+
+                // 1-2. 수량 유효성 및 주문 가능 재고량 검증
+                if (quantity <= 0) {
+                    throw new OrderException(OrderErrorCode.INVALID_ORDER_QUANTITY);
+                }
+                int availableQuantity = inventory.getQuantity() - inventory.getReservedQuantity();
+                if (availableQuantity < quantity) {
+                    throw new OrderException(OrderErrorCode.INSUFFICIENT_AVAILABLE_QUANTITY);
+                }
+
+                // 1-3. 제품 단가에 대한 가격 계산
                 // TODO: productService 등으로 상품 가격 조회
                 // int unitPrice = getProductPrice(d.getProductId());
                 int unitPrice = 1500;
-
-                int quantity = d.getQuantity();
                 long itemTotalPrice = (long) unitPrice * quantity;
-
-                // 비관적 락 적용 -> 주문 가능 수량 검증
-                WarehouseInventory inventory = jpaWarehouseInventoryRepository.findByProductIdForUpdate(d.getProductId())
-                        .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.PRODUCT_INVENTORY_NOT_FOUND));
-
-                int availableQuantity = inventory.getQuantity() - inventory.getReservedQuantity();
-                if (availableQuantity < quantity) {
-                    throw new OrderUpdateInvalidException(OrderErrorCode.INSUFFICIENT_AVAILABLE_QUANTITY);
-                }
-
                 totalQuantity += quantity;
                 totalPrice += itemTotalPrice;
 
+                // 1-4. 주문 상세 엔티티 생성
                 details.add(OrderDetail.builder()
                         .orderId(null) // 일단 비워두고 나중에 채움
                         .productId(d.getProductId())
@@ -127,9 +134,12 @@ public class OrderCommandServiceImpl implements OrderCommandService {
                     .orderStatus(savedOrder.getOrderStatus())
                     .createdAt(savedOrder.getCreatedAt())
                     .build();
-        } catch (InterruptedException e) {
-            throw new RuntimeException("분산 락 획득 중 인터럽트 발생", e);
-        } finally {
+
+        } catch (InterruptedException e) { // 락 획득 도중 인터럽트 발생 시 예외 처리
+            throw new OrderException(OrderErrorCode.INVENTORY_LOCK_TIMEOUT);
+        } catch (DataAccessException e) { // DB 접근 중 예외 발생 시 처리
+            throw new OrderException(OrderErrorCode.ORDER_SAVE_FAILED);
+        } finally { // 락 해제
             lock.unlock();
         }
     }
@@ -139,12 +149,12 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     public OrderCommandResponse updateOrder(Long orderId, OrderUpdateRequest request, Long memberId) {
         // 1. 주문 조회
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID));
+                .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND));
 
         // 2. 권한 및 상태 검증
         validateOrderOwner(order, memberId);
         if (!OrderStatus.REQUESTED.equals(order.getOrderStatus())) {
-            throw new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID);
+            throw new OrderException(OrderErrorCode.CANNOT_UPDATE_ORDER_STATUS);
         }
 
         // 3. 기존 주문 상세 삭제
@@ -158,22 +168,29 @@ public class OrderCommandServiceImpl implements OrderCommandService {
         List<OrderDetail> details = new ArrayList<>();
 
         for (OrderDetailUpdateRequest d : request.getOrderDetails()) {
-            // TODO: productService 등으로 상품 가격 조회
-//            int unitPrice = getProductPrice(d.getProductId()); // 임시 함수
-            int unitPrice = 1500;
-            int quantity = d.getQuantity();
-            long itemTotalPrice = (long) unitPrice * quantity;
-
+            // 4-1. 비관적 락을 통한 재고 확인
             WarehouseInventory inventory = jpaWarehouseInventoryRepository.findByProductIdForUpdate(d.getProductId())
-                    .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.PRODUCT_INVENTORY_NOT_FOUND));
+                    .orElseThrow(() -> new OrderException(OrderErrorCode.PRODUCT_INVENTORY_NOT_FOUND));
+            int quantity = d.getQuantity();
+
+            // 4-2. 수량 유효성 및 주문 가능 재고량 검증
+            if (quantity <= 0) {
+                throw new OrderException(OrderErrorCode.INVALID_ORDER_QUANTITY);
+            }
             int availableQuantity = inventory.getQuantity() - inventory.getReservedQuantity();
             if (availableQuantity < quantity) {
-                throw new OrderUpdateInvalidException(OrderErrorCode.INSUFFICIENT_AVAILABLE_QUANTITY);
+                throw new OrderException(OrderErrorCode.INSUFFICIENT_AVAILABLE_QUANTITY);
             }
 
+            // 4-3. 제품 단가에 대한 가격 계산
+            // TODO: productService 등으로 상품 가격 조회
+            // int unitPrice = getProductPrice(d.getProductId());
+            int unitPrice = 1500;
+            long itemTotalPrice = (long) unitPrice * quantity;
             totalQuantity += quantity;
             totalPrice += itemTotalPrice;
 
+            // 4-4. 주문 상세 엔티티 생성
             details.add(OrderDetail.builder()
                     .orderId(orderId)
                     .productId(d.getProductId())
@@ -208,12 +225,12 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     public OrderCommandResponse cancelOrder(Long orderId, Long memberId) {
         // 1. 주문 조회
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID));
+                .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND));
 
         // 2. 권한 및 상태 검증
         validateOrderOwner(order, memberId);
         if (!OrderStatus.REQUESTED.equals(order.getOrderStatus())) {
-            throw new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID);
+            throw new OrderException(OrderErrorCode.CANNOT_CANCEL_ORDER);
         }
 
         // 3. 상태 변경
@@ -232,20 +249,21 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     public OrderCommandResponse approveOrder(Long orderId, Long memberId) {
         // 1. 주문 조회
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID));
+                .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND));
 
         // 2. 권한 및 상태 검증
         if (!OrderStatus.REQUESTED.equals(order.getOrderStatus())) {
-            throw new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID);
+            throw new OrderException(OrderErrorCode.CANNOT_APPROVE_ORDER);
         }
 
         // 3. 상태 변경
         order.changeStatus(OrderStatus.APPROVED, null, LocalDateTime.now());
 
+        // 4. 예약 재고 변경
         List<OrderDetail> details = orderDetailRepository.findByOrderId(orderId);
         for (OrderDetail detail : details) {
             WarehouseInventory inventory = jpaWarehouseInventoryRepository.findByProductIdForUpdate(detail.getProductId())
-                    .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.PRODUCT_INVENTORY_NOT_FOUND));
+                    .orElseThrow(() -> new OrderException(OrderErrorCode.PRODUCT_INVENTORY_NOT_FOUND));
             inventory.increaseReservedQuantity(detail.getQuantity(), LocalDateTime.now());
         }
 
@@ -273,14 +291,14 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     public OrderCommandResponse rejectOrder(Long orderId, OrderRejectRequest request, Long memberId) {
         // 1. 주문 조회
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID));
+                .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND));
 
         // 2. 권한 및 상태 검증
         if (!OrderStatus.REQUESTED.equals(order.getOrderStatus())) {
-            throw new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID);
+            throw new OrderException(OrderErrorCode.CANNOT_REJECT_ORDER);
         }
         if (request.getRejectReason() == null || request.getRejectReason().isBlank()) {
-            throw new OrderUpdateInvalidException(OrderErrorCode.REJECT_REASON_REQUIRED);
+            throw new OrderException(OrderErrorCode.REJECT_REASON_REQUIRED);
         }
 
         // 3. 상태 변경
@@ -296,7 +314,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
     // 주문 코드 생성
     private String generateOrderCode() {
-
+        // 오늘 날짜를 yyMMdd 형식으로 변환
         LocalDate today = LocalDate.now();
         String datePart = today.format(DateTimeFormatter.ofPattern("yyMMdd"));
 
@@ -315,7 +333,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     // 권한 검증
     private void validateOrderOwner(Order order, Long memberId) {
         if (!order.getMemberId().equals(memberId)) {
-            throw new OrderUpdateInvalidException(OrderErrorCode.UNAUTHORIZED_ORDER_ACCESS);
+            throw new OrderException(OrderErrorCode.UNAUTHORIZED_ORDER_ACCESS);
         }
     }
 
