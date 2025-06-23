@@ -53,4 +53,17 @@ public class Warehouse {
         this.isDeleted = isDeleted;
     }
 
+    public void updateInfo(String name, String address, boolean status, LocalDateTime modifiedAt) {
+        this.warehouseName = name;
+        this.warehouseAddress = address;
+        this.warehouseStatus = status;
+        this.modifiedAt = modifiedAt;
+    }
+
+    public void softDelete() {
+        this.isDeleted = true;
+        this.modifiedAt = LocalDateTime.now();
+    }
+
+
 }
