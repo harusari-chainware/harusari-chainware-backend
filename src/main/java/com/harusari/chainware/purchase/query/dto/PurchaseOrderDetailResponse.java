@@ -1,4 +1,4 @@
-package com.harusari.chainware.purchase.query.dto.response;
+package com.harusari.chainware.purchase.query.dto;
 
 import lombok.Getter;
 import lombok.Setter;

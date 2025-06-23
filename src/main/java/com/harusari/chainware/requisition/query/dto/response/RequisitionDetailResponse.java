@@ -1,7 +1,6 @@
 package com.harusari.chainware.requisition.query.dto.response;
 
 import com.harusari.chainware.requisition.command.domain.aggregate.RequisitionStatus;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 

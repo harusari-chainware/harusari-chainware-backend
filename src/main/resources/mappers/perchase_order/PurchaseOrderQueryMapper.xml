@@ -5,7 +5,7 @@
 
 <mapper namespace="com.harusari.chainware.purchase.query.mapper.PurchaseOrderQueryMapper">
 
-    <select id="findPurchaseOrders" resultType="com.harusari.chainware.purchase.query.dto.response.PurchaseOrderSummaryResponse">
+    <select id="findPurchaseOrders" resultType="com.harusari.chainware.purchase.query.dto.PurchaseOrderSummaryResponse">
         SELECT
         po.purchase_order_id,
         po.purchase_order_code,
@@ -33,7 +33,7 @@
     </select>
 
 
-    <resultMap id="PurchaseOrderDetailMap" type="com.harusari.chainware.purchase.query.dto.response.PurchaseOrderDetailResponse">
+    <resultMap id="PurchaseOrderDetailMap" type="com.harusari.chainware.purchase.query.dto.PurchaseOrderDetailResponse">
         <id property="purchaseOrderId" column="purchase_order_id"/>
         <result property="purchaseOrderCode" column="purchase_order_code"/>
         <result property="vendorName" column="vendor_name"/>
@@ -57,7 +57,7 @@
             po.purchase_order_id = #{purchaseOrderId}
     </select>
 
-    <select id="findProductsByPurchaseOrderId" resultType="com.harusari.chainware.purchase.query.dto.response.PurchaseOrderProductResponse">
+    <select id="findProductsByPurchaseOrderId" resultType="com.harusari.chainware.purchase.query.dto.PurchaseOrderProductResponse">
         SELECT
             pod.product_id,
             p.product_name,

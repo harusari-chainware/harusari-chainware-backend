@@ -3,9 +3,9 @@ package com.harusari.chainware.purchase.query.controller;
 
 
 import com.harusari.chainware.auth.model.CustomUserDetails;
-import com.harusari.chainware.purchase.query.dto.request.PurchaseOrderSearchCondition;
-import com.harusari.chainware.purchase.query.dto.response.PurchaseOrderDetailResponse;
-import com.harusari.chainware.purchase.query.dto.response.PurchaseOrderSummaryResponse;
+import com.harusari.chainware.purchase.query.dto.PurchaseOrderSearchCondition;
+import com.harusari.chainware.purchase.query.dto.PurchaseOrderDetailResponse;
+import com.harusari.chainware.purchase.query.dto.PurchaseOrderSummaryResponse;
 import com.harusari.chainware.purchase.query.service.PurchaseOrderQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
