@@ -4,6 +4,12 @@ import com.harusari.chainware.delivery.command.domain.aggregate.Delivery;
 import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryMethod;
 import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryStatus;
 import com.harusari.chainware.delivery.command.domain.repository.DeliveryRepository;
+import com.harusari.chainware.member.command.domain.aggregate.Member;
+import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
+import com.harusari.chainware.member.command.domain.repository.AuthorityCommandRepository;
+import com.harusari.chainware.member.command.domain.repository.MemberCommandRepository;
+import com.harusari.chainware.member.command.infrastructure.repository.JpaAuthorityCommandRepository;
+import com.harusari.chainware.member.command.infrastructure.repository.JpaMemberCommandRepository;
 import com.harusari.chainware.order.command.application.dto.request.*;
 import com.harusari.chainware.order.command.application.dto.response.OrderCommandResponse;
 import com.harusari.chainware.order.command.domain.aggregate.Order;
@@ -23,7 +29,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+
 
 @Service
 @Transactional
@@ -36,11 +44,14 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     private final DeliveryRepository deliveryRepository;
     private final JpaWarehouseInventoryRepository jpaWarehouseInventoryRepository;
 
+    private final JpaMemberCommandRepository memberCommandRepository;
+    private final JpaAuthorityCommandRepository authorityCommandRepository;
+
+
     // 주문 등록
     @Override
-    public OrderCommandResponse createOrder(OrderCreateRequest request) {
-
-        // 1. 가격 계산용 변수
+    public OrderCommandResponse createOrder(OrderCreateRequest request, Long memberId) {
+        // 1. 가격 계산
         int productCount = request.getOrderDetails().size();
         int totalQuantity = 0;
         long totalPrice = 0L;
@@ -80,7 +91,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
         // 2. 주문 엔티티 생성 및 저장
         Order order = Order.builder()
                 .franchiseId(request.getFranchiseId())
-                .memberId(request.getMemberId())
+                .memberId(memberId)
                 .orderCode(generateOrderCode())
                 .deliveryDueDate(request.getDeliveryDueDate())
                 .productCount(productCount)
@@ -106,7 +117,6 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
         orderDetailRepository.saveAll(finalDetails);
 
-
         return OrderCommandResponse.builder()
                 .orderId(savedOrder.getOrderId())
                 .franchiseId(savedOrder.getFranchiseId())
@@ -115,33 +125,15 @@ public class OrderCommandServiceImpl implements OrderCommandService {
                 .build();
     }
 
-    // 주문 코드 생성
-    private String generateOrderCode() {
-
-        LocalDate today = LocalDate.now();
-        String datePart = today.format(DateTimeFormatter.ofPattern("yyMMdd"));
-
-        // 오늘 날짜의 기존 주문 수 조회
-        long count = orderRepository.countByCreatedAtBetween(
-                today.atStartOfDay(),
-                today.plusDays(1).atStartOfDay()
-        );
-
-        // 코드 중 시퀀스값 계산
-        String sequencePart = String.format("%03d", count + 1);
-
-        return "SO-" + datePart + sequencePart;
-    }
-
     // 주문 수정
     @Override
-    public OrderCommandResponse updateOrder(Long orderId, OrderUpdateRequest request) {
-
+    public OrderCommandResponse updateOrder(Long orderId, OrderUpdateRequest request, Long memberId) {
         // 1. 주문 조회
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID));
 
-        // 2. 상태 검증 (REQUESTED 상태일 때만 수정 가능)
+        // 2. 권한 및 상태 검증
+        validateOrderOwner(order, memberId);
         if (!OrderStatus.REQUESTED.equals(order.getOrderStatus())) {
             throw new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID);
         }
@@ -194,7 +186,6 @@ public class OrderCommandServiceImpl implements OrderCommandService {
         // 6. 저장
         orderDetailRepository.saveAll(details);
 
-        // 7. 응답
         return OrderCommandResponse.builder()
                 .orderId(order.getOrderId())
                 .franchiseId(order.getFranchiseId())
@@ -205,13 +196,13 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
     // 주문 취소
     @Override
-    public OrderCommandResponse cancelOrder(Long orderId) {
-
+    public OrderCommandResponse cancelOrder(Long orderId, Long memberId) {
         // 1. 주문 조회
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID));
 
-        // 2. 상태 검증
+        // 2. 권한 및 상태 검증
+        validateOrderOwner(order, memberId);
         if (!OrderStatus.REQUESTED.equals(order.getOrderStatus())) {
             throw new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID);
         }
@@ -229,13 +220,12 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
     // 주문 승인
     @Override
-    public OrderCommandResponse approveOrder(Long orderId) {
-
+    public OrderCommandResponse approveOrder(Long orderId, Long memberId) {
         // 1. 주문 조회
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID));
 
-        // 2. 상태 검증
+        // 2. 권한 및 상태 검증
         if (!OrderStatus.REQUESTED.equals(order.getOrderStatus())) {
             throw new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID);
         }
@@ -271,17 +261,15 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
     // 주문 반려
     @Override
-    public OrderCommandResponse rejectOrder(Long orderId, OrderRejectRequest request) {
-
+    public OrderCommandResponse rejectOrder(Long orderId, OrderRejectRequest request, Long memberId) {
         // 1. 주문 조회
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID));
 
-        // 2. 검증 (주문 상태, 반려 사유)
+        // 2. 권한 및 상태 검증
         if (!OrderStatus.REQUESTED.equals(order.getOrderStatus())) {
             throw new OrderUpdateInvalidException(OrderErrorCode.ORDER_UPDATE_INVALID);
         }
-
         if (request.getRejectReason() == null || request.getRejectReason().isBlank()) {
             throw new OrderUpdateInvalidException(OrderErrorCode.REJECT_REASON_REQUIRED);
         }
@@ -295,6 +283,31 @@ public class OrderCommandServiceImpl implements OrderCommandService {
                 .orderStatus(order.getOrderStatus())
                 .createdAt(order.getCreatedAt())
                 .build();
+    }
+
+    // 주문 코드 생성
+    private String generateOrderCode() {
+
+        LocalDate today = LocalDate.now();
+        String datePart = today.format(DateTimeFormatter.ofPattern("yyMMdd"));
+
+        // 오늘 날짜의 기존 주문 수 조회
+        long count = orderRepository.countByCreatedAtBetween(
+                today.atStartOfDay(),
+                today.plusDays(1).atStartOfDay()
+        );
+
+        // 코드 중 시퀀스값 계산
+        String sequencePart = String.format("%03d", count + 1);
+
+        return "SO-" + datePart + sequencePart;
+    }
+
+    // 권한 검증
+    private void validateOrderOwner(Order order, Long memberId) {
+        if (!order.getMemberId().equals(memberId)) {
+            throw new OrderUpdateInvalidException(OrderErrorCode.UNAUTHORIZED_ORDER_ACCESS);
+        }
     }
 
 }
