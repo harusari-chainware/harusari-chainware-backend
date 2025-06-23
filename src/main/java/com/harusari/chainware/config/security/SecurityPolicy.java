@@ -16,7 +16,8 @@ public class SecurityPolicy {
             "/api/v1/members/headquarters",
             "/api/v1/members/franchise",
             "/api/v1/members/vendor",
-            "/api/v1/members/warehouse"
+            "/api/v1/members/warehouse",
+            "/api/v1/members"
     };
 
     protected static final String[] GENERAL_MANAGER_URLS = {
