@@ -17,4 +17,17 @@ public enum MemberAuthorityType {
 
     private final String authorityLabelKo;
 
+    public static MemberAuthorityType of(Integer authorityId) {
+        return switch (authorityId) {
+            case 1 -> MASTER;
+            case 2 -> GENERAL_MANAGER;
+            case 3 -> SENIOR_MANAGER;
+            case 4 -> WAREHOUSE_MANAGER;
+            case 5 -> FRANCHISE_MANAGER;
+            case 6 -> VENDOR_MANAGER;
+            case 99 -> SYSTEM;
+            default -> throw new IllegalArgumentException("Unknown authorityId: " + authorityId);
+        };
+    }
+
 }

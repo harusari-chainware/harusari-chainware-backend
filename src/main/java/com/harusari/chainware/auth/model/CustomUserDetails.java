@@ -1,5 +1,6 @@
 package com.harusari.chainware.auth.model;
 
+import com.harusari.chainware.member.command.domain.aggregate.Member;
 import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,12 @@ public class CustomUserDetails implements UserDetails {
     private final Long memberId;
     private final String email;
     private final MemberAuthorityType memberAuthorityType;
+
+    public CustomUserDetails(Member member) {
+        this.memberId = member.getMemberId();
+        this.email = member.getEmail();
+        this.memberAuthorityType = MemberAuthorityType.of(member.getAuthorityId()); // ← 이 부분이 핵심
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
