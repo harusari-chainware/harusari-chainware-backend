@@ -1,6 +1,6 @@
 package com.harusari.chainware.statistics.query.mapper;
 
-import com.harusari.chainware.statistics.query.dto.MenuSalesResponse;
+import com.harusari.chainware.statistics.query.dto.menuSales.MenuSalesResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

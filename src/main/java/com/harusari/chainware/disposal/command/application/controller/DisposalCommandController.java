@@ -1,5 +1,6 @@
 package com.harusari.chainware.disposal.command.application.controller;
 
+import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.disposal.command.application.dto.DisposalCommandRequestDto;
 import com.harusari.chainware.disposal.command.application.service.DisposalCommandService;
@@ -19,26 +20,14 @@ public class DisposalCommandController {
 
     private final DisposalCommandService disposalCommandService;
 
-    /*
-        @PostMapping
-        public ResponseEntity<ApiResponse<Void>> registerDisposal(
-                @RequestBody DisposalCommandRequestDto request,
-                @AuthenticationPrincipal CustomUserDetails userDetails
-        ) {
-            Long memberId = userDetails.getMemberId();
-            MemberAuthorityType authorityType = userDetails.getAuthorityType();
 
-            disposalCommandService.registerDisposal(request, memberId, authorityType);
-            return ResponseEntity.ok(ApiResponse.success(null));
-        }
-    */
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> registerDisposal(
-            @RequestBody DisposalCommandRequestDto request
+            @RequestBody DisposalCommandRequestDto request,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        // 임시 하드코딩된 사용자 정보
-        Long memberId = 1L;
-        MemberAuthorityType authorityType = MemberAuthorityType.FRANCHISE_MANAGER;
+        Long memberId = userDetails.getMemberId();
+        MemberAuthorityType authorityType = userDetails.getMemberAuthorityType();
 
         disposalCommandService.registerDisposal(request, memberId, authorityType);
         return ResponseEntity.ok(ApiResponse.success(null));

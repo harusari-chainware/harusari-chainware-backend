@@ -19,6 +19,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static com.harusari.chainware.config.security.SecurityPolicy.*;
+import static com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType.*;
 import static com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType.MASTER;
 import static com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType.*;
 
@@ -48,16 +49,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, MASTER_ONLY_URLS).hasAuthority(MASTER.name())
                         .requestMatchers(HttpMethod.DELETE, MASTER_ONLY_URLS).hasAuthority(MASTER.name())
 
-                        // Public (permitAll)
-                        .requestMatchers(HttpMethod.POST, PUBLIC_URLS).permitAll()
-
-                        // Authenticated
-                        .requestMatchers(HttpMethod.GET, AUTHENTICATED_URLS).authenticated()
-                        .requestMatchers(HttpMethod.POST, AUTHENTICATED_URLS).authenticated()
-                        .requestMatchers(HttpMethod.PUT, AUTHENTICATED_URLS).authenticated()
-                        .requestMatchers(HttpMethod.DELETE, AUTHENTICATED_URLS).authenticated()
-
-                        // GENERAL MANAGER
+                        // GENERAL_MANAGER
                         .requestMatchers(HttpMethod.GET, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
                         .requestMatchers(HttpMethod.POST, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
                         .requestMatchers(HttpMethod.PUT, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
@@ -76,6 +68,17 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, VENDOR_MANAGER_URLS).hasAuthority(VENDOR_MANAGER.name())
                         .requestMatchers(HttpMethod.DELETE, VENDOR_MANAGER_URLS).hasAuthority(VENDOR_MANAGER.name())
 
+                        // FRANCHISE_MANAGER
+                        .requestMatchers(FRANCHISE_MANAGER_URLS).hasAuthority(FRANCHISE_MANAGER.name())
+
+                        // Public (permitAll)
+                        .requestMatchers(HttpMethod.POST, PUBLIC_URLS).permitAll()
+
+                        // Authenticated
+                        .requestMatchers(HttpMethod.GET, AUTHENTICATED_URLS).authenticated()
+                        .requestMatchers(HttpMethod.POST, AUTHENTICATED_URLS).authenticated()
+                        .requestMatchers(HttpMethod.PUT, AUTHENTICATED_URLS).authenticated()
+                        .requestMatchers(HttpMethod.DELETE, AUTHENTICATED_URLS).authenticated()
 
                         // 그 외 모든 요청 및 HTTP method 차단
                         .anyRequest().denyAll()

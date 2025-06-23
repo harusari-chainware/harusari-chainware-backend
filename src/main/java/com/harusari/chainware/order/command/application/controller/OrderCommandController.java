@@ -1,5 +1,6 @@
 package com.harusari.chainware.order.command.application.controller;
 
+import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.order.command.application.dto.request.OrderCreateRequest;
 import com.harusari.chainware.order.command.application.dto.request.OrderRejectRequest;
@@ -8,60 +9,65 @@ import com.harusari.chainware.order.command.application.dto.response.OrderComman
 import com.harusari.chainware.order.command.application.service.OrderCommandService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
 public class OrderCommandController {
 
     private final OrderCommandService orderCommandService;
 
     // 주문 등록
-    @PostMapping("/orders")
+    @PostMapping
     public ResponseEntity<ApiResponse<OrderCommandResponse>> createOrder(
-            @RequestBody OrderCreateRequest request
+            @RequestBody OrderCreateRequest request,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        System.out.println("createOrder 메소드 실행");
-        OrderCommandResponse response = orderCommandService.createOrder(request);
+        OrderCommandResponse response = orderCommandService.createOrder(request, customUserDetails.getMemberId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     // 주문 수정
-    @PutMapping("/orders/{orderId}")
+    @PutMapping("/{orderId}")
     public ResponseEntity<ApiResponse<OrderCommandResponse>> updateOrder(
             @PathVariable Long orderId,
-            @RequestBody OrderUpdateRequest request
+            @RequestBody OrderUpdateRequest request,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        OrderCommandResponse response = orderCommandService.updateOrder(orderId, request);
+        OrderCommandResponse response = orderCommandService.updateOrder(orderId, request, customUserDetails.getMemberId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     // 주문 취소
-    @PutMapping("/orders/{orderId}/cancel")
+    @PutMapping("/{orderId}/cancel")
     public ResponseEntity<ApiResponse<OrderCommandResponse>> cancelOrder(
-            @PathVariable Long orderId
+            @PathVariable Long orderId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        OrderCommandResponse response = orderCommandService.cancelOrder(orderId);
+        OrderCommandResponse response = orderCommandService.cancelOrder(orderId, customUserDetails.getMemberId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     // 주문 승인
-    @PutMapping("/orders/{orderId}/approve")
+    @PutMapping("/{orderId}/approve")
     public ResponseEntity<ApiResponse<OrderCommandResponse>> approveOrder(
-            @PathVariable Long orderId
+            @PathVariable Long orderId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        OrderCommandResponse response = orderCommandService.approveOrder(orderId);
+        OrderCommandResponse response = orderCommandService.approveOrder(orderId, customUserDetails.getMemberId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     // 주문 반려
-    @PutMapping("/orders/{orderId}/reject")
+    @PutMapping("/{orderId}/reject")
     public ResponseEntity<ApiResponse<OrderCommandResponse>> rejectOrder(
             @PathVariable Long orderId,
-            @RequestBody OrderRejectRequest request
+            @RequestBody OrderRejectRequest request,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        OrderCommandResponse response = orderCommandService.rejectOrder(orderId, request);
+        OrderCommandResponse response = orderCommandService.rejectOrder(orderId, request, customUserDetails.getMemberId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

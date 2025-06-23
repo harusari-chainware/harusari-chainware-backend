@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.harusari.chainware.statistics.query.mapper.PurchaseOrderStatisticsQueryMapper">
+
+    <!-- 거래처 단위 발주 통계 -->
+    <select id="getVendorLevelStatistics"
+            resultType="com.harusari.chainware.statistics.query.dto.purchaseOrder.PurchaseOrderStatisticsResponse">
+        SELECT
+        DATE(po.created_at) AS date,
+        v.vendor_name AS vendorName,
+        COUNT(DISTINCT po.purchase_order_id) AS totalOrders,
+        SUM(pod.quantity) AS totalQuantity,
+        SUM(pod.total_price) AS totalAmount
+        FROM purchase_order po
+        JOIN purchase_order_detail pod ON po.purchase_order_id = pod.po_id
+        JOIN vendor v ON po.vendor_id = v.vendor_id
+        WHERE po.purchase_order_status IN ('APPROVED', 'SHIPPED', 'WAREHOUSED')
+        AND DATE(po.created_at) BETWEEN #{startDate} AND #{endDate}
+        <if test="vendorId != null">
+            AND po.vendor_id = #{vendorId}
+        </if>
+        GROUP BY DATE(po.created_at), v.vendor_name
+        ORDER BY date ASC
+    </select>
+
+    <!-- 거래처 + 제품 단위 발주 통계 -->
+    <select id="getProductLevelStatistics"
+            resultType="com.harusari.chainware.statistics.query.dto.purchaseOrder.PurchaseOrderProductStatisticsResponse">
+        SELECT
+        DATE(po.created_at) AS date,
+        v.vendor_name AS vendorName,
+        p.product_name AS productName,
+        SUM(pod.quantity) AS quantity,
+        SUM(pod.total_price) AS amount
+        FROM purchase_order po
+        JOIN purchase_order_detail pod ON po.purchase_order_id = pod.po_id
+        JOIN product p ON pod.product_id = p.product_id
+        JOIN vendor v ON po.vendor_id = v.vendor_id
+        WHERE po.purchase_order_status IN ('APPROVED', 'SHIPPED', 'WAREHOUSED')
+        AND DATE(po.created_at) BETWEEN #{startDate} AND #{endDate}
+        <if test="vendorId != null">
+            AND po.vendor_id = #{vendorId}
+        </if>
+        GROUP BY DATE(po.created_at), v.vendor_name, p.product_name
+        ORDER BY date ASC
+    </select>
+
+</mapper>
