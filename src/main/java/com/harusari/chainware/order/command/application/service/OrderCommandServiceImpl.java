@@ -206,7 +206,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
                 productCount,
                 totalQuantity,
                 totalPrice,
-                LocalDateTime.now()
+                request.getDeliveryDueDate()
         );
 
         // 6. 저장
