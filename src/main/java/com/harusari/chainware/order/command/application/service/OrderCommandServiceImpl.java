@@ -4,10 +4,6 @@ import com.harusari.chainware.delivery.command.domain.aggregate.Delivery;
 import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryMethod;
 import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryStatus;
 import com.harusari.chainware.delivery.command.domain.repository.DeliveryRepository;
-import com.harusari.chainware.member.command.domain.aggregate.Member;
-import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
-import com.harusari.chainware.member.command.domain.repository.AuthorityCommandRepository;
-import com.harusari.chainware.member.command.domain.repository.MemberCommandRepository;
 import com.harusari.chainware.member.command.infrastructure.repository.JpaAuthorityCommandRepository;
 import com.harusari.chainware.member.command.infrastructure.repository.JpaMemberCommandRepository;
 import com.harusari.chainware.order.command.application.dto.request.*;
@@ -29,7 +25,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 
 
