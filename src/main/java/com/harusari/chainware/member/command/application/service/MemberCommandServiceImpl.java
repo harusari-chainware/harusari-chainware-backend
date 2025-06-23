@@ -1,11 +1,9 @@
 package com.harusari.chainware.member.command.application.service;
 
-import com.harusari.chainware.exception.member.EmailAlreadyExistsException;
-import com.harusari.chainware.exception.member.EmailVerificationRequiredException;
-import com.harusari.chainware.exception.member.InvalidMemberAuthorityException;
-import com.harusari.chainware.exception.member.MemberErrorCode;
-import com.harusari.chainware.franchise.command.application.service.FranchiseCommandServiceImpl;
+import com.harusari.chainware.exception.member.*;
+import com.harusari.chainware.franchise.command.application.service.FranchiseCommandService;
 import com.harusari.chainware.member.command.application.dto.request.MemberCreateRequest;
+import com.harusari.chainware.member.command.application.dto.request.PasswordChangeRequest;
 import com.harusari.chainware.member.command.application.dto.request.franchise.MemberWithFranchiseRequest;
 import com.harusari.chainware.member.command.application.dto.request.vendor.MemberWithVendorRequest;
 import com.harusari.chainware.member.command.application.dto.request.warehouse.MemberWithWarehouseRequest;
@@ -14,6 +12,7 @@ import com.harusari.chainware.member.command.domain.aggregate.Member;
 import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
 import com.harusari.chainware.member.command.domain.repository.AuthorityCommandRepository;
 import com.harusari.chainware.member.command.domain.repository.MemberCommandRepository;
+import com.harusari.chainware.member.command.domain.repository.MemberCommandRepositoryCustom;
 import com.harusari.chainware.member.common.mapper.MemberMapStruct;
 import com.harusari.chainware.vendor.command.application.service.VendorCommandService;
 import com.harusari.chainware.warehouse.command.domain.aggregate.Warehouse;
@@ -26,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import static com.harusari.chainware.exception.member.MemberErrorCode.*;
 import static com.harusari.chainware.member.common.constants.EmailValidationConstant.EMAIL_VALIDATION_PREFIX;
 
 @Service
@@ -37,10 +37,11 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     private final WarehouseMapStruct warehouseMapStruct;
     private final PasswordEncoder passwordEncoder;
 
-    private final FranchiseCommandServiceImpl franchiseCommandService;
+    private final FranchiseCommandService franchiseCommandService;
     private final VendorCommandService vendorCommandService;
 
     private final MemberCommandRepository memberCommandRepository;
+    private final MemberCommandRepositoryCustom memberCommandRepositoryCustom;
     private final AuthorityCommandRepository authorityCommandRepository;
     private final WarehouseRepository warehouseRepository;
 
@@ -100,6 +101,17 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         }
     }
 
+    @Override
+    public void changePassword(PasswordChangeRequest passwordChangeRequest, String email) {
+        Member member = memberCommandRepositoryCustom.findActiveMemberByEmail(email);
+
+        validateCurrentPassword(passwordChangeRequest.currentPassword(), member.getPassword());
+        validateNewPassword(passwordChangeRequest, member.getPassword());
+
+        String encodedPassword = passwordEncoder.encode(passwordChangeRequest.newPassword());
+        member.updateEncodedPassword(encodedPassword);
+    }
+
     private Member registerMember(MemberCreateRequest memberCreateRequest) {
         validateEmailVerification(memberCreateRequest.email(), memberCreateRequest.validationToken());
 
@@ -130,6 +142,30 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     private void deleteEmailVerificationToken(String token) {
         String redisKey = EMAIL_VALIDATION_PREFIX + token;
         redisTemplate.delete(redisKey);
+    }
+
+    private void validateCurrentPassword(String currentPassword, String storedPassword) {
+        if (!passwordEncoder.matches(currentPassword, storedPassword)) {
+            throw new InvalidCurrentPasswordException(INVALID_CURRENT_PASSWORD_EXCEPTION);
+        }
+    }
+
+    private void validateNewPassword(PasswordChangeRequest request, String currentPassword) {
+        final int PASSWORD_MINIMUM_LENGTH = 8;
+        String newPassword = request.newPassword();
+        String confirmPassword = request.confirmPassword();
+
+        if (newPassword.length() < PASSWORD_MINIMUM_LENGTH) {
+            throw new InvalidPasswordChangeException(INVALID_PASSWORD_CHANGE_EXCEPTION);
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            throw new PasswordConfirmationMismatchException(PASSWORD_CONFIRMATION_MISMATCH_EXCEPTION);
+        }
+
+        if (passwordEncoder.matches(newPassword, currentPassword)) {
+            throw new PasswordSameAsCurrentException(PASSWORD_SAME_AS_CURRENT_EXCEPTION);
+        }
     }
 
 }
