@@ -1,5 +1,7 @@
 package com.harusari.chainware.statistics.query.service;
 
+import com.harusari.chainware.statistics.exception.StatisticsErrorCode;
+import com.harusari.chainware.statistics.exception.StatisticsException;
 import com.harusari.chainware.statistics.query.dto.TotalSalesStatisticsResponse;
 import com.harusari.chainware.statistics.query.mapper.TotalSalesStatisticsQueryMapper;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +42,7 @@ public class TotalSalesStatisticsQueryServiceImpl implements TotalSalesStatistic
                 prevStartDate = startDate.minusMonths(1).withDayOfMonth(1);
                 prevEndDate = prevStartDate.withDayOfMonth(prevStartDate.lengthOfMonth());
             }
-            default -> throw new IllegalArgumentException("지원하지 않는 통계 유형입니다.");
+            default -> throw new StatisticsException(StatisticsErrorCode.UNSUPPORTED_PERIOD);
         }
 
         long total = mapper.getTotalAmount(franchiseId, startDate, endDate);

@@ -1,5 +1,7 @@
 package com.harusari.chainware.statistics.query.service;
 
+import com.harusari.chainware.statistics.exception.StatisticsErrorCode;
+import com.harusari.chainware.statistics.exception.StatisticsException;
 import com.harusari.chainware.statistics.query.dto.DisposalRateStatisticsResponseBase;
 import com.harusari.chainware.statistics.query.mapper.DisposalRateStatisticsQueryMapper;
 import lombok.RequiredArgsConstructor;
@@ -28,17 +30,24 @@ public class DisposalRateStatisticsQueryServiceImpl implements DisposalRateStati
 
         switch (period) {
             case "DAILY" -> startDate = endDate = baseDate;
+
             case "WEEKLY" -> {
                 startDate = baseDate.with(DayOfWeek.MONDAY);
                 endDate = baseDate.with(DayOfWeek.SUNDAY);
-                if (today.isBefore(endDate)) throw new IllegalArgumentException("이번 주는 아직 완료되지 않았습니다.");
+                if (today.isBefore(endDate)) {
+                    throw new StatisticsException(StatisticsErrorCode.PERIOD_NOT_COMPLETED);
+                }
             }
+
             case "MONTHLY" -> {
                 startDate = baseDate.withDayOfMonth(1);
                 endDate = baseDate.withDayOfMonth(baseDate.lengthOfMonth());
-                if (today.isBefore(endDate)) throw new IllegalArgumentException("이번 달은 아직 완료되지 않았습니다.");
+                if (today.isBefore(endDate)) {
+                    throw new StatisticsException(StatisticsErrorCode.PERIOD_NOT_COMPLETED);
+                }
             }
-            default -> throw new IllegalArgumentException("지원하지 않는 통계 단위입니다.");
+
+            default -> throw new StatisticsException(StatisticsErrorCode.UNSUPPORTED_PERIOD);
         }
 
         if (includeProduct) {

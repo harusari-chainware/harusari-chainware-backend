@@ -1,11 +1,14 @@
 package com.harusari.chainware.statistics.query.service;
 
+import com.harusari.chainware.statistics.exception.StatisticsErrorCode;
+import com.harusari.chainware.statistics.exception.StatisticsException;
 import com.harusari.chainware.statistics.query.dto.InventoryTurnoverResponse;
 import com.harusari.chainware.statistics.query.mapper.InventoryStatisticsMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -23,7 +26,7 @@ public class InventoryStatisticsQueryServiceImpl implements InventoryStatisticsQ
 
         if (franchiseId != null) {
             if (!period.equalsIgnoreCase("MONTHLY")) {
-                throw new IllegalArgumentException("가맹점은 월간(MONTHLY) 회전율 조회만 지원합니다.");
+                throw new StatisticsException(StatisticsErrorCode.INVALID_PERIOD_FOR_FRANCHISE);
             }
             return getFranchiseMonthlyTurnover(franchiseId, baseDate);
         }
@@ -31,7 +34,7 @@ public class InventoryStatisticsQueryServiceImpl implements InventoryStatisticsQ
         return switch (period.toUpperCase()) {
             case "WEEKLY" -> getWeeklyTurnover(baseDate);
             case "MONTHLY" -> getMonthlyTurnover(baseDate);
-            default -> throw new IllegalArgumentException("지원하지 않는 기간 유형입니다. (WEEKLY 또는 MONTHLY만 허용)");
+            default -> throw new StatisticsException(StatisticsErrorCode.UNSUPPORTED_PERIOD);
         };
     }
 
@@ -42,8 +45,8 @@ public class InventoryStatisticsQueryServiceImpl implements InventoryStatisticsQ
     }
 
     private List<InventoryTurnoverResponse> getWeeklyTurnover(LocalDate baseDate) {
-        LocalDate startDate = baseDate.with(java.time.DayOfWeek.MONDAY);
-        LocalDate endDate = baseDate.with(java.time.DayOfWeek.SUNDAY);
+        LocalDate startDate = baseDate.with(DayOfWeek.MONDAY);
+        LocalDate endDate = baseDate.with(DayOfWeek.SUNDAY);
         return inventoryStatisticsMapper.getWeeklyTurnover(startDate, endDate);
     }
 

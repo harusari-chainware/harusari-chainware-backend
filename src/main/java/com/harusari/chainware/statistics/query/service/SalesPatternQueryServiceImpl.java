@@ -1,5 +1,7 @@
 package com.harusari.chainware.statistics.query.service;
 
+import com.harusari.chainware.statistics.exception.StatisticsErrorCode;
+import com.harusari.chainware.statistics.exception.StatisticsException;
 import com.harusari.chainware.statistics.query.mapper.SalesPatternMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,7 +33,7 @@ public class SalesPatternQueryServiceImpl implements SalesPatternQueryService {
                     ? salesPatternMapper.getDailySalesByFranchise(franchiseId, baseDate)
                     : salesPatternMapper.getDailySalesForHeadquarters(baseDate);
 
-            default -> throw new IllegalArgumentException("지원하지 않는 기간 유형입니다. (HOURLY, WEEKLY, MONTHLY만 허용)");
+            default -> throw new StatisticsException(StatisticsErrorCode.UNSUPPORTED_PERIOD);
         };
     }
 }
