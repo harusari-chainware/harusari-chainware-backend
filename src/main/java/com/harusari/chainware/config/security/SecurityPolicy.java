@@ -16,7 +16,8 @@ public class SecurityPolicy {
             "/api/v1/members/headquarters",
             "/api/v1/members/franchise",
             "/api/v1/members/vendor",
-            "/api/v1/members/warehouse"
+            "/api/v1/members/warehouse",
+            "/api/v1/disposal"
     };
 
     protected static final String[] GENERAL_MANAGER_URLS = {
@@ -26,7 +27,8 @@ public class SecurityPolicy {
             "/api/v1/statistics/purchase-order",
             "/api/v1/statistics/patterns",
             "/api/v1/statistics/store-order",
-            "/api/v1/statistics/total-sales"
+            "/api/v1/statistics/total-sales",
+            "/api/v1/disposal"
 
 
     };
@@ -38,15 +40,18 @@ public class SecurityPolicy {
             "/api/v1/statistics/purchase-order",
             "/api/v1/statistics/patterns",
             "/api/v1/statistics/store-order",
-            "/api/v1/statistics/total-sales"
+            "/api/v1/statistics/total-sales",
+            "/api/v1/disposal"
 
     };
 
     protected static final String[] WAREHOUSE_MANAGER_URLS = {
+            "/api/v1/disposal"
 
     };
 
     protected static final String[] FRANCHISE_MANAGER_URLS = {
+            "/api/v1/disposal"
 
     };
 
