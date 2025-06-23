@@ -5,6 +5,7 @@ import com.harusari.chainware.statistics.query.dto.disposal.DisposalRateStatisti
 import com.harusari.chainware.statistics.query.service.disposal.DisposalRateStatisticsQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,7 +22,7 @@ public class DisposalRateStatisticsQueryController {
     private final DisposalRateStatisticsQueryService service;
 
     @GetMapping
-    public ApiResponse<List<? extends DisposalRateStatisticsResponseBase>> getDisposalRate(
+    public ResponseEntity<ApiResponse<List<? extends DisposalRateStatisticsResponseBase>>> getDisposalRate(
             @RequestParam String period,
             @RequestParam(required = false) Long warehouseId,
             @RequestParam(required = false) Long franchiseId,
@@ -30,6 +31,6 @@ public class DisposalRateStatisticsQueryController {
     ) {
         List<? extends DisposalRateStatisticsResponseBase> result =
                 service.getDisposalStatistics(period.toUpperCase(), warehouseId, franchiseId, targetDate, includeProduct);
-        return ApiResponse.success(result);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 }

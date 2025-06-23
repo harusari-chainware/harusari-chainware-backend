@@ -5,6 +5,7 @@ import com.harusari.chainware.statistics.query.dto.totalSales.TotalSalesStatisti
 import com.harusari.chainware.statistics.query.service.totalSales.TotalSalesStatisticsQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -17,12 +18,12 @@ public class TotalSalesStatisticsQueryController {
     private final TotalSalesStatisticsQueryService service;
 
     @GetMapping
-    public ApiResponse<TotalSalesStatisticsResponse> getTotalSalesStatistics(
+    public ResponseEntity<ApiResponse<TotalSalesStatisticsResponse>> getTotalSalesStatistics(
             @RequestParam(defaultValue = "DAILY") String period,
             @RequestParam(required = false) Long franchiseId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
     ) {
         TotalSalesStatisticsResponse result = service.getStatistics(period.toUpperCase(), franchiseId, targetDate);
-        return ApiResponse.success(result);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 }

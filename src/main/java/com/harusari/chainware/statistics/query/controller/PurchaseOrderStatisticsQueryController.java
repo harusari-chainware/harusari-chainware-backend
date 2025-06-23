@@ -5,6 +5,7 @@ import com.harusari.chainware.statistics.query.dto.purchaseOrder.PurchaseOrderSt
 import com.harusari.chainware.statistics.query.service.purchaseOrder.PurchaseOrderStatisticsQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,7 +22,7 @@ public class PurchaseOrderStatisticsQueryController {
     private final PurchaseOrderStatisticsQueryService purchaseOrderStatisticsQueryService;
 
     @GetMapping
-    public ApiResponse<List<? extends PurchaseOrderStatisticsResponseBase>> getStatistics(
+    public ResponseEntity<ApiResponse<List<? extends PurchaseOrderStatisticsResponseBase>>> getStatistics(
             @RequestParam String period,
             @RequestParam(required = false) Long vendorId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate,
@@ -31,6 +32,6 @@ public class PurchaseOrderStatisticsQueryController {
                 purchaseOrderStatisticsQueryService.getStatistics(
                         period.toUpperCase(), vendorId, targetDate, includeProduct);
 
-        return ApiResponse.success(result);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 }
