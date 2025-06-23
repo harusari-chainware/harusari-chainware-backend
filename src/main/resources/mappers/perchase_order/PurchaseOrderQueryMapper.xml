@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.harusari.chainware.purchase.query.mapper.PurchaseOrderQueryMapper">
+
+    <select id="findPurchaseOrders" resultType="com.harusari.chainware.purchase.query.dto.PurchaseOrderSummaryResponse">
+        SELECT
+        po.purchase_order_id,
+        po.purchase_order_code,
+        po.purchase_order_status AS status,
+        po.created_member_id AS requesterId,
+        po.created_at,
+        po.total_amount
+        FROM purchase_order po
+        WHERE 1 = 1
+        <if test="condition.status != null">
+            AND po.purchase_order_status = #{condition.status}
+        </if>
+        <if test="condition.requesterId != null">
+            AND po.created_member_id = #{condition.requesterId}
+        </if>
+        <if test="condition.startDate != null">
+            AND po.created_at &gt;= #{condition.startDate}
+        </if>
+        <if test="condition.endDate != null">
+            AND po.created_at &lt;= #{condition.endDate}
+        </if>
+        ORDER BY po.created_at DESC
+        LIMIT #{condition.size}
+        OFFSET #{condition.offset}
+    </select>
+
+
+    <resultMap id="PurchaseOrderDetailMap" type="com.harusari.chainware.purchase.query.dto.PurchaseOrderDetailResponse">
+        <id property="purchaseOrderId" column="purchase_order_id"/>
+        <result property="purchaseOrderCode" column="purchase_order_code"/>
+        <result property="vendorName" column="vendor_name"/>
+        <result property="status" column="purchase_order_status"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="findPurchaseOrderById" resultMap="PurchaseOrderDetailMap">
+        SELECT
+            po.purchase_order_id,
+            po.purchase_order_code,
+            v.vendor_name,
+            po.purchase_order_status,
+            po.total_amount,
+            po.created_at
+        FROM
+            purchase_order po
+                JOIN vendor v ON po.vendor_id = v.vendor_id
+        WHERE
+            po.purchase_order_id = #{purchaseOrderId}
+    </select>
+
+    <select id="findProductsByPurchaseOrderId" resultType="com.harusari.chainware.purchase.query.dto.PurchaseOrderProductResponse">
+        SELECT
+            pod.product_id,
+            p.product_name,
+            pod.quantity,
+            pod.unit_price
+        FROM
+            purchase_order_detail pod
+                JOIN product p ON pod.product_id = p.product_id
+        WHERE
+            pod.purchase_order_id = #{purchaseOrderId}
+    </select>
+
+
+</mapper>

@@ -19,6 +19,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static com.harusari.chainware.config.security.SecurityPolicy.*;
+import static com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType.MASTER;
 import static com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType.*;
 
 @Configuration
@@ -47,30 +48,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, MASTER_ONLY_URLS).hasAuthority(MASTER.name())
                         .requestMatchers(HttpMethod.DELETE, MASTER_ONLY_URLS).hasAuthority(MASTER.name())
 
-                        // Franchise
-                        .requestMatchers(HttpMethod.GET, FRANCHISE_MANAGER_URLS).hasAuthority(FRANCHISE_MANAGER.name())
-                        .requestMatchers(HttpMethod.POST, FRANCHISE_MANAGER_URLS).hasAuthority(FRANCHISE_MANAGER.name())
-                        .requestMatchers(HttpMethod.PUT, FRANCHISE_MANAGER_URLS).hasAuthority(FRANCHISE_MANAGER.name())
-                        .requestMatchers(HttpMethod.DELETE, FRANCHISE_MANAGER_URLS).hasAuthority(FRANCHISE_MANAGER.name())
-
-                        // Warehouse
-                        .requestMatchers(HttpMethod.GET, WAREHOUSE_MANAGER_URLS).hasAuthority(WAREHOUSE_MANAGER.name())
-                        .requestMatchers(HttpMethod.POST, WAREHOUSE_MANAGER_URLS).hasAuthority(WAREHOUSE_MANAGER.name())
-                        .requestMatchers(HttpMethod.PUT, WAREHOUSE_MANAGER_URLS).hasAuthority(WAREHOUSE_MANAGER.name())
-                        .requestMatchers(HttpMethod.DELETE, WAREHOUSE_MANAGER_URLS).hasAuthority(WAREHOUSE_MANAGER.name())
-
-                        // GeneralManager
-                        .requestMatchers(HttpMethod.GET, GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
-                        .requestMatchers(HttpMethod.POST, GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
-                        .requestMatchers(HttpMethod.PUT, GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
-                        .requestMatchers(HttpMethod.DELETE, GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
-
-                        // Manager
-                        .requestMatchers(HttpMethod.GET, SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
-                        .requestMatchers(HttpMethod.POST, SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
-                        .requestMatchers(HttpMethod.PUT, SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
-                        .requestMatchers(HttpMethod.DELETE, SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
-
                         // Public (permitAll)
                         .requestMatchers(HttpMethod.POST, PUBLIC_URLS).permitAll()
 
@@ -79,6 +56,20 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, AUTHENTICATED_URLS).authenticated()
                         .requestMatchers(HttpMethod.PUT, AUTHENTICATED_URLS).authenticated()
                         .requestMatchers(HttpMethod.DELETE, AUTHENTICATED_URLS).authenticated()
+
+                        // GENERAL MANAGER
+                        .requestMatchers(HttpMethod.GET, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
+                        .requestMatchers(HttpMethod.POST, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
+                        .requestMatchers(HttpMethod.PUT, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
+                        .requestMatchers(HttpMethod.DELETE, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
+
+
+                        // SENIOR MANAGER
+                        .requestMatchers(HttpMethod.GET, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
+                        .requestMatchers(HttpMethod.POST, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
+                        .requestMatchers(HttpMethod.PUT, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
+                        .requestMatchers(HttpMethod.DELETE, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
+
 
                         // 그 외 모든 요청 및 HTTP method 차단
                         .anyRequest().denyAll()

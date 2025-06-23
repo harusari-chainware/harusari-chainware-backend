@@ -17,10 +17,19 @@ public class SecurityPolicy {
             "/api/v1/members/franchise",
             "/api/v1/members/vendor",
             "/api/v1/members/warehouse",
+            "/api/v1/members",
+            "/api/v1/members/warehouse",
             "/api/v1/disposal"
     };
 
     protected static final String[] GENERAL_MANAGER_URLS = {
+            "/api/v1/requisitions/create",
+            "/api/v1/requisitions/{requisitionId}/submit",
+            "/api/v1/requisitions",
+            "/api/v1/requisitions/{requisitionID}",
+            "/api/v1/purchases",
+            "/api/v1/purchases/{purchaseOrderId}",
+            "/api/v1/vendors/{vendorId}",
             "/api/v1/statistics/disposal-rate",
             "/api/v1/statistics/inventory-turnover",
             "/api/v1/statistics/menu-sales",
@@ -34,6 +43,12 @@ public class SecurityPolicy {
     };
 
     protected static final String[] SENIOR_MANAGER_URLS = {
+            "/api/v1/requisitions/{requisitionId}/approve",
+            "/api/v1/requisitions/{requisitionId}/reject",
+            "/api/v1/requisitions",
+            "/api/v1/requisitions/{requisitionID}",
+            "/api/v1/purchases",
+            "/api/v1/purchases/{purchaseOrderId}",
             "/api/v1/statistics/disposal-rate",
             "/api/v1/statistics/inventory-turnover",
             "/api/v1/statistics/menu-sales",

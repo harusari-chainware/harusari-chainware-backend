@@ -88,13 +88,13 @@
         m.name AS member_name,
         m.phone_number AS member_phone,
         v.vendor_name,
-        v.vendor_contact,
+<!--        v.vendor_contact,-->
         v.vendor_type,
         v.vendor_address,
         v.vendor_tax_id,
         v.vendor_memo,
         v.vendor_status,
-        v.agreement,
+<!--        v.agreement,-->
         v.vendor_start_date,
         v.vendor_end_date
         FROM vendor v
