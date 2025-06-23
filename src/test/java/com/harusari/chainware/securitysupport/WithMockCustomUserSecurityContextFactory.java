@@ -2,6 +2,7 @@ package com.harusari.chainware.securitysupport;
 
 import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.member.command.domain.aggregate.Member;
+import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -15,7 +16,12 @@ public class WithMockCustomUserSecurityContextFactory implements WithSecurityCon
         SecurityContext context = SecurityContextHolder.createEmptyContext();
 
         Member member = createMemberByPosition(annotation.position(), annotation.memberId());
-        CustomUserDetails principal = new CustomUserDetails(member);
+        CustomUserDetails principal = new CustomUserDetails(
+                member.getMemberId(),
+                member.getEmail(),
+                MemberAuthorityType.of(member.getAuthorityId())
+        );
+
 
         Authentication auth = new UsernamePasswordAuthenticationToken(
                 principal, null, principal.getAuthorities());

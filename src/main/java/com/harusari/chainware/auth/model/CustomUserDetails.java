@@ -18,12 +18,6 @@ public class CustomUserDetails implements UserDetails {
     private final String email;
     private final MemberAuthorityType memberAuthorityType;
 
-    public CustomUserDetails(Member member) {
-        this.memberId = member.getMemberId();
-        this.email = member.getEmail();
-        this.memberAuthorityType = MemberAuthorityType.of(member.getAuthorityId());
-    }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(memberAuthorityType::name);
