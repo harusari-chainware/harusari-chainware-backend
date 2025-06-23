@@ -6,7 +6,7 @@
 
     <!-- 거래처 단위 발주 통계 -->
     <select id="getVendorLevelStatistics"
-            resultType="com.harusari.chainware.statistics.query.dto.PurchaseOrderStatisticsResponse">
+            resultType="com.harusari.chainware.statistics.query.dto.purchaseOrder.PurchaseOrderStatisticsResponse">
         SELECT
         DATE(po.created_at) AS date,
         v.vendor_name AS vendorName,
@@ -27,7 +27,7 @@
 
     <!-- 거래처 + 제품 단위 발주 통계 -->
     <select id="getProductLevelStatistics"
-            resultType="com.harusari.chainware.statistics.query.dto.PurchaseOrderProductStatisticsResponse">
+            resultType="com.harusari.chainware.statistics.query.dto.purchaseOrder.PurchaseOrderProductStatisticsResponse">
         SELECT
         DATE(po.created_at) AS date,
         v.vendor_name AS vendorName,

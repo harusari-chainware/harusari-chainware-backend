@@ -6,7 +6,7 @@
 <mapper namespace="com.harusari.chainware.statistics.query.mapper.InventoryStatisticsMapper">
 
     <!-- 본사 주간 회전율 -->
-    <select id="getWeeklyTurnover" resultType="com.harusari.chainware.statistics.query.dto.InventoryTurnoverResponse">
+    <select id="getWeeklyTurnover" resultType="com.harusari.chainware.statistics.query.dto.invertoryTurnover.InventoryTurnoverResponse">
         SELECT
         p.product_id AS productId,
         p.product_name AS productName,
@@ -42,7 +42,7 @@
     </select>
 
     <!-- 본사 월간 회전율 -->
-    <select id="getMonthlyTurnover" resultType="com.harusari.chainware.statistics.query.dto.InventoryTurnoverResponse">
+    <select id="getMonthlyTurnover" resultType="com.harusari.chainware.statistics.query.dto.invertoryTurnover.InventoryTurnoverResponse">
         SELECT
         p.product_id AS productId,
         p.product_name AS productName,
@@ -78,7 +78,7 @@
     </select>
 
     <!-- 가맹점 월간 회전율 -->
-    <select id="getFranchiseMonthlyTurnover" resultType="com.harusari.chainware.statistics.query.dto.InventoryTurnoverResponse">
+    <select id="getFranchiseMonthlyTurnover" resultType="com.harusari.chainware.statistics.query.dto.invertoryTurnover.InventoryTurnoverResponse">
         SELECT
         p.product_id AS productId,
         p.product_name AS productName,

@@ -1,8 +1,8 @@
 package com.harusari.chainware.statistics.query.controller;
 
 import com.harusari.chainware.common.dto.ApiResponse;
-import com.harusari.chainware.statistics.query.dto.InventoryTurnoverResponse;
-import com.harusari.chainware.statistics.query.service.InventoryStatisticsQueryService;
+import com.harusari.chainware.statistics.query.dto.invertoryTurnover.InventoryTurnoverResponse;
+import com.harusari.chainware.statistics.query.service.inventoryTurnover.InventoryStatisticsQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;

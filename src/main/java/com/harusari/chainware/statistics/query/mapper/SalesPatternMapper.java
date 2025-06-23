@@ -1,8 +1,8 @@
 package com.harusari.chainware.statistics.query.mapper;
 
-import com.harusari.chainware.statistics.query.dto.DailySalesResponse;
-import com.harusari.chainware.statistics.query.dto.HourlySalesResponse;
-import com.harusari.chainware.statistics.query.dto.WeekdaySalesResponse;
+import com.harusari.chainware.statistics.query.dto.salePattern.DailySalesResponse;
+import com.harusari.chainware.statistics.query.dto.salePattern.HourlySalesResponse;
+import com.harusari.chainware.statistics.query.dto.salePattern.WeekdaySalesResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

@@ -6,7 +6,7 @@
 <mapper namespace="com.harusari.chainware.statistics.query.mapper.StoreOrderStatisticsQueryMapper">
 
     <select id="getFranchiseLevelStatistics"
-            resultType="com.harusari.chainware.statistics.query.dto.StoreOrderStatisticsResponse">
+            resultType="com.harusari.chainware.statistics.query.dto.storeOrder.StoreOrderStatisticsResponse">
         SELECT
         DATE(so.created_at) AS date,
         f.franchise_name AS franchiseName,
@@ -26,7 +26,7 @@
     </select>
 
     <select id="getProductLevelStatistics"
-            resultType="com.harusari.chainware.statistics.query.dto.StoreOrderProductStatisticsResponse">
+            resultType="com.harusari.chainware.statistics.query.dto.storeOrder.StoreOrderProductStatisticsResponse">
         SELECT
         DATE(so.created_at) AS date,
         f.franchise_name AS franchiseName,

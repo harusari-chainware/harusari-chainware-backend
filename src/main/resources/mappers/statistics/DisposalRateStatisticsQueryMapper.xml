@@ -3,7 +3,7 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.harusari.chainware.statistics.query.mapper.DisposalRateStatisticsQueryMapper">
 
-    <select id="getDisposalRate" resultType="com.harusari.chainware.statistics.query.dto.DisposalRateStatisticsResponse">
+    <select id="getDisposalRate" resultType="com.harusari.chainware.statistics.query.dto.disposal.DisposalRateStatisticsResponse">
         SELECT
         DATE(d.created_at) AS date,
         CASE
@@ -28,7 +28,7 @@
         ORDER BY date ASC
     </select>
 
-    <select id="getProductLevelDisposalRate" resultType="com.harusari.chainware.statistics.query.dto.DisposalRateProductStatisticsResponse">
+    <select id="getProductLevelDisposalRate" resultType="com.harusari.chainware.statistics.query.dto.disposal.DisposalRateProductStatisticsResponse">
         SELECT
         DATE(d.created_at) AS date,
         p.product_name,

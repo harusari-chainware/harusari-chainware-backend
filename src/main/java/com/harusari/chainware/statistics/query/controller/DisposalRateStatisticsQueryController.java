@@ -1,8 +1,8 @@
 package com.harusari.chainware.statistics.query.controller;
 
 import com.harusari.chainware.common.dto.ApiResponse;
-import com.harusari.chainware.statistics.query.dto.DisposalRateStatisticsResponseBase;
-import com.harusari.chainware.statistics.query.service.DisposalRateStatisticsQueryService;
+import com.harusari.chainware.statistics.query.dto.disposal.DisposalRateStatisticsResponseBase;
+import com.harusari.chainware.statistics.query.service.disposal.DisposalRateStatisticsQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;

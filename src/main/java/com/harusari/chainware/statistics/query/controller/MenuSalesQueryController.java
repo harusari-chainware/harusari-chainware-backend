@@ -1,8 +1,8 @@
 package com.harusari.chainware.statistics.query.controller;
 
 import com.harusari.chainware.common.dto.ApiResponse;
-import com.harusari.chainware.statistics.query.dto.MenuSalesResponse;
-import com.harusari.chainware.statistics.query.service.MenuSalesQueryService;
+import com.harusari.chainware.statistics.query.dto.menuSales.MenuSalesResponse;
+import com.harusari.chainware.statistics.query.service.menuSales.MenuSalesQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;

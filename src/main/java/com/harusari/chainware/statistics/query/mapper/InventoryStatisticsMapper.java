@@ -1,6 +1,6 @@
 package com.harusari.chainware.statistics.query.mapper;
 
-import com.harusari.chainware.statistics.query.dto.InventoryTurnoverResponse;
+import com.harusari.chainware.statistics.query.dto.invertoryTurnover.InventoryTurnoverResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

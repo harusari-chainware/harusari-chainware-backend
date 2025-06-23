@@ -1,7 +1,7 @@
 package com.harusari.chainware.statistics.query.mapper;
 
-import com.harusari.chainware.statistics.query.dto.PurchaseOrderProductStatisticsResponse;
-import com.harusari.chainware.statistics.query.dto.PurchaseOrderStatisticsResponse;
+import com.harusari.chainware.statistics.query.dto.purchaseOrder.PurchaseOrderProductStatisticsResponse;
+import com.harusari.chainware.statistics.query.dto.purchaseOrder.PurchaseOrderStatisticsResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

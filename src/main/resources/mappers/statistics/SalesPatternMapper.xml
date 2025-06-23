@@ -5,7 +5,7 @@
 <mapper namespace="com.harusari.chainware.statistics.query.mapper.SalesPatternMapper">
 
     <!-- 시간대별 (Hourly) -->
-    <select id="getHourlySalesByFranchise" resultType="com.harusari.chainware.statistics.query.dto.HourlySalesResponse">
+    <select id="getHourlySalesByFranchise" resultType="com.harusari.chainware.statistics.query.dto.salePattern.HourlySalesResponse">
         SELECT
         HOUR(s.sold_at) AS hour,
         SUM(s.total_amount) AS totalAmount
@@ -16,7 +16,7 @@
         ORDER BY hour
     </select>
 
-    <select id="getHourlySalesForHeadquarters" resultType="com.harusari.chainware.statistics.query.dto.HourlySalesResponse">
+    <select id="getHourlySalesForHeadquarters" resultType="com.harusari.chainware.statistics.query.dto.salePattern.HourlySalesResponse">
         SELECT
         HOUR(s.sold_at) AS hour,
         SUM(s.total_amount) AS totalAmount
@@ -27,7 +27,7 @@
     </select>
 
     <!-- 요일별 평균 (Weekday, 최근 30일) -->
-    <select id="getWeekdaySalesByFranchise" resultType="com.harusari.chainware.statistics.query.dto.WeekdaySalesResponse">
+    <select id="getWeekdaySalesByFranchise" resultType="com.harusari.chainware.statistics.query.dto.salePattern.WeekdaySalesResponse">
         SELECT
         CASE DAYOFWEEK(s.sold_at)
         WHEN 1 THEN '일'
@@ -48,7 +48,7 @@
         ORDER BY DAYOFWEEK(s.sold_at)
     </select>
 
-    <select id="getWeekdaySalesForHeadquarters" resultType="com.harusari.chainware.statistics.query.dto.WeekdaySalesResponse">
+    <select id="getWeekdaySalesForHeadquarters" resultType="com.harusari.chainware.statistics.query.dto.salePattern.WeekdaySalesResponse">
         SELECT
         CASE DAYOFWEEK(s.sold_at)
         WHEN 1 THEN '일'
@@ -69,7 +69,7 @@
     </select>
 
     <!-- 일별 추이 (Daily, 최근 30일) -->
-    <select id="getDailySalesByFranchise" resultType="com.harusari.chainware.statistics.query.dto.DailySalesResponse">
+    <select id="getDailySalesByFranchise" resultType="com.harusari.chainware.statistics.query.dto.salePattern.DailySalesResponse">
         SELECT
         d.generated_date AS date,
         COALESCE(SUM(s.total_amount), 0) AS totalAmount
@@ -89,7 +89,7 @@
         ORDER BY d.generated_date
     </select>
 
-    <select id="getDailySalesForHeadquarters" resultType="com.harusari.chainware.statistics.query.dto.DailySalesResponse">
+    <select id="getDailySalesForHeadquarters" resultType="com.harusari.chainware.statistics.query.dto.salePattern.DailySalesResponse">
         SELECT
         d.generated_date AS date,
         COALESCE(SUM(s.total_amount), 0) AS totalAmount

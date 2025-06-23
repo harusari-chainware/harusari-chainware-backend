@@ -1,8 +1,8 @@
 package com.harusari.chainware.statistics.query.controller;
 
 import com.harusari.chainware.common.dto.ApiResponse;
-import com.harusari.chainware.statistics.query.dto.PurchaseOrderStatisticsResponseBase;
-import com.harusari.chainware.statistics.query.service.PurchaseOrderStatisticsQueryService;
+import com.harusari.chainware.statistics.query.dto.purchaseOrder.PurchaseOrderStatisticsResponseBase;
+import com.harusari.chainware.statistics.query.service.purchaseOrder.PurchaseOrderStatisticsQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;

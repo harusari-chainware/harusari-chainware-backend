@@ -1,7 +1,7 @@
 package com.harusari.chainware.statistics.query.mapper;
 
-import com.harusari.chainware.statistics.query.dto.DisposalRateProductStatisticsResponse;
-import com.harusari.chainware.statistics.query.dto.DisposalRateStatisticsResponse;
+import com.harusari.chainware.statistics.query.dto.disposal.DisposalRateProductStatisticsResponse;
+import com.harusari.chainware.statistics.query.dto.disposal.DisposalRateStatisticsResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
