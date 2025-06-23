@@ -25,7 +25,8 @@ public class SecurityPolicy {
             "/api/v1/requisitions",
             "/api/v1/requisitions/{requisitionID}",
             "/api/v1/purchases",
-            "/api/v1/purchases/{purchaseOrderId}"
+            "/api/v1/purchases/{purchaseOrderId}",
+            "/api/v1/vendors/{vendorId}"
     };
 
     protected static final String[] SENIOR_MANAGER_URLS = {

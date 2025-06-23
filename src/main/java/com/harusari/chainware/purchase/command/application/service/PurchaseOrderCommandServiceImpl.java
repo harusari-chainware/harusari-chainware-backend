@@ -52,7 +52,7 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
                 .requisitionId(requisitionId)
                 .vendorId(requisition.getVendorId())
                 .createdMemberId(requisition.getCreatedMemberId())
-                .vendorMemberId(requisition.getApprovedMemberId()) // ⬅ 결재자를 거래처 담당자로 사용
+                .vendorMemberId(requisition.getApprovedMemberId()) // 결재자를 거래처 담당자로 사용
                 .purchaseOrderCode(code)
                 .totalAmount(totalAmount)
                 .purchaseOrderStatus(PurchaseOrderStatus.REQUESTED)
