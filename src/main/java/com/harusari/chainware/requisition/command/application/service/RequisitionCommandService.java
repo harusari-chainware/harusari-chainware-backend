@@ -15,7 +15,7 @@ public interface RequisitionCommandService {
     void approveRequisition(Long requisitionId, Long memberId);
 
 
-    void rejectRequisition(Long requisitionId, Long memberId, RejectRequisitionRequest request);
+    void rejectRequisition(Long memberId, Long requisitionId, RejectRequisitionRequest request);
 
     void deleteRequisition(Long memberId, Long requisitionId);
 
