@@ -21,7 +21,7 @@ public class CustomUserDetails implements UserDetails {
     public CustomUserDetails(Member member) {
         this.memberId = member.getMemberId();
         this.email = member.getEmail();
-        this.memberAuthorityType = MemberAuthorityType.of(member.getAuthorityId()); // ← 이 부분이 핵심
+        this.memberAuthorityType = MemberAuthorityType.of(member.getAuthorityId());
     }
 
     @Override
