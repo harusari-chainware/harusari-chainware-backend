@@ -1,5 +1,6 @@
 package com.harusari.chainware.statistics.query.controller;
 
+import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.statistics.query.dto.InventoryTurnoverResponse;
 import com.harusari.chainware.statistics.query.service.InventoryStatisticsQueryService;
 import lombok.RequiredArgsConstructor;
@@ -20,27 +21,30 @@ public class InventoryStatisticsQueryController {
     private final InventoryStatisticsQueryService inventoryStatisticsQueryService;
 
     @GetMapping("/monthly")
-    public List<InventoryTurnoverResponse> getMonthlyTurnover(
+    public ApiResponse<List<InventoryTurnoverResponse>> getMonthlyTurnover(
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
     ) {
-        return inventoryStatisticsQueryService.getMonthlyTurnover(targetDate);
+        List<InventoryTurnoverResponse> result = inventoryStatisticsQueryService.getMonthlyTurnover(targetDate);
+        return ApiResponse.success(result);
     }
 
     @GetMapping("/weekly")
-    public List<InventoryTurnoverResponse> getWeeklyTurnover(
+    public ApiResponse<List<InventoryTurnoverResponse>> getWeeklyTurnover(
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
     ) {
-        return inventoryStatisticsQueryService.getWeeklyTurnover(targetDate);
+        List<InventoryTurnoverResponse> result = inventoryStatisticsQueryService.getWeeklyTurnover(targetDate);
+        return ApiResponse.success(result);
     }
 
     @GetMapping("/monthly/franchise")
-    public List<InventoryTurnoverResponse> getFranchiseTurnover(
+    public ApiResponse<List<InventoryTurnoverResponse>> getFranchiseTurnover(
             @RequestParam Long franchiseId,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
     ) {
-        return inventoryStatisticsQueryService.getFranchiseMonthlyTurnover(franchiseId, targetDate);
+        List<InventoryTurnoverResponse> result = inventoryStatisticsQueryService.getFranchiseMonthlyTurnover(franchiseId, targetDate);
+        return ApiResponse.success(result);
     }
 }

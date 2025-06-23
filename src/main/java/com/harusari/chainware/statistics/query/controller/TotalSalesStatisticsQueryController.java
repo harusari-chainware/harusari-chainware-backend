@@ -1,5 +1,6 @@
 package com.harusari.chainware.statistics.query.controller;
 
+import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.statistics.query.dto.TotalSalesStatisticsResponse;
 import com.harusari.chainware.statistics.query.service.TotalSalesStatisticsQueryService;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +17,12 @@ public class TotalSalesStatisticsQueryController {
     private final TotalSalesStatisticsQueryService service;
 
     @GetMapping
-    public TotalSalesStatisticsResponse getTotalSalesStatistics(
+    public ApiResponse<TotalSalesStatisticsResponse> getTotalSalesStatistics(
             @RequestParam(defaultValue = "DAILY") String period,
             @RequestParam(required = false) Long franchiseId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
     ) {
-        return service.getStatistics(period.toUpperCase(), franchiseId, targetDate);
+        TotalSalesStatisticsResponse result = service.getStatistics(period.toUpperCase(), franchiseId, targetDate);
+        return ApiResponse.success(result);
     }
 }

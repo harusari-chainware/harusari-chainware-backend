@@ -1,5 +1,6 @@
 package com.harusari.chainware.statistics.query.controller;
 
+import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.statistics.query.dto.DisposalRateStatisticsResponseBase;
 import com.harusari.chainware.statistics.query.service.DisposalRateStatisticsQueryService;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +21,15 @@ public class DisposalRateStatisticsQueryController {
     private final DisposalRateStatisticsQueryService service;
 
     @GetMapping
-    public List<? extends DisposalRateStatisticsResponseBase> getDisposalRate(
+    public ApiResponse<List<? extends DisposalRateStatisticsResponseBase>> getDisposalRate(
             @RequestParam String period,
             @RequestParam(required = false) Long warehouseId,
             @RequestParam(required = false) Long franchiseId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate,
             @RequestParam(defaultValue = "false") boolean includeProduct
     ) {
-        return service.getDisposalStatistics(period.toUpperCase(), warehouseId, franchiseId, targetDate, includeProduct);
+        List<? extends DisposalRateStatisticsResponseBase> result =
+                service.getDisposalStatistics(period.toUpperCase(), warehouseId, franchiseId, targetDate, includeProduct);
+        return ApiResponse.success(result);
     }
 }
