@@ -1,7 +1,9 @@
 package com.harusari.chainware.member.command.application.controller;
 
+import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.member.command.application.dto.request.MemberCreateRequest;
+import com.harusari.chainware.member.command.application.dto.request.PasswordChangeRequest;
 import com.harusari.chainware.member.command.application.dto.request.franchise.MemberWithFranchiseRequest;
 import com.harusari.chainware.member.command.application.dto.request.vendor.MemberWithVendorRequest;
 import com.harusari.chainware.member.command.application.dto.request.warehouse.MemberWithWarehouseRequest;
@@ -9,6 +11,7 @@ import com.harusari.chainware.member.command.application.service.MemberCommandSe
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -62,6 +65,19 @@ public class MemberCommandController {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
+                .body(ApiResponse.success(null));
+    }
+
+    @PutMapping("/members/password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @RequestBody PasswordChangeRequest passwordChangeRequest,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
+        String email = customUserDetails.getEmail();
+        memberCommandService.changePassword(passwordChangeRequest, email);
+
+        return  ResponseEntity
+                .status(HttpStatus.OK)
                 .body(ApiResponse.success(null));
     }
 

@@ -41,6 +41,7 @@ public class SecurityPolicy {
 
     protected static final String[] AUTHENTICATED_URLS = {
             "/api/v1/auth/logout",
+            "/api/v1/members/password",
             "/api/v1/requisitions/**",
             "/api/v1/orders/**",
             "/api/v1/delivery/**",
