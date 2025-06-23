@@ -1,5 +1,6 @@
 package com.harusari.chainware.auth.model;
 
+import com.harusari.chainware.member.command.domain.aggregate.Member;
 import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
