@@ -12,6 +12,7 @@ public class SecurityPolicy {
     };
 
     protected static final String[] MASTER_ONLY_URLS = {
+            "/api/v1/members/email-exists",
             "/api/v1/members/headquarters",
             "/api/v1/members/franchise",
             "/api/v1/members/vendor",
@@ -58,6 +59,7 @@ public class SecurityPolicy {
 
     protected static final String[] AUTHENTICATED_URLS = {
             "/api/v1/auth/logout",
+            "/api/v1/members/password",
             "/api/v1/requisitions/**",
             "/api/v1/orders/**",
             "/api/v1/delivery/**",

@@ -18,7 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import static com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType.*;
+import static com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType.MASTER;
 
 @Configuration
 @EnableWebSecurity
@@ -45,20 +45,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, SecurityPolicy.MASTER_ONLY_URLS).hasAuthority(MASTER.name())
                         .requestMatchers(HttpMethod.PUT, SecurityPolicy.MASTER_ONLY_URLS).hasAuthority(MASTER.name())
                         .requestMatchers(HttpMethod.DELETE, SecurityPolicy.MASTER_ONLY_URLS).hasAuthority(MASTER.name())
-
-                        // GENERAL_MANAGER
-                        .requestMatchers(HttpMethod.GET, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
-                        .requestMatchers(HttpMethod.POST, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
-                        .requestMatchers(HttpMethod.PUT, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
-                        .requestMatchers(HttpMethod.DELETE, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
-
-                        // SENIOR_MANAGER
-                        .requestMatchers(HttpMethod.GET, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
-                        .requestMatchers(HttpMethod.POST, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
-                        .requestMatchers(HttpMethod.PUT, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
-                        .requestMatchers(HttpMethod.DELETE, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
-
-
 
                         // Public (permitAll)
                         .requestMatchers(HttpMethod.POST, SecurityPolicy.PUBLIC_URLS).permitAll()
