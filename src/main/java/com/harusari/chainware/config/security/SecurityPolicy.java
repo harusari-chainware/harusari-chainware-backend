@@ -20,10 +20,25 @@ public class SecurityPolicy {
     };
 
     protected static final String[] GENERAL_MANAGER_URLS = {
+            "/api/v1/statistics/disposal-rate",
+            "/api/v1/statistics/inventory-turnover",
+            "/api/v1/statistics/menu-sales",
+            "/api/v1/statistics/purchase-order",
+            "/api/v1/statistics/patterns",
+            "/api/v1/statistics/store-order",
+            "/api/v1/statistics/total-sales"
+
 
     };
 
     protected static final String[] SENIOR_MANAGER_URLS = {
+            "/api/v1/statistics/disposal-rate",
+            "/api/v1/statistics/inventory-turnover",
+            "/api/v1/statistics/menu-sales",
+            "/api/v1/statistics/purchase-order",
+            "/api/v1/statistics/patterns",
+            "/api/v1/statistics/store-order",
+            "/api/v1/statistics/total-sales"
 
     };
 

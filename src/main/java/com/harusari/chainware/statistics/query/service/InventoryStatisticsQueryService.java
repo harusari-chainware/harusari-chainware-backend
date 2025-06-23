@@ -7,10 +7,6 @@ import java.util.List;
 
 public interface InventoryStatisticsQueryService {
 
-    List<InventoryTurnoverResponse> getMonthlyTurnover(LocalDate targetDate);
-
-    List<InventoryTurnoverResponse> getWeeklyTurnover(LocalDate targetDate);
-
-    List<InventoryTurnoverResponse> getFranchiseMonthlyTurnover(Long franchiseId, LocalDate targetDate);
+    List<InventoryTurnoverResponse> getTurnover(String period, Long franchiseId, LocalDate targetDate);
 
 }

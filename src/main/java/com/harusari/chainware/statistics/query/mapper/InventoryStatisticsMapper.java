@@ -10,20 +10,22 @@ import java.util.List;
 @Mapper
 public interface InventoryStatisticsMapper {
 
-    List<InventoryTurnoverResponse> selectWarehouseTurnoverMonthly(
+    // 본사 주간 회전율
+    List<InventoryTurnoverResponse> getWeeklyTurnover(
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
 
-    List<InventoryTurnoverResponse> selectWarehouseTurnoverWeekly(
+    // 본사 월간 회전율
+    List<InventoryTurnoverResponse> getMonthlyTurnover(
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
 
-    List<InventoryTurnoverResponse> selectFranchiseTurnoverWithBom(
+    // 가맹점 월간 회전율
+    List<InventoryTurnoverResponse> getFranchiseMonthlyTurnover(
             @Param("franchiseId") Long franchiseId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
-
 }

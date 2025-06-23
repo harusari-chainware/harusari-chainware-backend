@@ -6,9 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.List;
 
 @Service
@@ -19,67 +17,39 @@ public class InventoryStatisticsQueryServiceImpl implements InventoryStatisticsQ
 
     @Override
     @Transactional
-    public List<InventoryTurnoverResponse> getMonthlyTurnover(LocalDate targetDate) {
-        LocalDate now = LocalDate.now();
+    public List<InventoryTurnoverResponse> getTurnover(String period, Long franchiseId, LocalDate targetDate) {
+        // 기본 날짜는 저번달 1일
+        LocalDate baseDate = (targetDate != null) ? targetDate : LocalDate.now().minusMonths(1).withDayOfMonth(1);
 
-        if (targetDate == null) {
-            YearMonth lastMonth = YearMonth.from(now.minusMonths(1));
-            LocalDate start = lastMonth.atDay(1);
-            LocalDate end = lastMonth.atEndOfMonth();
-            return inventoryStatisticsMapper.selectWarehouseTurnoverMonthly(start, end);
+        if (franchiseId != null) {
+            if (!period.equalsIgnoreCase("MONTHLY")) {
+                throw new IllegalArgumentException("가맹점은 월간(MONTHLY) 회전율 조회만 지원합니다.");
+            }
+            return getFranchiseMonthlyTurnover(franchiseId, baseDate);
         }
 
-        YearMonth targetMonth = YearMonth.from(targetDate);
-        YearMonth currentMonth = YearMonth.from(now);
-
-        if (targetMonth.equals(currentMonth)) {
-            throw new IllegalArgumentException("해당 월은 아직 종료되지 않아 회전율 통계를 조회할 수 없습니다.");
-        }
-
-        LocalDate start = targetMonth.atDay(1);
-        LocalDate end = targetMonth.atEndOfMonth();
-        return inventoryStatisticsMapper.selectWarehouseTurnoverMonthly(start, end);
+        return switch (period.toUpperCase()) {
+            case "WEEKLY" -> getWeeklyTurnover(baseDate);
+            case "MONTHLY" -> getMonthlyTurnover(baseDate);
+            default -> throw new IllegalArgumentException("지원하지 않는 기간 유형입니다. (WEEKLY 또는 MONTHLY만 허용)");
+        };
     }
 
-    @Override
-    @Transactional
-    public List<InventoryTurnoverResponse> getWeeklyTurnover(LocalDate targetDate) {
-        LocalDate now = LocalDate.now();
-
-        if (targetDate == null) {
-            LocalDate lastWeekSunday = now.with(DayOfWeek.SUNDAY).minusWeeks(1);
-            LocalDate start = lastWeekSunday.minusDays(6);
-            return inventoryStatisticsMapper.selectWarehouseTurnoverWeekly(start, lastWeekSunday);
-        }
-
-        LocalDate targetWeekStart = targetDate.with(DayOfWeek.MONDAY);
-        LocalDate targetWeekEnd = targetWeekStart.plusDays(6);
-        LocalDate currentWeekStart = now.with(DayOfWeek.MONDAY);
-
-        if (!targetWeekEnd.isBefore(now)) {
-            throw new IllegalArgumentException("해당 주는 아직 종료되지 않아 회전율 통계를 조회할 수 없습니다.");
-        }
-
-        return inventoryStatisticsMapper.selectWarehouseTurnoverWeekly(targetWeekStart, targetWeekEnd);
+    private List<InventoryTurnoverResponse> getFranchiseMonthlyTurnover(Long franchiseId, LocalDate baseDate) {
+        LocalDate startDate = baseDate.withDayOfMonth(1);
+        LocalDate endDate = baseDate.withDayOfMonth(baseDate.lengthOfMonth());
+        return inventoryStatisticsMapper.getFranchiseMonthlyTurnover(franchiseId, startDate, endDate);
     }
 
-    @Override
-    @Transactional
-    public List<InventoryTurnoverResponse> getFranchiseMonthlyTurnover(Long franchiseId, LocalDate targetDate) {
-        if (franchiseId == null) {
-            throw new IllegalArgumentException("franchiseId는 필수입니다.");
-        }
+    private List<InventoryTurnoverResponse> getWeeklyTurnover(LocalDate baseDate) {
+        LocalDate startDate = baseDate.with(java.time.DayOfWeek.MONDAY);
+        LocalDate endDate = baseDate.with(java.time.DayOfWeek.SUNDAY);
+        return inventoryStatisticsMapper.getWeeklyTurnover(startDate, endDate);
+    }
 
-        LocalDate now = LocalDate.now();
-        YearMonth yearMonth = (targetDate != null) ? YearMonth.from(targetDate) : YearMonth.from(now.minusMonths(1));
-
-        if (yearMonth.equals(YearMonth.from(now))) {
-            throw new IllegalArgumentException("해당 월은 아직 종료되지 않아 회전율 통계를 조회할 수 없습니다.");
-        }
-
-        LocalDate start = yearMonth.atDay(1);
-        LocalDate end = yearMonth.atEndOfMonth();
-
-        return inventoryStatisticsMapper.selectFranchiseTurnoverWithBom(franchiseId, start, end);
+    private List<InventoryTurnoverResponse> getMonthlyTurnover(LocalDate baseDate) {
+        LocalDate startDate = baseDate.withDayOfMonth(1);
+        LocalDate endDate = baseDate.withDayOfMonth(baseDate.lengthOfMonth());
+        return inventoryStatisticsMapper.getMonthlyTurnover(startDate, endDate);
     }
 }

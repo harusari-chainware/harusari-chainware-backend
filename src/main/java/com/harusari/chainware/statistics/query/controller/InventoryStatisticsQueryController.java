@@ -20,31 +20,15 @@ public class InventoryStatisticsQueryController {
 
     private final InventoryStatisticsQueryService inventoryStatisticsQueryService;
 
-    @GetMapping("/monthly")
-    public ApiResponse<List<InventoryTurnoverResponse>> getMonthlyTurnover(
+    @GetMapping
+    public ApiResponse<List<InventoryTurnoverResponse>> getInventoryTurnover(
+            @RequestParam(defaultValue = "MONTHLY") String period,
+            @RequestParam(required = false) Long franchiseId,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
     ) {
-        List<InventoryTurnoverResponse> result = inventoryStatisticsQueryService.getMonthlyTurnover(targetDate);
-        return ApiResponse.success(result);
-    }
-
-    @GetMapping("/weekly")
-    public ApiResponse<List<InventoryTurnoverResponse>> getWeeklyTurnover(
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
-    ) {
-        List<InventoryTurnoverResponse> result = inventoryStatisticsQueryService.getWeeklyTurnover(targetDate);
-        return ApiResponse.success(result);
-    }
-
-    @GetMapping("/monthly/franchise")
-    public ApiResponse<List<InventoryTurnoverResponse>> getFranchiseTurnover(
-            @RequestParam Long franchiseId,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
-    ) {
-        List<InventoryTurnoverResponse> result = inventoryStatisticsQueryService.getFranchiseMonthlyTurnover(franchiseId, targetDate);
-        return ApiResponse.success(result);
+        return ApiResponse.success(
+                inventoryStatisticsQueryService.getTurnover(period, franchiseId, targetDate)
+        );
     }
 }
