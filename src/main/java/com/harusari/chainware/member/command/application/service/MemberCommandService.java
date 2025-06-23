@@ -1,6 +1,7 @@
 package com.harusari.chainware.member.command.application.service;
 
 import com.harusari.chainware.member.command.application.dto.request.MemberCreateRequest;
+import com.harusari.chainware.member.command.application.dto.request.PasswordChangeRequest;
 import com.harusari.chainware.member.command.application.dto.request.franchise.MemberWithFranchiseRequest;
 import com.harusari.chainware.member.command.application.dto.request.vendor.MemberWithVendorRequest;
 import com.harusari.chainware.member.command.application.dto.request.warehouse.MemberWithWarehouseRequest;
@@ -15,5 +16,7 @@ public interface MemberCommandService {
     void registerVendor(MemberWithVendorRequest memberWithVendorRequest, MultipartFile agreementFile);
 
     void registerWarehouse(MemberWithWarehouseRequest memberWithWarehouseRequest);
+
+    void changePassword(PasswordChangeRequest passwordChangeRequest, String email);
 
 }

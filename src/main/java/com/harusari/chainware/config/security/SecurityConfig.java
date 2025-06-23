@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import static com.harusari.chainware.config.security.SecurityPolicy.*;
 import static com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType.MASTER;
 
 @Configuration
@@ -41,19 +42,19 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // Master
-                        .requestMatchers(HttpMethod.GET, SecurityPolicy.MASTER_ONLY_URLS).hasAuthority(MASTER.name())
-                        .requestMatchers(HttpMethod.POST, SecurityPolicy.MASTER_ONLY_URLS).hasAuthority(MASTER.name())
-                        .requestMatchers(HttpMethod.PUT, SecurityPolicy.MASTER_ONLY_URLS).hasAuthority(MASTER.name())
-                        .requestMatchers(HttpMethod.DELETE, SecurityPolicy.MASTER_ONLY_URLS).hasAuthority(MASTER.name())
+                        .requestMatchers(HttpMethod.GET, MASTER_ONLY_URLS).hasAuthority(MASTER.name())
+                        .requestMatchers(HttpMethod.POST, MASTER_ONLY_URLS).hasAuthority(MASTER.name())
+                        .requestMatchers(HttpMethod.PUT, MASTER_ONLY_URLS).hasAuthority(MASTER.name())
+                        .requestMatchers(HttpMethod.DELETE, MASTER_ONLY_URLS).hasAuthority(MASTER.name())
 
                         // Public (permitAll)
-                        .requestMatchers(HttpMethod.POST, SecurityPolicy.PUBLIC_URLS).permitAll()
+                        .requestMatchers(HttpMethod.POST, PUBLIC_URLS).permitAll()
 
                         // Authenticated
-                        .requestMatchers(HttpMethod.GET, SecurityPolicy.AUTHENTICATED_URLS).authenticated()
-                        .requestMatchers(HttpMethod.POST, SecurityPolicy.AUTHENTICATED_URLS).authenticated()
-                        .requestMatchers(HttpMethod.PUT, SecurityPolicy.AUTHENTICATED_URLS).authenticated()
-                        .requestMatchers(HttpMethod.DELETE, SecurityPolicy.AUTHENTICATED_URLS).authenticated()
+                        .requestMatchers(HttpMethod.GET, AUTHENTICATED_URLS).authenticated()
+                        .requestMatchers(HttpMethod.POST, AUTHENTICATED_URLS).authenticated()
+                        .requestMatchers(HttpMethod.PUT, AUTHENTICATED_URLS).authenticated()
+                        .requestMatchers(HttpMethod.DELETE, AUTHENTICATED_URLS).authenticated()
 
                         // 그 외 모든 요청 및 HTTP method 차단
                         .anyRequest().denyAll()
