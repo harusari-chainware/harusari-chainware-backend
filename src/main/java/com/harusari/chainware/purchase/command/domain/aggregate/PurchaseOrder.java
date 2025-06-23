@@ -1,0 +1,67 @@
+package com.harusari.chainware.purchase.command.domain.aggregate;
+
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "purchase_order")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class PurchaseOrder {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long purchaseOrderId;
+
+    @Column(name = "requisition_id", nullable = false)
+    private Long requisitionId;
+
+    @Column(name = "vendor_id", nullable = false)
+    private Long vendorId;
+
+    @Column(name = "created_member_id", nullable = false)
+    private Long createdMemberId;
+
+    @Column(name = "vendor_member_id", nullable = false)
+    private Long vendorMemberId;
+
+    @Column(name = "purchase_order_code", length = 50, nullable = false)
+    private String purchaseOrderCode;
+
+    @Column(name = "total_amount", nullable = false)
+    private Long totalAmount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "purchase_order_status", nullable = false, length = 20)
+    private PurchaseOrderStatus purchaseOrderStatus;
+
+    @Column(name = "reject_reason", length = 255)
+    private String rejectReason;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "modified_at")
+    private LocalDateTime modifiedAt;
+
+    @Builder
+    public PurchaseOrder(Long requisitionId, Long vendorId, Long createdMemberId, Long vendorMemberId,
+                         String purchaseOrderCode, Long totalAmount, PurchaseOrderStatus purchaseOrderStatus,
+                         String rejectReason, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+        this.requisitionId = requisitionId;
+        this.vendorId = vendorId;
+        this.createdMemberId = createdMemberId;
+        this.vendorMemberId = vendorMemberId;
+        this.purchaseOrderCode = purchaseOrderCode;
+        this.totalAmount = totalAmount;
+        this.purchaseOrderStatus = purchaseOrderStatus;
+        this.rejectReason = rejectReason;
+        this.createdAt = createdAt;
+        this.modifiedAt = modifiedAt;
+    }
+}
