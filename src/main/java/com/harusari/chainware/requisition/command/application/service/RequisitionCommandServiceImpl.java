@@ -109,7 +109,7 @@ public class RequisitionCommandServiceImpl implements RequisitionCommandService 
 
     @Override
     @Transactional
-    public void rejectRequisition(Long requisitionId, Long memberId, RejectRequisitionRequest request) {
+    public void rejectRequisition(Long memberId, Long requisitionId, RejectRequisitionRequest request) {
         Requisition requisition = requisitionRepository.findById(requisitionId)
                 .orElseThrow(() -> new NotFoundException("품의서를 찾을 수 없습니다."));
 

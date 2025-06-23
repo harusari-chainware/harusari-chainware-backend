@@ -20,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import static com.harusari.chainware.config.security.SecurityPolicy.*;
 import static com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType.MASTER;
+import static com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType.*;
 
 @Configuration
 @EnableWebSecurity
@@ -55,6 +56,20 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, AUTHENTICATED_URLS).authenticated()
                         .requestMatchers(HttpMethod.PUT, AUTHENTICATED_URLS).authenticated()
                         .requestMatchers(HttpMethod.DELETE, AUTHENTICATED_URLS).authenticated()
+
+                        // GENERAL MANAGER
+                        .requestMatchers(HttpMethod.GET, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
+                        .requestMatchers(HttpMethod.POST, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
+                        .requestMatchers(HttpMethod.PUT, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
+                        .requestMatchers(HttpMethod.DELETE, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
+
+
+                        // SENIOR MANAGER
+                        .requestMatchers(HttpMethod.GET, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
+                        .requestMatchers(HttpMethod.POST, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
+                        .requestMatchers(HttpMethod.PUT, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
+                        .requestMatchers(HttpMethod.DELETE, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
+
 
                         // 그 외 모든 요청 및 HTTP method 차단
                         .anyRequest().denyAll()
