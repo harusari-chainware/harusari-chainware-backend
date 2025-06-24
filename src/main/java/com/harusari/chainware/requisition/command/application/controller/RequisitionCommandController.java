@@ -57,6 +57,7 @@ public class RequisitionCommandController {
     }
 
     @Operation(summary = "품의서 반려", description = "결재자로 입력된 책임 관리자가 품의서를 반려한다.")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "품의서 반려됨")
     @PutMapping("/{requisitionId}/reject")
     public ResponseEntity<ApiResponse<Void>> rejectRequisition(
             @AuthenticationPrincipal CustomUserDetails userDetail,
@@ -69,6 +70,7 @@ public class RequisitionCommandController {
 
 
     @Operation(summary = "품의서 삭제", description = "임시 저장 또는 상신 상태의 품의서를 삭제한다.")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "품의서 삭제 완료")
     @DeleteMapping("/{requisitionId}")
     public ResponseEntity<ApiResponse<Void>> deleteRequisition(
             @AuthenticationPrincipal CustomUserDetails userDetails,

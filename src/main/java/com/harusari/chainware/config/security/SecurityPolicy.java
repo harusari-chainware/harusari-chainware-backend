@@ -27,7 +27,14 @@ public class SecurityPolicy {
             "/api/v1/statistics/purchase-order",
             "/api/v1/statistics/patterns",
             "/api/v1/statistics/store-order",
-            "/api/v1/statistics/total-sales"
+            "/api/v1/statistics/total-sales",
+            "/api/v1/requisitions",
+            "/api/v1/requisitions/create",
+            "/api/v1/requisitions/{requisitionID}/submit",
+            "/api/v1/requisitions/{requisitionID}",
+            "/api/v1/purchases",
+            "/api/v1/purchases/{purchaseOrderId}",
+            "/api/v1/purchases/{purchaseOrderId}/cancel"
 
 
     };
@@ -48,6 +55,7 @@ public class SecurityPolicy {
             "/api/v1/requisitions/{requisitionID}",
             "/api/v1/purchases",
             "/api/v1/purchases/{purchaseOrderId}",
+            "/api/v1/purchases/{purchaseOrderId}/cancel",
             "/api/v1/vendors/{vendorId}"
     };
 
@@ -62,7 +70,9 @@ public class SecurityPolicy {
     };
 
     protected static final String[] VENDOR_MANAGER_URLS = {
-            "/api/v1/purchases/{purchaseOrderId}/approve"
+            "/api/v1/purchases/{purchaseOrderId}/approve",
+            "/api/v1/purchases/{purchaseOrderId}/reject"
+
     };
 
     protected static final String[] AUTHENTICATED_URLS = {
