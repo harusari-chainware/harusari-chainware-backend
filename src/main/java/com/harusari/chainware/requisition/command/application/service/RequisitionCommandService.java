@@ -1,6 +1,7 @@
 package com.harusari.chainware.requisition.command.application.service;
 
 import com.harusari.chainware.requisition.command.application.dto.request.CreateRequisitionRequest;
+import com.harusari.chainware.requisition.command.application.dto.request.UpdateRequisitionRequest;
 import com.harusari.chainware.requisition.command.domain.aggregate.RejectRequisitionRequest;
 
 public interface RequisitionCommandService {
@@ -18,5 +19,8 @@ public interface RequisitionCommandService {
     void rejectRequisition(Long memberId, Long requisitionId, RejectRequisitionRequest request);
 
     void deleteRequisition(Long memberId, Long requisitionId);
+
+
+    void update(Long requisitionId, UpdateRequisitionRequest request, Long memberId);
 
 }

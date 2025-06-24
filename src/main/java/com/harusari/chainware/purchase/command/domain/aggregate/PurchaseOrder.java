@@ -69,19 +69,12 @@ public class PurchaseOrder {
 
     // 발주 승인
     public void approve() {
-        if (this.getPurchaseOrderStatus() != PurchaseOrderStatus.REQUESTED) {
-            throw new InvalidStatusException("발주는 REQUESTED 상태일 때만 승인할 수 있습니다.");
-        }
-
         this.purchaseOrderStatus = PurchaseOrderStatus.APPROVED;
         this.modifiedAt = LocalDateTime.now();
     }
 
     // 발주 거절
     public void reject(String rejectReason) {
-        if (this.purchaseOrderStatus != PurchaseOrderStatus.REQUESTED) {
-            throw new InvalidStatusException("거절은 REQUESTED 상태에서만 가능합니다.");
-        }
         this.purchaseOrderStatus = PurchaseOrderStatus.REJECTED;
         this.rejectReason = rejectReason;
         this.modifiedAt = LocalDateTime.now();
@@ -89,10 +82,6 @@ public class PurchaseOrder {
 
     // 발주 요청 취소
     public void cancel(String cancelReason) {
-        if (this.purchaseOrderStatus != PurchaseOrderStatus.REQUESTED) {
-            throw new InvalidStatusException("취소는 REQUESTED 상태에서만 가능합니다.");
-        }
-
         this.purchaseOrderStatus = PurchaseOrderStatus.CANCELLED;
         this.rejectReason = cancelReason; // 사유 저장 재활용
         this.modifiedAt = LocalDateTime.now();

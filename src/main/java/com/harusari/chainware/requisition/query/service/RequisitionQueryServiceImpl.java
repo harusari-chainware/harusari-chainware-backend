@@ -1,5 +1,7 @@
 package com.harusari.chainware.requisition.query.service;
 
+import com.harusari.chainware.exception.requisition.RequisitionErrorCode;
+import com.harusari.chainware.exception.requisition.RequisitionException;
 import com.harusari.chainware.requisition.query.dto.request.RequisitionSearchCondition;
 import com.harusari.chainware.requisition.query.dto.response.RequisitionDetailResponse;
 import com.harusari.chainware.requisition.query.dto.response.RequisitionItemResponse;
@@ -28,7 +30,7 @@ public class RequisitionQueryServiceImpl implements RequisitionQueryService {
     public RequisitionDetailResponse getRequisitionDetail(Long memberId, Long requisitionId) {
         RequisitionDetailResponse detail = requisitionQueryMapper.findRequisitionById(requisitionId, memberId);
         if (detail == null) {
-            throw new IllegalArgumentException("조회 권한이 없거나 존재하지 않는 품의서입니다.");
+            throw new RequisitionException(RequisitionErrorCode.REQUISITION_NOT_FOUND);
         }
 
         List<RequisitionItemResponse> items = requisitionQueryMapper.findItemsByRequisitionId(requisitionId);

@@ -3,6 +3,7 @@ package com.harusari.chainware.requisition.command.application.controller;
 import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.purchase.command.application.service.PurchaseOrderCommandService;
 import com.harusari.chainware.requisition.command.application.dto.request.CreateRequisitionRequest;
+import com.harusari.chainware.requisition.command.application.dto.request.UpdateRequisitionRequest;
 import com.harusari.chainware.requisition.command.application.service.RequisitionCommandService;
 import com.harusari.chainware.requisition.command.domain.aggregate.RejectRequisitionRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -80,4 +81,14 @@ public class RequisitionCommandController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
+    @PatchMapping("/{id}")
+    @Operation(summary = "품의서 수정", description = "작성자가 SUBMITTED 이전 상태의 품의서를 수정합니다.")
+    public ResponseEntity<ApiResponse<Void>> updateRequisition(
+            @PathVariable Long id,
+            @RequestBody @Valid UpdateRequisitionRequest request,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        requisitionCommandService.update(id, request, user.getMemberId());
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
 }

@@ -1,5 +1,9 @@
 package com.harusari.chainware.purchase.command.application.service;
 
+import com.harusari.chainware.exception.purchase.PurchaseOrderErrorCode;
+import com.harusari.chainware.exception.purchase.PurchaseOrderException;
+import com.harusari.chainware.exception.requisition.RequisitionErrorCode;
+import com.harusari.chainware.exception.requisition.RequisitionException;
 import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
 import com.harusari.chainware.purchase.command.application.dto.request.CancelPurchaseOrderRequest;
 import com.harusari.chainware.purchase.command.application.dto.request.RejectPurchaseOrderRequest;
@@ -37,13 +41,13 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
         // 1. 품의서 전체 정보 조회 (승인자, 거래처 등)
         RequisitionDetailResponse requisition = requisitionQueryMapper.findRequisitionById(requisitionId, memberId);
         if (requisition == null) {
-            throw new IllegalArgumentException("존재하지 않는 품의서입니다.");
+            throw new RequisitionException(RequisitionErrorCode.REQUISITION_NOT_FOUND);
         }
 
         // 2. 품의서 품목 리스트 조회
         List<RequisitionItemResponse> items = requisitionQueryMapper.findItemsByRequisitionId(requisitionId);
         if (items.isEmpty()) {
-            throw new IllegalStateException("품의서에 품목이 존재하지 않습니다.");
+            throw new RequisitionException(RequisitionErrorCode.REQUISITION_ITEM_NOT_FOUND);
         }
 
         // 3. 총 금액 계산
@@ -87,10 +91,10 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
     @Transactional
     public void approve(Long purchaseOrderId, Long memberId) {
         PurchaseOrder order = purchaseOrderRepository.findById(purchaseOrderId)
-                .orElseThrow(() -> new NotFoundException("발주를 찾을 수 없습니다."));
+                .orElseThrow(() -> new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_UNAUTHORIZED_VENDOR));
 
         if (!order.getPurchaseOrderStatus().equals(PurchaseOrderStatus.REQUESTED)) {
-            throw new InvalidStatusException("요청 상태의 발주만 승인할 수 있습니다.");
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_APPROVE_INVALID_STATUS);
         }
 
         order.approve();
@@ -101,14 +105,14 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
     @Transactional
     public void rejectPurchaseOrder(Long memberId, Long purchaseOrderId, RejectPurchaseOrderRequest request) {
         PurchaseOrder order = purchaseOrderRepository.findById(purchaseOrderId)
-                .orElseThrow(() -> new NotFoundException("발주를 찾을 수 없습니다."));
+                .orElseThrow(() -> new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_NOT_FOUND));
 
         if (!order.getVendorMemberId().equals(memberId)) {
-            throw new AccessDeniedException("해당 발주의 거래처 담당자가 아닙니다.");
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_UNAUTHORIZED_VENDOR);
         }
 
         if (!order.getPurchaseOrderStatus().equals(PurchaseOrderStatus.REQUESTED)) {
-            throw new InvalidStatusException("요청 상태의 발주만 거절할 수 있습니다.");
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_REJECT_INVALID_STATUS);
         }
 
         order.reject(request.getRejectReason());
@@ -119,14 +123,14 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
     @Transactional
     public void cancelPurchaseOrder(Long memberId, Long purchaseOrderId, CancelPurchaseOrderRequest request, MemberAuthorityType authorityType) {
         PurchaseOrder order = purchaseOrderRepository.findById(purchaseOrderId)
-                .orElseThrow(() -> new NotFoundException("발주를 찾을 수 없습니다."));
+                .orElseThrow(() -> new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_NOT_FOUND));
 
         if (!(authorityType == MemberAuthorityType.GENERAL_MANAGER || authorityType == MemberAuthorityType.SENIOR_MANAGER)) {
-            throw new AccessDeniedException("발주를 취소할 권한이 없습니다.");
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_UNAUTHORIZED_WRITER);
         }
 
         if (order.getPurchaseOrderStatus() != PurchaseOrderStatus.REQUESTED) {
-            throw new InvalidStatusException("요청 상태의 발주만 취소할 수 있습니다.");
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_CANCEL_INVALID_STATUS);
         }
 
         order.cancel(request.getCancelReason());

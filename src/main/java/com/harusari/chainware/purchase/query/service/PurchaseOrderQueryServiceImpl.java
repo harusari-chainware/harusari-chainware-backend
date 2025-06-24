@@ -1,5 +1,7 @@
 package com.harusari.chainware.purchase.query.service;
 
+import com.harusari.chainware.exception.purchase.PurchaseOrderErrorCode;
+import com.harusari.chainware.exception.purchase.PurchaseOrderException;
 import com.harusari.chainware.purchase.query.dto.PurchaseOrderSearchCondition;
 import com.harusari.chainware.purchase.query.dto.PurchaseOrderDetailResponse;
 import com.harusari.chainware.purchase.query.dto.PurchaseOrderSummaryResponse;
@@ -26,6 +28,11 @@ public class PurchaseOrderQueryServiceImpl implements PurchaseOrderQueryService 
     @Transactional
     public PurchaseOrderDetailResponse getPurchaseOrderDetail(Long memberId, Long purchaseOrderId) {
         var order = mapper.findPurchaseOrderById(memberId, purchaseOrderId);
+
+        if (order == null) {
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_NOT_FOUND);
+        }
+
         var products = mapper.findProductsByPurchaseOrderId(memberId, purchaseOrderId);
 
         PurchaseOrderDetailResponse response = new PurchaseOrderDetailResponse();
