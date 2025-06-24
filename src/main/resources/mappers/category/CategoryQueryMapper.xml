@@ -50,13 +50,16 @@
 
     <!-- CategoryWithProductsResponse 생성자 매핑 -->
     <resultMap id="CategoryWithProductsMap" type="com.harusari.chainware.category.query.dto.response.CategoryWithProductsResponse">
-        <constructor>
-            <idArg column="category_id" javaType="java.lang.Long"/>
-            <arg column="category_name" javaType="java.lang.String"/>
-            <arg column="top_category_id" javaType="java.lang.Long"/>
-            <!-- products는 collection으로 매핑 -->
-        </constructor>
-        <collection property="products" ofType="com.harusari.chainware.product.query.dto.response.ProductDto" resultMap="ProductDtoMap"/>
+        <id property="categoryId" column="category_id"/>
+        <result property="categoryName" column="category_name"/>
+        <result property="topCategoryId" column="top_category_id"/>
+
+        <!-- product 리스트는 별도로 collection으로 설정 -->
+        <collection property="products"
+                    ofType="com.harusari.chainware.product.query.dto.response.ProductDto"
+                    resultMap="ProductDtoMap"
+                    javaType="java.util.ArrayList"
+                    notNullColumn="product_id" />
     </resultMap>
 
     <!-- TopCategoryOnlyResponse 생성자 매핑 -->
@@ -76,8 +79,11 @@
             <arg column="top_category_name" javaType="java.lang.String"/>
             <!-- products는 collection으로 매핑 -->
         </constructor>
-        <collection property="products" ofType="com.harusari.chainware.product.query.dto.response.ProductDto" resultMap="ProductDtoMap"/>
-    </resultMap>
+        <collection property="products"
+                    ofType="com.harusari.chainware.product.query.dto.response.ProductDto"
+                    javaType="java.util.ArrayList"
+                    resultMap="ProductDtoMap"/>
+        </resultMap>
 
     <!-- 상위 카테고리 기본 정보 조회 -->
     <select id="selectTopCategoryBasic" parameterType="long" resultMap="TopCategoryOnlyResponseMap">
