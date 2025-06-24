@@ -30,7 +30,9 @@ public class WarehouseCommandController {
 
     // 창고마스터 삭제
     @DeleteMapping("/{warehouseId}")
-    public ResponseEntity<ApiResponse<WarehouseCommandResponse>> deleteWarehouse(@PathVariable Long warehouseId) {
+    public ResponseEntity<ApiResponse<WarehouseCommandResponse>> deleteWarehouse(
+            @PathVariable Long warehouseId
+    ) {
         WarehouseCommandResponse response = warehouseCommandService.deleteWarehouse(warehouseId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
@@ -57,7 +59,9 @@ public class WarehouseCommandController {
 
     // 보유 재고 삭제
     @DeleteMapping("/inventory/{inventoryId}")
-    public ResponseEntity<ApiResponse<WarehouseInventoryCommandResponse>> deleteInventory(@PathVariable Long inventoryId) {
+    public ResponseEntity<ApiResponse<WarehouseInventoryCommandResponse>> deleteInventory(
+            @PathVariable Long inventoryId
+    ) {
         WarehouseInventoryCommandResponse response = warehouseCommandService.deleteInventory(inventoryId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
