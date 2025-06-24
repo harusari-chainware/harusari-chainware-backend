@@ -3,6 +3,7 @@ package com.harusari.chainware.member.query.repository;
 import com.harusari.chainware.member.command.domain.aggregate.Member;
 import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
 import com.harusari.chainware.member.query.dto.request.MemberSearchRequest;
+import com.harusari.chainware.member.query.dto.response.MemberSearchDetailResponse;
 import com.harusari.chainware.member.query.dto.response.MemberSearchResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -85,6 +86,22 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepositoryCustom {
         long total = Optional.ofNullable(result).orElse(TOTAL_DEFAULT_VALUE);
 
         return new PageImpl<>(contents, pageable, total);
+    }
+
+    @Override
+    public Optional<MemberSearchDetailResponse> findMemberSearchDetailById(Long memberId) {
+        return Optional.ofNullable(queryFactory
+                .select(Projections.constructor(MemberSearchDetailResponse.class,
+                        member.memberId, member.email, member.name,
+                        authority.authorityLabelKr, member.phoneNumber,
+                        member.birthDate, member.position, member.joinAt,
+                        member.modifiedAt, member.isDeleted
+                ))
+                .from(member)
+                .leftJoin(authority).on(member.authorityId.eq(authority.authorityId))
+                .where(member.memberId.eq(memberId))
+                .fetchOne()
+        );
     }
 
     private BooleanExpression emailEq(String email) {
