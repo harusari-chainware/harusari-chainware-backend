@@ -17,7 +17,8 @@ public class SecurityPolicy {
             "/api/v1/members/franchise",
             "/api/v1/members/vendor",
             "/api/v1/members/warehouse",
-            "/api/v1/members"
+            "/api/v1/members",
+            "/api/v1/members/{memberId}",
     };
 
     protected static final String[] GENERAL_MANAGER_URLS = {
@@ -60,13 +61,14 @@ public class SecurityPolicy {
     };
 
     protected static final String[] WAREHOUSE_MANAGER_URLS = {
-
+            "/api/v1/delivery/{deliveryId}/start"
     };
 
     protected static final String[] FRANCHISE_MANAGER_URLS = {
             "/api/v1/orders",
             "/api/v1/orders/{orderId}",
-            "/api/v1/orders/{orderId}/cancel"
+            "/api/v1/orders/{orderId}/cancel",
+            "/api/v1/delivery/{deliveryId}/complete"
     };
 
     protected static final String[] VENDOR_MANAGER_URLS = {
