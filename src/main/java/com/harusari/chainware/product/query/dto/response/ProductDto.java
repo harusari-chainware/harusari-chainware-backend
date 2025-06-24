@@ -19,4 +19,21 @@ public class ProductDto {
     private String origin;
     private Integer shelfLife;
     private boolean productStatus;
+
+    public ProductDto(Long productId, String productName, String productCode, Long categoryId,
+                      Integer basePrice, String unitQuantity, String unitSpec, StoreType storeType,
+                      Integer safetyStock, String origin, Integer shelfLife, boolean productStatus) {
+        this.productId = productId;
+        this.productName = productName;
+        this.productCode = productCode;
+        this.categoryId = categoryId;
+        this.basePrice = basePrice;
+        this.unitQuantity = unitQuantity;
+        this.unitSpec = unitSpec;
+        this.storeType = storeType;
+        this.safetyStock = safetyStock;
+        this.origin = origin;
+        this.shelfLife = shelfLife;
+        this.productStatus = productStatus;
+    }
 }

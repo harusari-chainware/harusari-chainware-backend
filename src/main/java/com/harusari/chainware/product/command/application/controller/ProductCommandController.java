@@ -39,7 +39,7 @@ public class ProductCommandController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @PutMapping("/{productId}/delete")
+    @DeleteMapping("/{productId}")
     public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long productId) {
 
         productCommandService.deleteProduct(productId);

@@ -45,7 +45,6 @@ public class Product {
     @Column(name = "unit_spec")
     private String unitSpec;
 
-    @Min(0)
     @Column(name = "base_price")
     private Integer basePrice;
 
@@ -53,14 +52,12 @@ public class Product {
     @Column(name = "store_type")
     private StoreType storeType;
 
-    @Min(0)
     @Column(name = "safety_stock")
     private Integer safetyStock;
 
     @Column(name = "origin")
     private String origin;
 
-    @Min(0)
     @Column(name = "shelf_life")
     private Integer shelfLife;
 

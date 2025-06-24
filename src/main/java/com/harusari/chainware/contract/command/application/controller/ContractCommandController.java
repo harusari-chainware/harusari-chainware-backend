@@ -35,7 +35,7 @@ public class ContractCommandController {
     }
 
     // 계약 삭제 (soft delete)
-    @PutMapping("/{contractId}/delete")
+    @DeleteMapping("/{contractId}")
     public ResponseEntity<ApiResponse<Void>> deleteContract(@PathVariable Long contractId) {
         contractService.deleteContract(contractId);
         return ResponseEntity.ok(ApiResponse.success(null));
