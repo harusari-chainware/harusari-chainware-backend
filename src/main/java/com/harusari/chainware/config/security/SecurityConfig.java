@@ -18,8 +18,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import static com.harusari.chainware.config.security.SecurityPolicy.*;
 import static com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType.*;
-import static com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType.SENIOR_MANAGER;
+import static com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType.MASTER;
+import static com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType.*;
 
 @Configuration
 @EnableWebSecurity
@@ -61,6 +63,27 @@ public class SecurityConfig {
 
 
 
+
+                        // GENERAL_MANAGER
+                        .requestMatchers(HttpMethod.GET, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
+                        .requestMatchers(HttpMethod.POST, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
+                        .requestMatchers(HttpMethod.PUT, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
+                        .requestMatchers(HttpMethod.DELETE, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
+
+                        // SENIOR_MANAGER
+                        .requestMatchers(HttpMethod.GET, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
+                        .requestMatchers(HttpMethod.POST, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
+                        .requestMatchers(HttpMethod.PUT, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
+                        .requestMatchers(HttpMethod.DELETE, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
+
+                        // FRANCHISE_MANAGER
+                        .requestMatchers(FRANCHISE_MANAGER_URLS).hasAuthority(FRANCHISE_MANAGER.name())
+
+                        // WAREHOUSE_MANAGER
+                        .requestMatchers(WAREHOUSE_MANAGER_URLS).hasAuthority(WAREHOUSE_MANAGER.name())
+
+                        // VENDOR_MANAGER
+                        .requestMatchers(VENDOR_MANAGER_URLS).hasAuthority(VENDOR_MANAGER.name())
 
                         // Public (permitAll)
                         .requestMatchers(HttpMethod.POST, SecurityPolicy.PUBLIC_URLS).permitAll()

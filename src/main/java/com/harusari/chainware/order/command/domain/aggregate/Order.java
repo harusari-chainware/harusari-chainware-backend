@@ -42,7 +42,6 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
-
     @Column(name = "reject_reason")
     private String rejectReason;
 
@@ -68,11 +67,12 @@ public class Order {
         this.createdAt = createdAt;
     }
 
-    public void update(int productCount, int totalQuantity, long totalPrice, LocalDateTime modifiedAt) {
+    public void update(int productCount, int totalQuantity, long totalPrice, LocalDate deliveryDueDate) {
         this.productCount = productCount;
         this.totalQuantity = totalQuantity;
         this.totalPrice = totalPrice;
-        this.modifiedAt = modifiedAt;
+        this.deliveryDueDate = deliveryDueDate;
+        this.modifiedAt = LocalDateTime.now();
     }
 
     public void changeStatus(OrderStatus status, String rejectReason, LocalDateTime modifiedAt) {

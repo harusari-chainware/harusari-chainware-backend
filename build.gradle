@@ -46,6 +46,7 @@ dependencies {
 
 	// redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.redisson:redisson-spring-boot-starter:3.25.2'
 
 	// aws sdk s3 v2
 	implementation 'software.amazon.awssdk:s3:2.25.57'

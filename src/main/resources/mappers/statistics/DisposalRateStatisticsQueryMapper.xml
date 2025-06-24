@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.harusari.chainware.statistics.query.mapper.DisposalRateStatisticsQueryMapper">
+
+    <select id="getDisposalRate" resultType="com.harusari.chainware.statistics.query.dto.disposal.DisposalRateStatisticsResponse">
+        SELECT
+        DATE(d.created_at) AS date,
+        CASE
+        WHEN #{warehouseId} IS NULL AND #{franchiseId} IS NULL THEN '전체'
+        WHEN #{warehouseId} IS NOT NULL THEN w.warehouse_name
+        WHEN #{franchiseId} IS NOT NULL THEN f.franchise_name
+        END AS targetName,
+        SUM(d.quantity) AS disposalQty,
+        SUM(d.quantity + 1000) AS totalQty,
+        ROUND(SUM(d.quantity) / SUM(d.quantity + 1000) * 100, 2) AS disposalRate
+        FROM disposal d
+        LEFT JOIN warehouse w ON d.warehouse_id = w.warehouse_id
+        LEFT JOIN franchise f ON d.franchise_id = f.franchise_id
+        WHERE d.created_at BETWEEN #{startDate} AND #{endDate}
+        <if test="warehouseId != null">
+            AND d.warehouse_id = #{warehouseId}
+        </if>
+        <if test="franchiseId != null">
+            AND d.franchise_id = #{franchiseId}
+        </if>
+        GROUP BY DATE(d.created_at), targetName
+        ORDER BY date ASC
+    </select>
+
+    <select id="getProductLevelDisposalRate" resultType="com.harusari.chainware.statistics.query.dto.disposal.DisposalRateProductStatisticsResponse">
+        SELECT
+        DATE(d.created_at) AS date,
+        p.product_name,
+        SUM(d.quantity) AS disposalQty,
+        SUM(d.quantity + 1000) AS totalQty,
+        ROUND(SUM(d.quantity) / SUM(d.quantity + 1000) * 100, 2) AS disposalRate
+        FROM disposal d
+        JOIN product p ON d.product_id = p.product_id
+        WHERE d.created_at BETWEEN #{startDate} AND #{endDate}
+        <if test="warehouseId != null">
+            AND d.warehouse_id = #{warehouseId}
+        </if>
+        <if test="franchiseId != null">
+            AND d.franchise_id = #{franchiseId}
+        </if>
+        GROUP BY DATE(d.created_at), p.product_name
+        ORDER BY date ASC
+    </select>
+</mapper>
