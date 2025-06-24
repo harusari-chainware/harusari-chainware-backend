@@ -9,8 +9,7 @@ import java.util.List;
 
 import static com.harusari.chainware.config.security.AccessType.*;
 import static com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType.*;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.*;
 
 @Getter
 @RequiredArgsConstructor
@@ -32,9 +31,33 @@ public enum SecurityPolicy {
 
     // Authenticated
     LOGOUT_POST("/api/v1/auth/logout", POST, AUTHENTICATED, List.of()), // 로그아웃
-    PASSWORD_POST("/api/v1/auth/password", POST, AUTHENTICATED, List.of()); // 비밀번호 변경
+    PASSWORD_POST("/api/v1/auth/password", POST, AUTHENTICATED, List.of()), // 비밀번호 변경
+
+    /* Category */
+    // Category
+    CATEGORY_POST("/api/v1/category", POST, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
+    CATEGORY_PUT("/api/v1/category/{categoryId}", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
+    CATEGORY_DELETE("/api/v1/category/{categoryId}", DELETE, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
+
+    // TopCategory
+    TOP_CATEGORY_POST("/api/v1/topcategory", POST, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
+    TOP_CATEGORY_PUT("/api/v1/topcategory/{topCategoryId}", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
+    TOP_CATEGORY_DELETE("/api/v1/topcategory/{topCategoryId}", DELETE, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
+
+    // Category Query
+    CATEGORY_LIST_GET("/api/v1/categories", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
+    CATEGORY_LIST_BY_TOP_GET("/api/v1/categories/top/{topCategoryId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
+    CATEGORY_DETAIL_BY_ID_GET("/api/v1/categories/{categoryId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
+
+    /* Contract */
+    CONTRACT_POST("/api/v1/contract", POST, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
+    CONTRACT_PUT("/api/v1/contract/{contractId}", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
+    CONTRACT_DELETE("/api/v1/contract/{contractId}", DELETE, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
 
     /* Product */
+    PRODUCT_POST("/api/v1/product", POST, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
+    PRODUCT_PUT("/api/v1/product/{productId}", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
+    PRODUCT_DELETE("/api/v1/product/{productId}", DELETE, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER));
 
 
     /* Franchise */
