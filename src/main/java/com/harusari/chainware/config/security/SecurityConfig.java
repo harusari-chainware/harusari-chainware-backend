@@ -67,6 +67,9 @@ public class SecurityConfig {
                         // WAREHOUSE_MANAGER
                         .requestMatchers(WAREHOUSE_MANAGER_URLS).hasAuthority(WAREHOUSE_MANAGER.name())
 
+                        // VENDOR_MANAGER
+                        .requestMatchers(VENDOR_MANAGER_URLS).hasAuthority(VENDOR_MANAGER.name())
+
                         // Public (permitAll)
                         .requestMatchers(HttpMethod.POST, PUBLIC_URLS).permitAll()
 
