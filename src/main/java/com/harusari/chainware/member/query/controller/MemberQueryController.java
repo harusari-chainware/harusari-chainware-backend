@@ -4,6 +4,7 @@ import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.common.dto.PageResponse;
 import com.harusari.chainware.member.command.application.dto.response.EmailExistsResponse;
 import com.harusari.chainware.member.query.dto.request.MemberSearchRequest;
+import com.harusari.chainware.member.query.dto.response.MemberSearchDetailResponse;
 import com.harusari.chainware.member.query.dto.response.MemberSearchResponse;
 import com.harusari.chainware.member.query.service.MemberQueryService;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,17 @@ public class MemberQueryController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(pageResponse));
+    }
+
+    @GetMapping("/members/{memberId}")
+    public ResponseEntity<ApiResponse<MemberSearchDetailResponse>> getMemberDetail(
+            @PathVariable(name = "memberId") Long memberId
+    ) {
+        MemberSearchDetailResponse memberSearchDetailResponse = memberQueryService.getMemberDetail(memberId);
+
+        return  ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(memberSearchDetailResponse));
     }
 
 }
