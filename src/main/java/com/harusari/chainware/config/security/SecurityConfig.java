@@ -7,7 +7,6 @@ import com.harusari.chainware.auth.jwt.RestAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -17,11 +16,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import static com.harusari.chainware.config.security.SecurityPolicy.*;
-import static com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType.*;
-import static com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType.MASTER;
-import static com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType.*;
 
 @Configuration
 @EnableWebSecurity
@@ -42,61 +36,26 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        // Master
-                        .requestMatchers(HttpMethod.GET, SecurityPolicy.MASTER_ONLY_URLS).hasAuthority(MASTER.name())
-                        .requestMatchers(HttpMethod.POST, SecurityPolicy.MASTER_ONLY_URLS).hasAuthority(MASTER.name())
-                        .requestMatchers(HttpMethod.PUT, SecurityPolicy.MASTER_ONLY_URLS).hasAuthority(MASTER.name())
-                        .requestMatchers(HttpMethod.DELETE, SecurityPolicy.MASTER_ONLY_URLS).hasAuthority(MASTER.name())
-
-                        // GENERAL_MANAGER
-                        .requestMatchers(HttpMethod.GET, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
-                        .requestMatchers(HttpMethod.POST, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
-                        .requestMatchers(HttpMethod.PUT, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
-                        .requestMatchers(HttpMethod.DELETE, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
-
-                        // SENIOR_MANAGER
-                        .requestMatchers(HttpMethod.GET, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
-                        .requestMatchers(HttpMethod.POST, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
-                        .requestMatchers(HttpMethod.PUT, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
-                        .requestMatchers(HttpMethod.DELETE, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
-
-
-
-
-                        // GENERAL_MANAGER
-                        .requestMatchers(HttpMethod.GET, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
-                        .requestMatchers(HttpMethod.POST, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
-                        .requestMatchers(HttpMethod.PUT, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
-                        .requestMatchers(HttpMethod.DELETE, SecurityPolicy.GENERAL_MANAGER_URLS).hasAuthority(GENERAL_MANAGER.name())
-
-                        // SENIOR_MANAGER
-                        .requestMatchers(HttpMethod.GET, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
-                        .requestMatchers(HttpMethod.POST, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
-                        .requestMatchers(HttpMethod.PUT, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
-                        .requestMatchers(HttpMethod.DELETE, SecurityPolicy.SENIOR_MANAGER_URLS).hasAuthority(SENIOR_MANAGER.name())
-
-                        // FRANCHISE_MANAGER
-                        .requestMatchers(FRANCHISE_MANAGER_URLS).hasAuthority(FRANCHISE_MANAGER.name())
-
-                        // WAREHOUSE_MANAGER
-                        .requestMatchers(WAREHOUSE_MANAGER_URLS).hasAuthority(WAREHOUSE_MANAGER.name())
-
-                        // VENDOR_MANAGER
-                        .requestMatchers(VENDOR_MANAGER_URLS).hasAuthority(VENDOR_MANAGER.name())
-
-                        // Public (permitAll)
-                        .requestMatchers(HttpMethod.POST, SecurityPolicy.PUBLIC_URLS).permitAll()
-
-                        // Authenticated
-                        .requestMatchers(HttpMethod.GET, SecurityPolicy.AUTHENTICATED_URLS).authenticated()
-                        .requestMatchers(HttpMethod.POST, SecurityPolicy.AUTHENTICATED_URLS).authenticated()
-                        .requestMatchers(HttpMethod.PUT, SecurityPolicy.AUTHENTICATED_URLS).authenticated()
-                        .requestMatchers(HttpMethod.DELETE, SecurityPolicy.AUTHENTICATED_URLS).authenticated()
-
-                        // 그 외 모든 요청 및 HTTP method 차단
-                        .anyRequest().denyAll()
-                )
+                .authorizeHttpRequests(auth -> {
+                    for (SecurityPolicy policy : SecurityPolicy.values()) {
+                        switch (policy.getAccessType()) {
+                            case PERMIT_ALL -> auth
+                                    .requestMatchers(policy.getMethod(), policy.getPath())
+                                    .permitAll();
+                            case AUTHENTICATED -> auth
+                                    .requestMatchers(policy.getMethod(), policy.getPath())
+                                    .authenticated();
+                            case ROLE_BASED -> auth
+                                    .requestMatchers(policy.getMethod(), policy.getPath())
+                                    .hasAnyAuthority(
+                                            policy.getMemberAuthorities().stream()
+                                                    .map(Enum::name)
+                                                    .toArray(String[]::new)
+                                    );
+                        }
+                    }
+                    auth.anyRequest().denyAll();
+                })
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(restAuthenticationEntryPoint)
                         .accessDeniedHandler(restAccessDeniedHandler)
