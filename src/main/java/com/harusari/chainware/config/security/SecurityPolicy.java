@@ -70,7 +70,6 @@ public class SecurityPolicy {
             "/api/v1/orders",
             "/api/v1/orders/{orderId}",
             "/api/v1/orders/{orderId}/cancel",
-            "/api/v1/orders/{orderId}/cancel",
             "/api/v1/delivery/{deliveryId}/complete",
     };
 
