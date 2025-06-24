@@ -44,13 +44,14 @@ public class SecurityPolicy {
     };
 
     protected static final String[] WAREHOUSE_MANAGER_URLS = {
-
+            "/api/v1/delivery/{deliveryId}/start"
     };
 
     protected static final String[] FRANCHISE_MANAGER_URLS = {
             "/api/v1/orders",
             "/api/v1/orders/{orderId}",
-            "/api/v1/orders/{orderId}/cancel"
+            "/api/v1/orders/{orderId}/cancel",
+            "/api/v1/delivery/{deliveryId}/complete"
     };
 
     protected static final String[] VENDOR_MANAGER_URLS = {

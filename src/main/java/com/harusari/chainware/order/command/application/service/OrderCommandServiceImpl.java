@@ -272,7 +272,6 @@ public class OrderCommandServiceImpl implements OrderCommandService {
                 .orderId(order.getOrderId())
                 .deliveryMethod(DeliveryMethod.HEADQUARTERS)
                 .deliveryStatus(DeliveryStatus.REQUESTED)
-                .startedAt(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .build();
 
