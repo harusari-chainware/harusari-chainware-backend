@@ -53,9 +53,9 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepositoryCustom {
     public Page<MemberSearchResponse> findMembers(MemberSearchRequest memberSearchRequest, Pageable pageable) {
         List<MemberSearchResponse> contents = queryFactory
                 .select(Projections.constructor(MemberSearchResponse.class,
-                        member.email, member.name, authority.authorityLabelKr,
-                        member.phoneNumber, member.birthDate, member.position,
-                        member.joinAt, member.isDeleted
+                        member.memberId, member.email, member.name,
+                        authority.authorityLabelKr, member.phoneNumber,
+                        member.birthDate, member.position, member.joinAt, member.isDeleted
                 ))
                 .from(member)
                 .leftJoin(authority).on(member.authorityId.eq(authority.authorityId))
