@@ -57,8 +57,11 @@ public enum SecurityPolicy {
     /* Product */
     PRODUCT_POST("/api/v1/product", POST, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
     PRODUCT_PUT("/api/v1/product/{productId}", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
-    PRODUCT_DELETE("/api/v1/product/{productId}", DELETE, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER));
+    PRODUCT_DELETE("/api/v1/product/{productId}", DELETE, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
 
+    // Product Query
+    PRODUCT_LIST_GET("/api/v1/products", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, FRANCHISE_MANAGER)),
+    PRODUCT_DETAIL_GET("/api/v1/products/{productId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, FRANCHISE_MANAGER));
 
     /* Franchise */
 
