@@ -17,22 +17,20 @@ public class SecurityPolicy {
             "/api/v1/members/franchise",
             "/api/v1/members/vendor",
             "/api/v1/members/warehouse",
-            "/api/v1/members"
+            "/api/v1/members",
+            "/api/v1/members/{memberId}",
     };
 
     protected static final String[] GENERAL_MANAGER_URLS = {
-            "/api/v1/statistics/disposal-rate",
-            "/api/v1/statistics/inventory-turnover",
-            "/api/v1/statistics/menu-sales",
-            "/api/v1/statistics/purchase-order",
-            "/api/v1/statistics/patterns",
-            "/api/v1/statistics/store-order",
-            "/api/v1/statistics/total-sales"
-
-
-    };
-
-    protected static final String[] SENIOR_MANAGER_URLS = {
+            "/api/v1/orders/{orderId}/approve",
+            "/api/v1/orders/{orderId}/reject",
+            "/api/v1/warehouse/{warehouseId}",
+            "/api/v1/requisitions",
+            "/api/v1/requisitions/create",
+            "/api/v1/requisitions/{requisitionID}",
+            "/api/v1/requisitions/{requisitionId}/submit",
+            "/api/v1/purchases",
+            "/api/v1/purchases/{purchaseOrderId}",
             "/api/v1/statistics/disposal-rate",
             "/api/v1/statistics/inventory-turnover",
             "/api/v1/statistics/menu-sales",
@@ -40,29 +38,48 @@ public class SecurityPolicy {
             "/api/v1/statistics/patterns",
             "/api/v1/statistics/store-order",
             "/api/v1/statistics/total-sales",
+    };
+
+    protected static final String[] SENIOR_MANAGER_URLS = {
             "/api/v1/orders/{orderId}/approve",
             "/api/v1/orders/{orderId}/reject",
-            "/api/v1/requisitions/create",
-            "/api/v1/requisitions/{requisitionId}/submit",
+            "/api/v1/warehouse/{warehouseId}",
             "/api/v1/requisitions",
             "/api/v1/requisitions/{requisitionID}",
+            "/api/v1/requisitions/{requisitionId}/approve",
+            "/api/v1/requisitions/{requisitionId}/reject",
             "/api/v1/purchases",
             "/api/v1/purchases/{purchaseOrderId}",
-            "/api/v1/vendors/{vendorId}"
+            "/api/v1/vendors/{vendorId}",
+            "/api/v1/statistics/disposal-rate",
+            "/api/v1/statistics/inventory-turnover",
+            "/api/v1/statistics/menu-sales",
+            "/api/v1/statistics/purchase-order",
+            "/api/v1/statistics/patterns",
+            "/api/v1/statistics/store-order",
+            "/api/v1/statistics/total-sales",
     };
 
     protected static final String[] WAREHOUSE_MANAGER_URLS = {
-
+            "/api/v1/delivery/{deliveryId}/start",
+            "/api/v1/warehouse/{warehouseId}/inventory",
+            "/api/v1/warehouse/inventory/{inventoryId}",
     };
 
     protected static final String[] FRANCHISE_MANAGER_URLS = {
             "/api/v1/orders",
             "/api/v1/orders/{orderId}",
-            "/api/v1/orders/{orderId}/cancel"
+            "/api/v1/orders/{orderId}/cancel",
+            "/api/v1/orders/{orderId}/cancel",
+            "/api/v1/delivery/{deliveryId}/complete",
     };
 
     protected static final String[] VENDOR_MANAGER_URLS = {
-
+            "/api/v1/auth/logout",
+            "/api/v1/members/password",
+            "/api/v1/requisitions/**",
+            "/api/v1/delivery/**",
+            "/api/v1/warehouse/**",
     };
 
     protected static final String[] AUTHENTICATED_URLS = {
