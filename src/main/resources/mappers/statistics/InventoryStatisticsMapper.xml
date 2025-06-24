@@ -5,46 +5,113 @@
 
 <mapper namespace="com.harusari.chainware.statistics.query.mapper.InventoryStatisticsMapper">
 
-    <!-- 월간 회전율 -->
-    <select id="selectWarehouseTurnoverMonthly"
-            resultType="com.harusari.chainware.statistics.query.dto.InventoryTurnoverResponse">
+    <!-- 본사 주간 회전율 -->
+    <select id="getWeeklyTurnover" resultType="com.harusari.chainware.statistics.query.dto.invertoryTurnover.InventoryTurnoverResponse">
         SELECT
         p.product_id AS productId,
         p.product_name AS productName,
-        COALESCE(SUM(wob.quantity), 0) AS totalOutboundQty,
-        COALESCE(AVG(wis.quantity), 0) AS averageInventory,
-        ROUND(COALESCE(SUM(wob.quantity), 0) / NULLIF(AVG(wis.quantity), 0), 2) AS turnoverRate
-        FROM product p
-        LEFT JOIN warehouse_outbound wob
-        ON wob.product_id = p.product_id
-        AND DATE(wob.outbounded_at) BETWEEN #{startDate} AND #{endDate}
-        LEFT JOIN warehouse_inventory_snapshot wis
-        ON wis.product_id = p.product_id
-        AND DATE(wis.snapshot_date) BETWEEN #{startDate} AND #{endDate}
-        WHERE p.is_deleted = 0
-        GROUP BY p.product_id, p.product_name
-        ORDER BY turnoverRate DESC
+        COALESCE(SUM(sd.quantity *
+        CASE
+        WHEN LOWER(bom.unit) = 'ml' AND LOWER(p.unit_spec) = 'l' THEN bom.quantity / 1000.0
+        WHEN LOWER(bom.unit) = 'g' AND LOWER(p.unit_spec) = 'kg' THEN bom.quantity / 1000.0
+        ELSE bom.quantity
+        END), 0) AS totalOutboundQty,
+        fi.unit_quantity AS averageInventory,
+        ROUND(COALESCE(SUM(sd.quantity *
+        CASE
+        WHEN LOWER(bom.unit) = 'ml' AND LOWER(p.unit_spec) = 'l' THEN bom.quantity / 1000.0
+        WHEN LOWER(bom.unit) = 'g' AND LOWER(p.unit_spec) = 'kg' THEN bom.quantity / 1000.0
+        ELSE bom.quantity
+        END), 0) / NULLIF(fi.unit_quantity, 0), 2) AS turnover
+        FROM sales_detail sd
+        JOIN menu m ON sd.menu_id = m.menu_id
+        JOIN bill_of_material bom ON m.menu_id = bom.menu_id
+        JOIN product p ON bom.product_id = p.product_id
+        LEFT JOIN (
+        SELECT product_id, AVG(quantity) AS unit_quantity
+        FROM warehouse_inventory_snapshot
+        WHERE snapshot_date BETWEEN #{startDate} AND #{endDate}
+        GROUP BY product_id
+        ) fi ON p.product_id = fi.product_id
+        WHERE sd.sales_id IN (
+        SELECT sales_id FROM sales
+        WHERE sold_at BETWEEN #{startDate} AND #{endDate}
+        )
+        GROUP BY p.product_id, p.product_name, fi.unit_quantity
+        ORDER BY turnover DESC
     </select>
 
-    <!-- 주간 회전율 -->
-    <select id="selectWarehouseTurnoverWeekly"
-            resultType="com.harusari.chainware.statistics.query.dto.InventoryTurnoverResponse">
+    <!-- 본사 월간 회전율 -->
+    <select id="getMonthlyTurnover" resultType="com.harusari.chainware.statistics.query.dto.invertoryTurnover.InventoryTurnoverResponse">
         SELECT
         p.product_id AS productId,
         p.product_name AS productName,
-        COALESCE(SUM(wob.quantity), 0) AS totalOutboundQty,
-        COALESCE(AVG(wis.quantity), 0) AS averageInventory,
-        ROUND(COALESCE(SUM(wob.quantity), 0) / NULLIF(AVG(wis.quantity), 0), 2) AS turnoverRate
-        FROM product p
-        LEFT JOIN warehouse_outbound wob
-        ON wob.product_id = p.product_id
-        AND DATE(wob.outbounded_at) BETWEEN #{startDate} AND #{endDate}
-        LEFT JOIN warehouse_inventory_snapshot wis
-        ON wis.product_id = p.product_id
-        AND DATE(wis.snapshot_date) BETWEEN #{startDate} AND #{endDate}
-        WHERE p.is_deleted = 0
-        GROUP BY p.product_id, p.product_name
-        ORDER BY turnoverRate DESC
+        COALESCE(SUM(sd.quantity *
+        CASE
+        WHEN LOWER(bom.unit) = 'ml' AND LOWER(p.unit_spec) = 'l' THEN bom.quantity / 1000.0
+        WHEN LOWER(bom.unit) = 'g' AND LOWER(p.unit_spec) = 'kg' THEN bom.quantity / 1000.0
+        ELSE bom.quantity
+        END), 0) AS totalOutboundQty,
+        fi.unit_quantity AS averageInventory,
+        ROUND(COALESCE(SUM(sd.quantity *
+        CASE
+        WHEN LOWER(bom.unit) = 'ml' AND LOWER(p.unit_spec) = 'l' THEN bom.quantity / 1000.0
+        WHEN LOWER(bom.unit) = 'g' AND LOWER(p.unit_spec) = 'kg' THEN bom.quantity / 1000.0
+        ELSE bom.quantity
+        END), 0) / NULLIF(fi.unit_quantity, 0), 2) AS turnover
+        FROM sales_detail sd
+        JOIN menu m ON sd.menu_id = m.menu_id
+        JOIN bill_of_material bom ON m.menu_id = bom.menu_id
+        JOIN product p ON bom.product_id = p.product_id
+        LEFT JOIN (
+        SELECT product_id, AVG(quantity) AS unit_quantity
+        FROM warehouse_inventory_snapshot
+        WHERE snapshot_date BETWEEN #{startDate} AND #{endDate}
+        GROUP BY product_id
+        ) fi ON p.product_id = fi.product_id
+        WHERE sd.sales_id IN (
+        SELECT sales_id FROM sales
+        WHERE sold_at BETWEEN #{startDate} AND #{endDate}
+        )
+        GROUP BY p.product_id, p.product_name, fi.unit_quantity
+        ORDER BY turnover DESC
+    </select>
+
+    <!-- 가맹점 월간 회전율 -->
+    <select id="getFranchiseMonthlyTurnover" resultType="com.harusari.chainware.statistics.query.dto.invertoryTurnover.InventoryTurnoverResponse">
+        SELECT
+        p.product_id AS productId,
+        p.product_name AS productName,
+        COALESCE(SUM(sd.quantity *
+        CASE
+        WHEN LOWER(bom.unit) = 'ml' AND LOWER(p.unit_spec) = 'l' THEN bom.quantity / 1000.0
+        WHEN LOWER(bom.unit) = 'g' AND LOWER(p.unit_spec) = 'kg' THEN bom.quantity / 1000.0
+        ELSE bom.quantity
+        END), 0) AS totalOutboundQty,
+        fi.unit_quantity AS averageInventory,
+        ROUND(COALESCE(SUM(sd.quantity *
+        CASE
+        WHEN LOWER(bom.unit) = 'ml' AND LOWER(p.unit_spec) = 'l' THEN bom.quantity / 1000.0
+        WHEN LOWER(bom.unit) = 'g' AND LOWER(p.unit_spec) = 'kg' THEN bom.quantity / 1000.0
+        ELSE bom.quantity
+        END), 0) / NULLIF(fi.unit_quantity, 0), 2) AS turnover
+        FROM sales_detail sd
+        JOIN menu m ON sd.menu_id = m.menu_id
+        JOIN bill_of_material bom ON m.menu_id = bom.menu_id
+        JOIN product p ON bom.product_id = p.product_id
+        LEFT JOIN (
+        SELECT product_id, AVG(unit_quantity) AS unit_quantity
+        FROM franchise_inventory
+        WHERE franchise_id = #{franchiseId}
+        GROUP BY product_id
+        ) fi ON p.product_id = fi.product_id
+        WHERE sd.sales_id IN (
+        SELECT sales_id FROM sales
+        WHERE sold_at BETWEEN #{startDate} AND #{endDate}
+        AND franchise_id = #{franchiseId}
+        )
+        GROUP BY p.product_id, p.product_name, fi.unit_quantity
+        ORDER BY turnover DESC
     </select>
 
 </mapper>

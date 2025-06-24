@@ -1,13 +1,12 @@
 package com.harusari.chainware.statistics.query.controller;
 
-import com.harusari.chainware.statistics.query.dto.MenuSalesResponse;
-import com.harusari.chainware.statistics.query.service.MenuSalesQueryService;
+import com.harusari.chainware.common.dto.ApiResponse;
+import com.harusari.chainware.statistics.query.dto.menuSales.MenuSalesResponse;
+import com.harusari.chainware.statistics.query.service.menuSales.MenuSalesQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,20 +19,18 @@ public class MenuSalesQueryController {
     private final MenuSalesQueryService menuSalesQueryService;
 
     @GetMapping
-    public List<MenuSalesResponse> getMenuSales(
+    public ResponseEntity<ApiResponse<List<MenuSalesResponse>>> getMenuSales(
             @RequestParam(required = false) Long franchiseId,
-            @RequestParam(defaultValue = "DAILY") String periodType,    // DAILY, WEEKLY, MONTHLY
+            @RequestParam(defaultValue = "DAILY") String periodType, // DAILY, WEEKLY, MONTHLY
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
     ) {
         LocalDate date = (targetDate != null) ? targetDate : LocalDate.now().minusDays(1);
 
-        if (franchiseId != null) {
-            // 가맹점용
-            return menuSalesQueryService.getMenuSalesByPeriod(franchiseId, periodType, date);
-        } else {
-            // 본사용
-            return menuSalesQueryService.getMenuSalesForHeadquarters(periodType, date);
-        }
+        List<MenuSalesResponse> result = (franchiseId != null)
+                ? menuSalesQueryService.getMenuSalesByPeriod(franchiseId, periodType, date)
+                : menuSalesQueryService.getMenuSalesForHeadquarters(periodType, date);
+
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 }

@@ -1,6 +1,6 @@
-package com.harusari.chainware.statistics.query.service;
+package com.harusari.chainware.statistics.query.service.menuSales;
 
-import com.harusari.chainware.statistics.query.dto.MenuSalesResponse;
+import com.harusari.chainware.statistics.query.dto.menuSales.MenuSalesResponse;
 import com.harusari.chainware.statistics.query.mapper.MenuSalesMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

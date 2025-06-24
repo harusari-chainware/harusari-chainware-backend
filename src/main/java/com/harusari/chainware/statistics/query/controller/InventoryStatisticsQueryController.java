@@ -1,9 +1,11 @@
 package com.harusari.chainware.statistics.query.controller;
 
-import com.harusari.chainware.statistics.query.dto.InventoryTurnoverResponse;
-import com.harusari.chainware.statistics.query.service.InventoryStatisticsQueryService;
+import com.harusari.chainware.common.dto.ApiResponse;
+import com.harusari.chainware.statistics.query.dto.invertoryTurnover.InventoryTurnoverResponse;
+import com.harusari.chainware.statistics.query.service.inventoryTurnover.InventoryStatisticsQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,19 +21,15 @@ public class InventoryStatisticsQueryController {
 
     private final InventoryStatisticsQueryService inventoryStatisticsQueryService;
 
-    @GetMapping("/monthly")
-    public List<InventoryTurnoverResponse> getMonthlyTurnover(
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<InventoryTurnoverResponse>>> getInventoryTurnover(
+            @RequestParam(defaultValue = "MONTHLY") String period,
+            @RequestParam(required = false) Long franchiseId,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
     ) {
-        return inventoryStatisticsQueryService.getMonthlyTurnover(targetDate);
-    }
-
-    @GetMapping("/weekly")
-    public List<InventoryTurnoverResponse> getWeeklyTurnover(
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
-    ) {
-        return inventoryStatisticsQueryService.getWeeklyTurnover(targetDate);
+        return ResponseEntity.ok(ApiResponse.success(
+                inventoryStatisticsQueryService.getTurnover(period, franchiseId, targetDate)
+        ));
     }
 }

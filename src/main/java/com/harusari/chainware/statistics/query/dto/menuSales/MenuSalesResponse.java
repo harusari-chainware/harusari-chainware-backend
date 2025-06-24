@@ -1,4 +1,4 @@
-package com.harusari.chainware.statistics.query.dto;
+package com.harusari.chainware.statistics.query.dto.menuSales;
 
 import lombok.Getter;
 
