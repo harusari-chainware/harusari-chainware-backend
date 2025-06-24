@@ -4,6 +4,7 @@ import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.member.command.application.dto.request.MemberCreateRequest;
 import com.harusari.chainware.member.command.application.dto.request.PasswordChangeRequest;
+import com.harusari.chainware.member.command.application.dto.request.UpdateMemberRequest;
 import com.harusari.chainware.member.command.application.dto.request.franchise.MemberWithFranchiseRequest;
 import com.harusari.chainware.member.command.application.dto.request.vendor.MemberWithVendorRequest;
 import com.harusari.chainware.member.command.application.dto.request.warehouse.MemberWithWarehouseRequest;
@@ -77,6 +78,18 @@ public class MemberCommandController {
         memberCommandService.changePassword(passwordChangeRequest, email);
 
         return  ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(null));
+    }
+
+    @PutMapping("/members/{memberId}")
+    public ResponseEntity<ApiResponse<Void>> updateMember(
+            @PathVariable(name = "memberId") Long memberId,
+            @RequestBody UpdateMemberRequest updateMemberRequest
+    ) {
+        memberCommandService.updateMemberRequest(memberId, updateMemberRequest);
+
+        return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(null));
     }
