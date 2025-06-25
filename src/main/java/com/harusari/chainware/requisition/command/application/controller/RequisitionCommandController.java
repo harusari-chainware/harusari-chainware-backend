@@ -23,8 +23,8 @@ public class RequisitionCommandController {
     private final RequisitionCommandService requisitionCommandService;
     private final PurchaseOrderCommandService purchaseOrderCommandService;
 
-    @Operation(summary = "품의서 저장 (임시)", description = "품의서를 저장합니다. 결재자는 필수이며, 품목 리스트는 최소 1개 이상이어야 합니다.")
     @PostMapping("/create")
+    @Operation(summary = "품의서 저장 (임시)", description = "품의서를 저장합니다. 결재자는 필수이며, 품목 리스트는 최소 1개 이상이어야 합니다.")
     public ResponseEntity<ApiResponse<Long>> createRequisition(
             @AuthenticationPrincipal CustomUserDetails userDetail,
             @Valid @RequestBody CreateRequisitionRequest request
@@ -34,9 +34,9 @@ public class RequisitionCommandController {
     }
 
 
+    @PutMapping("/{requisitionId}/submit")
     @Operation(summary = "품의서 상신", description = "로그인한 사용자가 작성한 임시 저장 품의서를 상신한다.")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "상신 완료")
-    @PutMapping("/{requisitionId}/submit")
     public ResponseEntity<ApiResponse<Void>> submitRequisition(
             @AuthenticationPrincipal CustomUserDetails userDetail,
             @PathVariable @NotNull Long requisitionId
@@ -45,9 +45,9 @@ public class RequisitionCommandController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
+    @PutMapping("/{requisitionId}/approve")
     @Operation(summary = "품의서 승인", description = "결재자로 입력된 책임 관리자가 품의서를 승인한다.")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "품의서 승인 완료")
-    @PutMapping("/{requisitionId}/approve")
     public ResponseEntity<ApiResponse<Void>> approveRequisition(
             @AuthenticationPrincipal CustomUserDetails userDetail,
             @PathVariable Long requisitionId
@@ -57,9 +57,9 @@ public class RequisitionCommandController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
+    @PutMapping("/{requisitionId}/reject")
     @Operation(summary = "품의서 반려", description = "결재자로 입력된 책임 관리자가 품의서를 반려한다.")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "품의서 반려됨")
-    @PutMapping("/{requisitionId}/reject")
     public ResponseEntity<ApiResponse<Void>> rejectRequisition(
             @AuthenticationPrincipal CustomUserDetails userDetail,
             @PathVariable Long requisitionId,
@@ -69,10 +69,9 @@ public class RequisitionCommandController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
-
+    @DeleteMapping("/{requisitionId}")
     @Operation(summary = "품의서 삭제", description = "임시 저장 또는 상신 상태의 품의서를 삭제한다.")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "품의서 삭제 완료")
-    @DeleteMapping("/{requisitionId}")
     public ResponseEntity<ApiResponse<Void>> deleteRequisition(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long requisitionId

@@ -22,6 +22,8 @@ public class PurchaseOrderCommandController {
 
 
     @PutMapping("/{purchaseOrderId}/approve")
+    @Operation(summary = "발주 승인", description = "거래처 담당자가 발주를 승인합니다.")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "발주서 승인됨")
     public ResponseEntity<ApiResponse<Void>> approvePurchaseOrder(
             @PathVariable("purchaseOrderId") Long purchaseOrderId,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -64,6 +66,7 @@ public class PurchaseOrderCommandController {
 
     @PutMapping("/{purchaseOrderId}")
     @Operation(summary = "발주서 수정", description = "REQUESTED 상태일 때만 발주서를 수정할 수 있습니다.")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "발주서 승인됨")
     public ResponseEntity<ApiResponse<Void>> updatePurchaseOrder(
             @PathVariable Long purchaseOrderId,
             @RequestBody @Valid UpdatePurchaseOrderRequest request,
