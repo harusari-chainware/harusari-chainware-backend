@@ -8,8 +8,10 @@ import com.harusari.chainware.purchase.query.dto.PurchaseOrderDetailResponse;
 import com.harusari.chainware.purchase.query.dto.PurchaseOrderSummaryResponse;
 import com.harusari.chainware.purchase.query.service.PurchaseOrderQueryService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import com.harusari.chainware.common.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,24 +24,29 @@ public class PurchaseOrderQueryController {
 
     private final PurchaseOrderQueryService purchaseOrderQueryService;
 
-    @Operation(summary = "발주 목록 조회", description = "로그인한 사용자의 ID 기준으로 발주 목록을 조회합니다.")
-    @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping
-    public List<PurchaseOrderSummaryResponse> getPurchaseOrders(
+    @Operation(summary = "발주 목록 조회", description = "로그인한 사용자의 ID 기준으로 발주 목록을 조회합니다.")
+    public ResponseEntity<ApiResponse<List<PurchaseOrderSummaryResponse>>> getPurchaseOrders(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @ModelAttribute PurchaseOrderSearchCondition condition
     ) {
         Long memberId = userDetails.getMemberId();
-        return purchaseOrderQueryService.getPurchaseOrders(memberId, condition);
+        List<PurchaseOrderSummaryResponse> result = purchaseOrderQueryService.getPurchaseOrders(memberId, condition);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(result));
     }
 
-    @Operation(summary = "발주 상세 조회", description = "로그인한 사용자의 ID와 발주 ID 기준으로 상세 조회합니다.")
-    @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/{purchaseOrderId}")
-    public PurchaseOrderDetailResponse getDetail(
+    @Operation(summary = "발주 상세 조회", description = "로그인한 사용자의 ID와 발주 ID 기준으로 상세 조회합니다.")
+    public ResponseEntity<ApiResponse<PurchaseOrderDetailResponse>> getDetail(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long purchaseOrderId
     ) {
-        return purchaseOrderQueryService.getPurchaseOrderDetail(userDetails.getMemberId(), purchaseOrderId);
+        PurchaseOrderDetailResponse detail = purchaseOrderQueryService.getPurchaseOrderDetail(userDetails.getMemberId(), purchaseOrderId);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(detail));
     }
+
 }
