@@ -1,4 +1,4 @@
-package com.harusari.chainware.warehouse.common.mapper;
+package com.harusari.chainware.warehouse.command.mapper;
 
 import com.harusari.chainware.warehouse.command.application.dto.CurrentWarehouseInventoryDto;
 import com.harusari.chainware.warehouse.command.application.dto.WarehouseInventorySnapshotResponseDto;
