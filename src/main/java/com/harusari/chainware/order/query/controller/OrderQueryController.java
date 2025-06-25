@@ -3,6 +3,7 @@ package com.harusari.chainware.order.query.controller;
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.common.dto.PageResponse;
 import com.harusari.chainware.order.query.dto.request.OrderSearchRequest;
+import com.harusari.chainware.order.query.dto.response.OrderSearchDetailResponse;
 import com.harusari.chainware.order.query.dto.response.OrderSearchResponse;
 import com.harusari.chainware.order.query.service.OrderQueryService;
 import lombok.RequiredArgsConstructor;
@@ -33,4 +34,14 @@ public class OrderQueryController {
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(response));
     }
+
+    // 주문 상세 조회
+    @GetMapping("/{orderId}")
+    public ResponseEntity<ApiResponse<OrderSearchDetailResponse>> getOrderDetail(
+            @PathVariable Long orderId
+    ) {
+        OrderSearchDetailResponse response = orderQueryService.getOrderDetail(orderId);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(response));
+    }
+
 }
