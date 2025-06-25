@@ -1,7 +1,8 @@
 package com.harusari.chainware.delivery.query.repository;
 
 import com.harusari.chainware.delivery.query.dto.request.DeliverySearchRequest;
-import com.harusari.chainware.delivery.query.dto.response.DeliverySearchResponse;
+import com.harusari.chainware.delivery.query.dto.response.*;
+import com.harusari.chainware.order.query.dto.response.OrderProductInfo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -16,8 +17,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.harusari.chainware.delivery.command.domain.aggregate.QDelivery.delivery;
-import static com.harusari.chainware.franchise.command.domain.aggregate.QFranchise.franchise;
 import static com.harusari.chainware.order.command.domain.aggregate.QOrder.order;
+import static com.harusari.chainware.order.command.domain.aggregate.QOrderDetail.orderDetail;
+import static com.harusari.chainware.franchise.command.domain.aggregate.QFranchise.franchise;
+import static com.harusari.chainware.member.command.domain.aggregate.QMember.member;
+import static com.harusari.chainware.product.command.domain.aggregate.QProduct.product;
 import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouse.warehouse;
 
 @Repository
@@ -96,4 +100,92 @@ public class DeliveryQueryRepositoryImpl implements DeliveryQueryRepositoryCusto
 
         return builder;
     }
+
+    @Override
+    public DeliveryDetailResponse findDeliveryDetailById(Long deliveryId) {
+        // 1. 배송 정보
+        DeliveryDetailInfo deliveryInfo = queryFactory
+                .select(Projections.constructor(DeliveryDetailInfo.class,
+                        delivery.trackingNumber,
+                        delivery.carrier,
+                        delivery.deliveryStatus,
+                        delivery.startedAt,
+                        delivery.deliveredAt
+                ))
+                .from(delivery)
+                .where(delivery.deliveryId.eq(deliveryId))
+                .fetchOne();
+
+        // 2. 창고 정보
+//        WarehouseInfo warehouseInfo = queryFactory
+//                .select(Projections.constructor(WarehouseInfo.class,
+//                        warehouse.warehouseName,
+//                        warehouse.warehouseAddress,
+//                        warehouse.warehouseManagerName
+//                ))
+//                .from(delivery)
+//                .join(warehouse).on(delivery.takeBackId.eq(warehouse.warehouseId))
+//                .where(delivery.deliveryId.eq(deliveryId))
+//                .fetchOne();
+
+        // 3. 가맹점 정보
+        FranchiseInfo franchiseInfo = queryFactory
+                .select(Projections.constructor(FranchiseInfo.class,
+                        franchise.franchiseName,
+                        franchise.franchiseAddress,
+                        franchise.franchiseTaxId,
+                        franchise.franchiseStatus,
+                        member.name,
+                        member.phoneNumber,
+                        franchise.franchiseContact
+                ))
+                .from(delivery)
+                .join(order).on(delivery.orderId.eq(order.orderId))
+                .join(franchise).on(order.franchiseId.eq(franchise.franchiseId))
+                .join(member).on(franchise.memberId.eq(member.memberId))
+                .where(delivery.deliveryId.eq(deliveryId))
+                .fetchOne();
+
+        // 4. 주문 정보
+        DeliveryOrderInfo orderInfo = queryFactory
+                .select(Projections.constructor(DeliveryOrderInfo.class,
+                        order.orderCode,
+                        order.productCount,
+                        order.totalQuantity,
+                        order.totalPrice,
+                        order.createdAt
+                ))
+                .from(delivery)
+                .join(order).on(delivery.orderId.eq(order.orderId))
+                .where(delivery.deliveryId.eq(deliveryId))
+                .fetchOne();
+
+        // 5. 제품 목록
+        List<DeliveryProductInfo> products = queryFactory
+                .select(Projections.constructor(DeliveryProductInfo.class,
+                        product.productCode,
+                        product.productName,
+                        product.unitQuantity,
+                        product.unitSpec,
+                        product.storeType.stringValue(),
+                        orderDetail.unitPrice,
+                        orderDetail.quantity,
+                        orderDetail.totalPrice
+                ))
+                .from(delivery)
+                .join(order).on(delivery.orderId.eq(order.orderId))
+                .join(orderDetail).on(order.orderId.eq(orderDetail.orderId))
+                .join(product).on(orderDetail.productId.eq(product.productId))
+                .where(delivery.deliveryId.eq(deliveryId))
+                .fetch();
+
+        return DeliveryDetailResponse.builder()
+                .deliveryInfo(deliveryInfo)
+//                .warehouseInfo(warehouseInfo)
+                .franchiseInfo(franchiseInfo)
+                .orderInfo(orderInfo)
+                .products(products)
+                .build();
+    }
+
 }
