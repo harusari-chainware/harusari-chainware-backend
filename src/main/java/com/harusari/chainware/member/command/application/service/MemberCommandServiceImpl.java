@@ -14,7 +14,6 @@ import com.harusari.chainware.member.command.domain.aggregate.Member;
 import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
 import com.harusari.chainware.member.command.domain.repository.AuthorityCommandRepository;
 import com.harusari.chainware.member.command.domain.repository.MemberCommandRepository;
-import com.harusari.chainware.member.command.domain.repository.MemberCommandRepositoryCustom;
 import com.harusari.chainware.member.common.mapstruct.MemberMapStruct;
 import com.harusari.chainware.vendor.command.application.service.VendorCommandService;
 import com.harusari.chainware.warehouse.command.domain.aggregate.Warehouse;
@@ -44,7 +43,6 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     private final VendorCommandService vendorCommandService;
 
     private final MemberCommandRepository memberCommandRepository;
-    private final MemberCommandRepositoryCustom memberCommandRepositoryCustom;
     private final AuthorityCommandRepository authorityCommandRepository;
     private final WarehouseRepository warehouseRepository;
 
@@ -106,7 +104,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
     @Override
     public void changePassword(PasswordChangeRequest passwordChangeRequest, String email) {
-        Member member = memberCommandRepositoryCustom.findActiveMemberByEmail(email);
+        Member member = memberCommandRepository.findActiveMemberByEmail(email);
 
         validateCurrentPassword(passwordChangeRequest.currentPassword(), member.getPassword());
         validateNewPassword(passwordChangeRequest, member.getPassword());
