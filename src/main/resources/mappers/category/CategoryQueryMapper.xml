@@ -5,29 +5,6 @@
 
 <mapper namespace="com.harusari.chainware.category.query.mapper.CategoryQueryMapper">
 
-    <!-- 상위 카테고리 목록 -->
-    <select id="selectTopCategories"
-            resultType="com.harusari.chainware.category.query.dto.response.TopCategoryOnlyResponse">
-        SELECT
-        tc.top_category_id AS topCategoryId,
-        tc.top_category_name AS topCategoryName
-        FROM top_category tc
-    </select>
-
-    <!-- 특정 상위 카테고리의 하위 카테고리 -->
-    <select id="selectCategoriesByTopCategoryId"
-            resultType="com.harusari.chainware.category.query.dto.response.CategoryResponse">
-        SELECT
-        c.category_id AS categoryId,
-        c.top_category_id AS topCategoryId,
-        c.category_name AS categoryName,
-        COUNT(p.product_id) AS productCount
-        FROM category c
-        LEFT JOIN product p ON p.category_id = c.category_id
-        WHERE c.top_category_id = #{topCategoryId}
-        GROUP BY c.category_id, c.top_category_id, c.category_name
-    </select>
-
     <!-- ProductDto 생성자 매핑 -->
     <resultMap id="ProductDtoMap" type="com.harusari.chainware.product.query.dto.response.ProductDto">
         <constructor>
@@ -142,5 +119,62 @@
         ORDER BY p.product_id
     </select>
 
+    <!-- 카테고리 리스트 with 페이징 -->
+    <select id="selectCategoriesByTopCategoryId"
+            resultType="com.harusari.chainware.category.query.dto.response.CategoryResponse">
+        SELECT
+        c.category_id AS categoryId,
+        c.top_category_id AS topCategoryId,
+        c.category_name AS categoryName,
+        COUNT(p.product_id) AS productCount
+        FROM category c
+        LEFT JOIN product p ON p.category_id = c.category_id
+        WHERE c.top_category_id = #{topCategoryId}
+        GROUP BY c.category_id, c.top_category_id, c.category_name
+        ORDER BY c.category_id
+        LIMIT #{limit}
+        OFFSET #{offset}
+    </select>
+
+    <select id="countCategoriesByTopCategoryId"
+            parameterType="com.harusari.chainware.category.query.dto.request.CategoryByTopCategoryRequest"
+            resultType="long">
+        SELECT COUNT(*) FROM category WHERE top_category_id = #{topCategoryId}
+    </select>
+
+    <select id="selectProductsByCategoryId" resultMap="ProductDtoMap">
+        SELECT
+        product_id,
+        product_name,
+        product_code,
+        category_id,
+        base_price,
+        unit_quantity,
+        unit_spec,
+        store_type,
+        safety_stock,
+        origin,
+        shelf_life,
+        product_status
+        FROM product
+        WHERE category_id = #{categoryId}
+        ORDER BY product_id
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countProductsByCategoryId" resultType="long">
+        SELECT COUNT(*) FROM product WHERE category_id = #{categoryId}
+    </select>
+
+    <select id="selectTopCategoriesWithPaging" resultType="com.harusari.chainware.category.query.dto.response.TopCategoryOnlyResponse">
+        SELECT top_category_id AS topCategoryId, top_category_name AS topCategoryName
+        FROM top_category
+        ORDER BY top_category_id
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countAllTopCategories" resultType="long">
+        SELECT COUNT(*) FROM top_category
+    </select>
 
 </mapper>
