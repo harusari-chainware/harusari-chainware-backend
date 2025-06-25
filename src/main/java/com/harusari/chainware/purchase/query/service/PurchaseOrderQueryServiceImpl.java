@@ -19,13 +19,13 @@ public class PurchaseOrderQueryServiceImpl implements PurchaseOrderQueryService 
     private final PurchaseOrderQueryMapper mapper;
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<PurchaseOrderSummaryResponse> getPurchaseOrders(Long memberId, PurchaseOrderSearchCondition condition) {
         return mapper.findPurchaseOrders(memberId, condition);
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public PurchaseOrderDetailResponse getPurchaseOrderDetail(Long memberId, Long purchaseOrderId) {
         var order = mapper.findPurchaseOrderById(memberId, purchaseOrderId);
 

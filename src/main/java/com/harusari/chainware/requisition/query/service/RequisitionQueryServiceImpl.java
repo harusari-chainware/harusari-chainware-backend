@@ -20,13 +20,13 @@ public class RequisitionQueryServiceImpl implements RequisitionQueryService {
     private final RequisitionQueryMapper requisitionQueryMapper;
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<RequisitionSummaryResponse> getMyRequisitions(Long memberId, RequisitionSearchCondition condition) {
         return requisitionQueryMapper.findMyRequisitions(memberId, condition);
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public RequisitionDetailResponse getRequisitionDetail(Long memberId, Long requisitionId) {
         RequisitionDetailResponse detail = requisitionQueryMapper.findRequisitionById(requisitionId, memberId);
         if (detail == null) {
