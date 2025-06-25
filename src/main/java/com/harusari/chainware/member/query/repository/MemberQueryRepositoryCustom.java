@@ -2,6 +2,7 @@ package com.harusari.chainware.member.query.repository;
 
 import com.harusari.chainware.member.command.domain.aggregate.Member;
 import com.harusari.chainware.member.query.dto.request.MemberSearchRequest;
+import com.harusari.chainware.member.query.dto.response.LoginHistoryResponse;
 import com.harusari.chainware.member.query.dto.response.MemberSearchDetailResponse;
 import com.harusari.chainware.member.query.dto.response.MemberSearchResponse;
 import org.springframework.data.domain.Page;
@@ -18,5 +19,7 @@ public interface MemberQueryRepositoryCustom {
     Page<MemberSearchResponse> findMembers(MemberSearchRequest condition, Pageable pageable);
 
     Optional<MemberSearchDetailResponse> findMemberSearchDetailById(Long memberId);
+
+    Page<LoginHistoryResponse> findLoginHistoryByMemberId(Long memberId, Pageable pageable);
 
 }
