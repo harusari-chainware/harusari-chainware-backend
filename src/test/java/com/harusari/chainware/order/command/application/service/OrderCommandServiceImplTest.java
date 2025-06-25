@@ -11,6 +11,8 @@ import com.harusari.chainware.order.command.domain.repository.OrderDetailReposit
 import com.harusari.chainware.order.command.domain.repository.OrderRepository;
 import com.harusari.chainware.order.exception.OrderErrorCode;
 import com.harusari.chainware.order.exception.OrderException;
+import com.harusari.chainware.product.command.domain.aggregate.Product;
+import com.harusari.chainware.product.command.domain.repository.ProductRepository;
 import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInventory;
 import com.harusari.chainware.warehouse.command.infrastructure.repository.JpaWarehouseInventoryRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,6 +52,9 @@ class OrderCommandServiceImplTest {
     private JpaWarehouseInventoryRepository jpaWarehouseInventoryRepository;
 
     @Mock
+    private ProductRepository productRepository;
+
+    @Mock
     private RedissonClient redissonClient;
 
     @Mock
@@ -83,6 +88,14 @@ class OrderCommandServiceImplTest {
                 .quantity(100)
                 .reservedQuantity(10)
                 .build();
+
+        Product product = Product.builder()
+                .productId(1L)
+                .basePrice(1500)
+                .build();
+
+        given(productRepository.findById(1L)).willReturn(Optional.of(product));
+
 
         Order savedOrder = Order.builder()
                 .franchiseId(1L)
@@ -176,9 +189,14 @@ class OrderCommandServiceImplTest {
         WarehouseInventory inventory1 = WarehouseInventory.builder().productId(1L).quantity(100).reservedQuantity(10).build();
         WarehouseInventory inventory2 = WarehouseInventory.builder().productId(2L).quantity(100).reservedQuantity(5).build();
 
+        Product product1 = Product.builder().productId(1L).basePrice(1500).build();
+        Product product2 = Product.builder().productId(2L).basePrice(2000).build();
+
         given(orderRepository.findById(orderId)).willReturn(Optional.of(existingOrder));
         given(jpaWarehouseInventoryRepository.findByProductIdForUpdate(1L)).willReturn(Optional.of(inventory1));
         given(jpaWarehouseInventoryRepository.findByProductIdForUpdate(2L)).willReturn(Optional.of(inventory2));
+        given(productRepository.findById(1L)).willReturn(Optional.of(product1));
+        given(productRepository.findById(2L)).willReturn(Optional.of(product2));
 
         // when
         OrderCommandResponse response = orderCommandService.updateOrder(orderId, updateRequest, memberId);
