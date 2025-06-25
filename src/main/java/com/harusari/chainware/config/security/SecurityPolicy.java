@@ -24,6 +24,7 @@ public enum SecurityPolicy {
     MEMBER_WAREHOUSE_POST("/api/v1/members/warehouse", POST, ROLE_BASED, List.of(MASTER)),
     MEMBERS_GET("/api/v1/members", GET, ROLE_BASED, List.of(MASTER)), // 회원 정보 조회
     MEMBERS_DETAIL_GET("/api/v1/members/{memberId}", GET, ROLE_BASED, List.of(MASTER)), // 회원 정보 상세 조회
+    LOGIN_HISTORY_GET("/api/v1/members/{memberId}/login-history", GET, ROLE_BASED, List.of(MASTER)),
 
     // Permit All
     LOGIN_POST("/api/v1/auth/login", POST, PERMIT_ALL, List.of()), // 로그인
@@ -75,12 +76,36 @@ public enum SecurityPolicy {
 
 
     /* Requisition */
+    REQUISITION_CREATE_POST("/api/v1/requisitions", POST, ROLE_BASED, List.of(GENERAL_MANAGER)), // 품의서 작성
+
+    REQUISITION_SUBMIT_PUT("/api/v1/requisitions/{requisitionId}/submit", PUT, ROLE_BASED, List.of(GENERAL_MANAGER)), // 품의서 상신
+
+    REQUISITION_DELETE("/api/v1/requisitions/{requisitionId}", DELETE, ROLE_BASED, List.of(GENERAL_MANAGER)), // 품의서 삭제
+
+    REQUISITION_APPROVE_PUT("/api/v1/requisitions/{requisitionId}/approve", PUT, ROLE_BASED, List.of(SENIOR_MANAGER)), // 품의서 승인
+
+    REQUISITION_REJECT_PUT("/api/v1/requisitions/{requisitionId}/reject", PUT, ROLE_BASED, List.of(SENIOR_MANAGER)), // 품의서 반려
+
+    REQUISITION_GET("/api/v1/requisitions", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 품의서 목록 조회
+
+    REQUISITION_DETAIL_GET("/api/v1/requisitions/{requisitionId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 품의서 상세 조회
 
 
     /* Delivery */
 
 
     /* Purchase Order */
+    PURCHASE_GET("/api/v1/purchases", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, VENDOR_MANAGER)), // 발주 목록 조회
+
+    PURCHASE_DETAIL_GET("/api/v1/purchases/{purchaseOrderId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 발주 상세 조회
+
+    PURCHASE_CANCEL_PUT("/api/v1/purchases/{purchaseOrderId}/cancel", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 발주 취소
+
+    PURCHASE_UPDATE_PUT("/api/v1/purchases/{purchaseOrderId}", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 발주 수정
+
+    PURCHASE_APPROVE_PUT("/api/v1/purchases/{purchaseOrderId}/approve", PUT, ROLE_BASED, List.of(VENDOR_MANAGER )), // 발주 승인
+
+    PURCHASE_REJECT_PUT("/api/v1/purchases/{purchaseOrderId}/reject", PUT, ROLE_BASED, List.of(VENDOR_MANAGER)); // 발주 거절
 
 
     /* Take Back */

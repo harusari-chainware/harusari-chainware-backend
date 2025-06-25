@@ -7,7 +7,7 @@ import com.harusari.chainware.vendor.command.application.dto.VendorStatusChangeR
 import com.harusari.chainware.vendor.command.application.dto.VendorUpdateRequestDto;
 import com.harusari.chainware.vendor.command.domain.aggregate.Vendor;
 import com.harusari.chainware.vendor.command.domain.repository.VendorRepository;
-import com.harusari.chainware.vendor.common.mapper.VendorMapStruct;
+import com.harusari.chainware.vendor.common.mapstruct.VendorMapStruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

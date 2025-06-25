@@ -4,6 +4,7 @@ import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.common.dto.PageResponse;
 import com.harusari.chainware.member.command.application.dto.response.EmailExistsResponse;
 import com.harusari.chainware.member.query.dto.request.MemberSearchRequest;
+import com.harusari.chainware.member.query.dto.response.LoginHistoryResponse;
 import com.harusari.chainware.member.query.dto.response.MemberSearchDetailResponse;
 import com.harusari.chainware.member.query.dto.response.MemberSearchResponse;
 import com.harusari.chainware.member.query.service.MemberQueryService;
@@ -55,6 +56,19 @@ public class MemberQueryController {
         return  ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(memberSearchDetailResponse));
+    }
+
+    @GetMapping("/members/{memberId}/login-history")
+    public ResponseEntity<ApiResponse<PageResponse<LoginHistoryResponse>>> searchLoginHistory(
+        @PathVariable(name = "memberId") Long memberId,
+        @PageableDefault(size = 10) Pageable pageable
+    ) {
+        Page<LoginHistoryResponse> loginHistoryResponse = memberQueryService.searchMemberLoginHistory(memberId, pageable);
+        PageResponse<LoginHistoryResponse> pageResponse = PageResponse.from(loginHistoryResponse);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(pageResponse));
     }
 
 }

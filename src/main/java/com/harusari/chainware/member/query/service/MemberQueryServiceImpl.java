@@ -3,6 +3,7 @@ package com.harusari.chainware.member.query.service;
 import com.harusari.chainware.exception.auth.MemberNotFoundException;
 import com.harusari.chainware.member.command.application.dto.response.EmailExistsResponse;
 import com.harusari.chainware.member.query.dto.request.MemberSearchRequest;
+import com.harusari.chainware.member.query.dto.response.LoginHistoryResponse;
 import com.harusari.chainware.member.query.dto.response.MemberSearchDetailResponse;
 import com.harusari.chainware.member.query.dto.response.MemberSearchResponse;
 import com.harusari.chainware.member.query.repository.MemberQueryRepository;
@@ -53,6 +54,11 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     public MemberSearchDetailResponse getMemberDetail(Long memberId) {
         return memberQueryRepository.findMemberSearchDetailById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND_EXCEPTION));
+    }
+
+    @Override
+    public Page<LoginHistoryResponse> searchMemberLoginHistory(Long memberId, Pageable pageable) {
+        return memberQueryRepository.findLoginHistoryByMemberId(memberId, pageable);
     }
 
     private String generateAndStoreEmailValidationToken(String email) {

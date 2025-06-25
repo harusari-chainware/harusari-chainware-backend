@@ -84,4 +84,23 @@ public class Requisition {
         this.rejectReason = rejectReason;
         this.modifiedAt = LocalDateTime.now().withNano(0);
     }
+
+
+    public void update(Long approvedMemberId, int productCount, int totalQuantity, Long totalPrice) {
+        this.approvedMemberId = approvedMemberId;
+        this.productCount = productCount;
+        this.totalQuantity = totalQuantity;
+        this.totalPrice = totalPrice;
+        this.modifiedAt = LocalDateTime.now();
+    }
+
+    public boolean isWriter(Long memberId) {
+        return this.createdMemberId.equals(memberId);
+    }
+
+    public boolean isModifiable() {
+        return this.requisitionStatus != RequisitionStatus.SUBMITTED &&
+                this.requisitionStatus != RequisitionStatus.APPROVED &&
+                this.requisitionStatus != RequisitionStatus.REJECTED;
+    }
 }
