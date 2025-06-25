@@ -33,7 +33,7 @@ public enum SecurityPolicy {
 
     // Authenticated
     LOGOUT_POST("/api/v1/auth/logout", POST, AUTHENTICATED, List.of()), // 로그아웃
-    PASSWORD_POST("/api/v1/auth/password", POST, AUTHENTICATED, List.of()); // 비밀번호 변경
+    PASSWORD_POST("/api/v1/auth/password", POST, AUTHENTICATED, List.of()), // 비밀번호 변경
 
     /* Product */
 
@@ -70,6 +70,14 @@ public enum SecurityPolicy {
 
     /* Statistics */
 
+
+    /* Swagger */
+    SWAGGER_UI_HTML_GET("/swagger-ui.html", GET, PERMIT_ALL, List.of()),
+    SWAGGER_UI_GET("/swagger-ui/**", GET, PERMIT_ALL, List.of()),
+    SWAGGER_GET("/swagger", GET, PERMIT_ALL, List.of()),
+    API_DOCS_GET("/api-docs", GET, PERMIT_ALL, List.of()),
+    API_DOCS_ALL_GET("/api-docs/**", GET, PERMIT_ALL, List.of()),
+    V3_API_DOCS_ALL_GET("/v3/api-docs/**", GET, PERMIT_ALL, List.of());
 
     private final String path;
     private final HttpMethod method;
