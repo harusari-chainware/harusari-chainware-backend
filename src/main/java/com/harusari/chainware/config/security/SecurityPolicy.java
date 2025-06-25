@@ -85,8 +85,11 @@ public enum SecurityPolicy {
 
 
     /* Swagger */
-    SWAGGER_UI("/api/v1/swagger-ui/**", POST, PERMIT_ALL, List.of()),
-    SWAGGER_RESOURCE("/api/v1/swagger-resources/**", POST, PERMIT_ALL, List.of());
+    SWAGGER_UI("/swagger-ui/**", GET, PERMIT_ALL, List.of()),
+    SWAGGER_RESOURCE("/swagger-resources/**", GET, PERMIT_ALL, List.of()),
+    SWAGGER_DOCS("/v3/api-docs/**", GET, PERMIT_ALL, List.of()),
+    SWAGGER_CONFIG("/v3/api-docs/swagger-config", GET, PERMIT_ALL, List.of()),
+    SWAGGER_WEBJARS("/webjars/**", GET, PERMIT_ALL, List.of());
 
 
     private final String path;
