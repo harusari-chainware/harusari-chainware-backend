@@ -49,7 +49,7 @@ public enum SecurityPolicy {
 
 
     /* Requisition */
-    REQUISITION_CREATE_POST("/api/v1/requisitions/create", POST, ROLE_BASED, List.of(GENERAL_MANAGER)), // 품의서 작성
+    REQUISITION_CREATE_POST("/api/v1/requisitions", POST, ROLE_BASED, List.of(GENERAL_MANAGER)), // 품의서 작성
 
     REQUISITION_SUBMIT_PUT("/api/v1/requisitions/{requisitionId}/submit", PUT, ROLE_BASED, List.of(GENERAL_MANAGER)), // 품의서 상신
 
