@@ -23,7 +23,7 @@ public class RequisitionCommandController {
     private final RequisitionCommandService requisitionCommandService;
     private final PurchaseOrderCommandService purchaseOrderCommandService;
 
-    @PostMapping()
+    @PostMapping
     @Operation(summary = "품의서 저장 (임시)", description = "품의서를 저장합니다. 결재자는 필수이며, 품목 리스트는 최소 1개 이상이어야 합니다.")
     public ResponseEntity<ApiResponse<Long>> createRequisition(
             @AuthenticationPrincipal CustomUserDetails userDetail,
