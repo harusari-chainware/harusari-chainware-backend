@@ -2,7 +2,7 @@ package com.harusari.chainware.warehouse.command.application.controller;
 
 import com.harusari.chainware.warehouse.command.application.dto.WarehouseInventorySnapshotResponseDto;
 import com.harusari.chainware.warehouse.command.application.service.InventorySnapshotScheduler;
-import com.harusari.chainware.warehouse.common.mapper.WarehouseInventorySnapshotQueryMapper;
+import com.harusari.chainware.warehouse.command.mapper.WarehouseInventorySnapshotQueryMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;

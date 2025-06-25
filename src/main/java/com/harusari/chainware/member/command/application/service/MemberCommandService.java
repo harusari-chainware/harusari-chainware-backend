@@ -2,6 +2,7 @@ package com.harusari.chainware.member.command.application.service;
 
 import com.harusari.chainware.member.command.application.dto.request.MemberCreateRequest;
 import com.harusari.chainware.member.command.application.dto.request.PasswordChangeRequest;
+import com.harusari.chainware.member.command.application.dto.request.UpdateMemberRequest;
 import com.harusari.chainware.member.command.application.dto.request.franchise.MemberWithFranchiseRequest;
 import com.harusari.chainware.member.command.application.dto.request.vendor.MemberWithVendorRequest;
 import com.harusari.chainware.member.command.application.dto.request.warehouse.MemberWithWarehouseRequest;
@@ -18,5 +19,7 @@ public interface MemberCommandService {
     void registerWarehouse(MemberWithWarehouseRequest memberWithWarehouseRequest);
 
     void changePassword(PasswordChangeRequest passwordChangeRequest, String email);
+
+    void updateMemberRequest(Long memberId, UpdateMemberRequest updateMemberRequest);
 
 }
