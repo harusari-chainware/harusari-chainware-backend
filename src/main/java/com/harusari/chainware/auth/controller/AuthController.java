@@ -5,6 +5,7 @@ import com.harusari.chainware.auth.dto.request.RefreshTokenRequest;
 import com.harusari.chainware.auth.dto.response.TokenResponse;
 import com.harusari.chainware.auth.service.AuthService;
 import com.harusari.chainware.common.dto.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +23,11 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<TokenResponse>> login(
-            @RequestBody LoginRequest loginRequest
+            @RequestBody LoginRequest loginRequest,
+            HttpServletRequest httpServletRequest
     ) {
-        TokenResponse token = authService.login(loginRequest);
+        TokenResponse token = authService.login(loginRequest, httpServletRequest);
+
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(token));

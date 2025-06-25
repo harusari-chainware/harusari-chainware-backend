@@ -3,6 +3,7 @@ package com.harusari.chainware.member.query.repository;
 import com.harusari.chainware.member.command.domain.aggregate.Member;
 import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
 import com.harusari.chainware.member.query.dto.request.MemberSearchRequest;
+import com.harusari.chainware.member.query.dto.response.LoginHistoryResponse;
 import com.harusari.chainware.member.query.dto.response.MemberSearchDetailResponse;
 import com.harusari.chainware.member.query.dto.response.MemberSearchResponse;
 import com.querydsl.core.types.Projections;
@@ -21,10 +22,13 @@ import java.util.Optional;
 
 import static com.harusari.chainware.member.command.domain.aggregate.QAuthority.authority;
 import static com.harusari.chainware.member.command.domain.aggregate.QMember.member;
+import static com.harusari.chainware.member.command.domain.aggregate.QLoginHistory.loginHistory;
 
 @Repository
 @RequiredArgsConstructor
 public class MemberQueryRepositoryImpl implements MemberQueryRepositoryCustom {
+
+    private static final long TOTAL_DEFAULT_VALUE = 0L;
 
     private final JPAQueryFactory queryFactory;
 
@@ -82,7 +86,6 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepositoryCustom {
                 )
                 .fetchOne();
 
-        final long TOTAL_DEFAULT_VALUE = 0L;
         long total = Optional.ofNullable(result).orElse(TOTAL_DEFAULT_VALUE);
 
         return new PageImpl<>(contents, pageable, total);
@@ -102,6 +105,31 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepositoryCustom {
                 .where(member.memberId.eq(memberId))
                 .fetchOne()
         );
+    }
+
+    @Override
+    public Page<LoginHistoryResponse> findLoginHistoryByMemberId(Long memberId, Pageable pageable) {
+        List<LoginHistoryResponse> contents = queryFactory
+                .select(Projections.constructor(LoginHistoryResponse.class,
+                        loginHistory.memberId, loginHistory.loginAt,
+                        loginHistory.ipAddress, loginHistory.browser
+                ))
+                .from(loginHistory)
+                .where(loginHistory.memberId.eq(memberId))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(loginHistory.loginAt.desc())
+                .fetch();
+
+        Long result = queryFactory
+                .select(loginHistory.count())
+                .from(loginHistory)
+                .where(loginHistory.memberId.eq(memberId))
+                .fetchOne();
+
+        long total = Optional.ofNullable(result).orElse(TOTAL_DEFAULT_VALUE);
+
+        return new PageImpl<>(contents, pageable, total);
     }
 
     private BooleanExpression emailEq(String email) {
