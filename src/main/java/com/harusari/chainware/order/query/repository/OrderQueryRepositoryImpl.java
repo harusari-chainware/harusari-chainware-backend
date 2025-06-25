@@ -3,10 +3,13 @@ package com.harusari.chainware.order.query.repository;
 import com.harusari.chainware.delivery.command.domain.aggregate.QDelivery;
 import com.harusari.chainware.franchise.command.domain.aggregate.FranchiseStatus;
 import com.harusari.chainware.franchise.command.domain.aggregate.QFranchise;
+import com.harusari.chainware.member.command.domain.aggregate.QMember;
 import com.harusari.chainware.order.command.domain.aggregate.OrderStatus;
 import com.harusari.chainware.order.command.domain.aggregate.QOrder;
+import com.harusari.chainware.order.command.domain.aggregate.QOrderDetail;
 import com.harusari.chainware.order.query.dto.request.OrderSearchRequest;
-import com.harusari.chainware.order.query.dto.response.OrderSearchResponse;
+import com.harusari.chainware.order.query.dto.response.*;
+import com.harusari.chainware.product.command.domain.aggregate.QProduct;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -30,6 +33,9 @@ public class OrderQueryRepositoryImpl implements OrderQueryRepositoryCustom {
     private final QOrder order = QOrder.order;
     private final QFranchise franchise = QFranchise.franchise;
     private final QDelivery delivery = QDelivery.delivery;
+    private final QMember member = QMember.member;
+    private final QOrderDetail orderDetail = QOrderDetail.orderDetail;
+    private final QProduct product = QProduct.product;
 
     @Override
     public Page<OrderSearchResponse> searchOrders(OrderSearchRequest request, Pageable pageable) {
@@ -73,6 +79,80 @@ public class OrderQueryRepositoryImpl implements OrderQueryRepositoryCustom {
 
         return new PageImpl<>(contents, pageable, Optional.ofNullable(count).orElse(0L));
     }
+
+    @Override
+    public OrderSearchDetailResponse findOrderDetailById(Long orderId) {
+        OrderBasicInfo basicInfo = queryFactory
+                .select(Projections.constructor(OrderBasicInfo.class,
+                        order.orderCode,
+                        order.orderStatus,
+                        delivery.trackingNumber,
+                        order.productCount,
+                        order.totalPrice,
+                        order.deliveryDueDate,
+                        order.createdAt,
+                        order.modifiedAt
+                ))
+                .from(order)
+                .leftJoin(delivery).on(delivery.orderId.eq(order.orderId))
+                .where(order.orderId.eq(orderId))
+                .fetchOne();
+
+        FranchiseOwnerInfo franchiseOwnerInfo = queryFactory
+                .select(Projections.constructor(FranchiseOwnerInfo.class,
+                        member.name,
+                        member.phoneNumber,
+                        franchise.franchiseName,
+                        franchise.franchiseContact,
+                        franchise.franchiseTaxId
+                ))
+                .from(order)
+                .join(franchise).on(order.franchiseId.eq(franchise.franchiseId))
+                .join(member).on(franchise.memberId.eq(member.memberId))
+                .where(order.orderId.eq(orderId))
+                .fetchOne();
+
+        String rejectReason = queryFactory
+                .select(order.rejectReason)
+                .from(order)
+                .where(order.orderId.eq(orderId))
+                .fetchOne();
+
+        List<OrderProductInfo> products = queryFactory
+                .select(Projections.constructor(OrderProductInfo.class,
+                        product.productCode,
+                        product.productName,
+                        product.unitQuantity,
+                        product.unitSpec,
+                        product.storeType.stringValue(),
+                        orderDetail.unitPrice,
+                        orderDetail.quantity,
+                        orderDetail.totalPrice
+                ))
+                .from(orderDetail)
+                .join(product).on(orderDetail.productId.eq(product.productId))
+                .where(orderDetail.orderId.eq(orderId))
+                .fetch();
+
+        List<DeliveryHistoryInfo> deliveryHistory = queryFactory
+                .select(Projections.constructor(DeliveryHistoryInfo.class,
+                        delivery.deliveredAt,
+                        delivery.carrier,
+                        delivery.deliveryStatus
+                ))
+                .from(delivery)
+                .where(delivery.orderId.eq(orderId))
+                .fetch();
+
+        return OrderSearchDetailResponse.builder()
+                .orderInfo(basicInfo)
+                .franchiseOwnerInfo(franchiseOwnerInfo)
+                .rejectReason(rejectReason)
+                .products(products)
+                .deliveryHistory(deliveryHistory)
+                .build();
+    }
+
 
     private BooleanExpression franchiseNameContains(String name) {
         return (name != null && !name.isBlank()) ? franchise.franchiseName.containsIgnoreCase(name) : null;

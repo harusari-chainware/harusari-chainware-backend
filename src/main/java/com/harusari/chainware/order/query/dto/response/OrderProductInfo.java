@@ -1,16 +1,17 @@
 package com.harusari.chainware.order.query.dto.response;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Builder;
 
 @Getter
-@Builder
+@AllArgsConstructor
 public class OrderProductInfo {
     private String productCode;
     private String productName;
-    private String unit;
+    private String unitQuantity;
+    private String unitSpec;
     private String storageType;
-    private long contractPrice;
-    private int quantity;
-    private long amount;
+    private Integer contractPrice;
+    private Integer quantity;
+    private Long amount;
 }

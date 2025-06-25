@@ -1,10 +1,10 @@
 package com.harusari.chainware.order.query.dto.response;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Builder;
 
 @Getter
-@Builder
+@AllArgsConstructor
 public class FranchiseOwnerInfo {
     private String ownerName;
     private String ownerPhone;
