@@ -41,4 +41,24 @@
             </when>
         </choose>
     </select>
+
+    <select id="findProductById" resultType="com.harusari.chainware.product.query.dto.response.ProductDto">
+        SELECT
+        product_id,
+        product_name,
+        product_code,
+        category_id,
+        base_price,
+        unit_quantity,
+        unit_spec,
+        store_type,
+        safety_stock,
+        origin,
+        shelf_life,
+        product_status
+        FROM product
+        WHERE is_deleted = false
+        AND product_id = #{productId}
+    </select>
+
 </mapper>

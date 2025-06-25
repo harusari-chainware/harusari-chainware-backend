@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.harusari.chainware.category.query.mapper.CategoryQueryMapper">
+
+    <!-- 상위 카테고리 목록 -->
+    <select id="selectTopCategories"
+            resultType="com.harusari.chainware.category.query.dto.response.TopCategoryOnlyResponse">
+        SELECT
+        tc.top_category_id AS topCategoryId,
+        tc.top_category_name AS topCategoryName
+        FROM top_category tc
+    </select>
+
+    <!-- 특정 상위 카테고리의 하위 카테고리 -->
+    <select id="selectCategoriesByTopCategoryId"
+            resultType="com.harusari.chainware.category.query.dto.response.CategoryResponse">
+        SELECT
+        c.category_id AS categoryId,
+        c.top_category_id AS topCategoryId,
+        c.category_name AS categoryName,
+        COUNT(p.product_id) AS productCount
+        FROM category c
+        LEFT JOIN product p ON p.category_id = c.category_id
+        WHERE c.top_category_id = #{topCategoryId}
+        GROUP BY c.category_id, c.top_category_id, c.category_name
+    </select>
+
+    <!-- ProductDto 생성자 매핑 -->
+    <resultMap id="ProductDtoMap" type="com.harusari.chainware.product.query.dto.response.ProductDto">
+        <constructor>
+            <idArg column="product_id" javaType="java.lang.Long"/>
+            <arg column="product_name" javaType="java.lang.String"/>
+            <arg column="product_code" javaType="java.lang.String"/>
+            <arg column="category_id" javaType="java.lang.Long"/>
+            <arg column="base_price" javaType="java.lang.Integer"/>
+            <arg column="unit_quantity" javaType="java.lang.String"/>
+            <arg column="unit_spec" javaType="java.lang.String"/>
+            <arg column="store_type" javaType="com.harusari.chainware.product.command.domain.aggregate.StoreType"/>
+            <arg column="safety_stock" javaType="java.lang.Integer"/>
+            <arg column="origin" javaType="java.lang.String"/>
+            <arg column="shelf_life" javaType="java.lang.Integer"/>
+            <arg column="product_status" javaType="Boolean"/>
+        </constructor>
+    </resultMap>
+
+    <!-- CategoryWithProductsResponse 생성자 매핑 -->
+    <resultMap id="CategoryWithProductsMap" type="com.harusari.chainware.category.query.dto.response.CategoryWithProductsResponse">
+        <id property="categoryId" column="category_id"/>
+        <result property="categoryName" column="category_name"/>
+        <result property="topCategoryId" column="top_category_id"/>
+
+        <!-- product 리스트는 별도로 collection으로 설정 -->
+        <collection property="products"
+                    ofType="com.harusari.chainware.product.query.dto.response.ProductDto"
+                    resultMap="ProductDtoMap"
+                    javaType="java.util.ArrayList"
+                    notNullColumn="product_id" />
+    </resultMap>
+
+    <!-- TopCategoryOnlyResponse 생성자 매핑 -->
+    <resultMap id="TopCategoryOnlyResponseMap" type="com.harusari.chainware.category.query.dto.response.TopCategoryOnlyResponse">
+        <constructor>
+            <idArg column="top_category_id" javaType="java.lang.Long"/>
+            <arg column="top_category_name" javaType="java.lang.String"/>
+        </constructor>
+    </resultMap>
+
+    <!-- CategoryDetailResponse 생성자 매핑 -->
+    <resultMap id="CategoryDetailResponseMap" type="com.harusari.chainware.category.query.dto.response.CategoryDetailResponse">
+        <constructor>
+            <idArg column="category_id" javaType="java.lang.Long"/>
+            <arg column="category_name" javaType="java.lang.String"/>
+            <arg column="top_category_id" javaType="java.lang.Long"/>
+            <arg column="top_category_name" javaType="java.lang.String"/>
+            <!-- products는 collection으로 매핑 -->
+        </constructor>
+        <collection property="products"
+                    ofType="com.harusari.chainware.product.query.dto.response.ProductDto"
+                    javaType="java.util.ArrayList"
+                    resultMap="ProductDtoMap"/>
+        </resultMap>
+
+    <!-- 상위 카테고리 기본 정보 조회 -->
+    <select id="selectTopCategoryBasic" parameterType="long" resultMap="TopCategoryOnlyResponseMap">
+        SELECT
+        top_category_id,
+        top_category_name
+        FROM top_category
+        WHERE top_category_id = #{topCategoryId}
+    </select>
+
+    <!-- 특정 상위 카테고리 포함 카테고리 + 제품 리스트 조회 -->
+    <select id="selectCategoriesWithProductsByTopCategoryId" parameterType="long" resultMap="CategoryWithProductsMap">
+        SELECT
+        c.category_id,
+        c.category_name,
+        c.top_category_id,
+        p.product_id,
+        p.product_name,
+        p.product_code,
+        p.category_id,
+        p.base_price,
+        p.unit_quantity,
+        p.unit_spec,
+        p.store_type,
+        p.safety_stock,
+        p.origin,
+        p.shelf_life,
+        p.product_status
+        FROM category c
+        LEFT JOIN product p ON p.category_id = c.category_id
+        WHERE c.top_category_id = #{topCategoryId}
+        ORDER BY c.category_id, p.product_id
+    </select>
+
+    <!-- 특정 하위 카테고리 상세 + 상위 카테고리 + 제품 리스트 조회 -->
+    <select id="selectCategoryDetailWithProducts" parameterType="long" resultMap="CategoryDetailResponseMap">
+        SELECT
+        c.category_id,
+        c.category_name,
+        c.top_category_id,
+        tc.top_category_name,
+        p.product_id,
+        p.product_name,
+        p.product_code,
+        p.category_id,
+        p.base_price,
+        p.unit_quantity,
+        p.unit_spec,
+        p.store_type,
+        p.safety_stock,
+        p.origin,
+        p.shelf_life,
+        p.product_status
+        FROM category c
+        JOIN top_category tc ON c.top_category_id = tc.top_category_id
+        LEFT JOIN product p ON p.category_id = c.category_id
+        WHERE c.category_id = #{categoryId}
+        ORDER BY p.product_id
+    </select>
+
+
+</mapper>
