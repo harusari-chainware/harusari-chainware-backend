@@ -4,4 +4,5 @@ import com.harusari.chainware.requisition.command.domain.aggregate.RequisitionDe
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface RequisitionDetailRepository extends JpaRepository<RequisitionDetail, Long> {
+    void deleteByRequisitionId(Long requisitionId);
 }
