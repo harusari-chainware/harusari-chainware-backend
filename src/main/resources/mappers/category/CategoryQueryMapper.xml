@@ -81,7 +81,7 @@
                     ofType="com.harusari.chainware.product.query.dto.response.ProductDto"
                     javaType="java.util.ArrayList"
                     resultMap="ProductDtoMap"/>
-        </resultMap>
+    </resultMap>
 
     <!-- 상위 카테고리 기본 정보 조회 -->
     <select id="selectTopCategoryBasic" parameterType="long" resultMap="TopCategoryOnlyResponseMap">
