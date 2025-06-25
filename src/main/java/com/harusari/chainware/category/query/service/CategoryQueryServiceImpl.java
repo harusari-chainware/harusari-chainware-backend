@@ -2,19 +2,19 @@ package com.harusari.chainware.category.query.service;
 
 import com.harusari.chainware.category.query.dto.response.*;
 import com.harusari.chainware.category.query.mapper.CategoryQueryMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class CategoryQueryServiceImpl implements CategoryQueryService {
 
     private final CategoryQueryMapper categoryQueryMapper;
-
-    public CategoryQueryServiceImpl(CategoryQueryMapper mapper) {
-        this.categoryQueryMapper = mapper;
-    }
 
     @Override
     public List<TopCategoryResponse> getCategoryListWithProductCount() {

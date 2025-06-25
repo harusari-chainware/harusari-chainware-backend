@@ -28,8 +28,6 @@
         GROUP BY c.category_id, c.top_category_id, c.category_name
     </select>
 
-<!--  ==================================================================================  -->
-
     <!-- ProductDto 생성자 매핑 -->
     <resultMap id="ProductDtoMap" type="com.harusari.chainware.product.query.dto.response.ProductDto">
         <constructor>

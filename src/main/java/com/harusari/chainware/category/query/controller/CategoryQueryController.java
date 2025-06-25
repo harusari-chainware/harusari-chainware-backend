@@ -22,8 +22,10 @@ public class CategoryQueryController {
     private final CategoryQueryService categoryQueryService;
 
     @GetMapping
-    public ResponseEntity<List<TopCategoryResponse>> getAllCategoryList() {
-        return ResponseEntity.ok(categoryQueryService.getCategoryListWithProductCount());
+    public ResponseEntity<ApiResponse<List<TopCategoryResponse>>> getAllCategoryList() {
+        return ResponseEntity.ok(ApiResponse.success(
+                categoryQueryService.getCategoryListWithProductCount()
+        ));
     }
 
     @GetMapping("/top/{topCategoryId}")
