@@ -4,7 +4,7 @@ import com.harusari.chainware.warehouse.command.application.dto.CurrentWarehouse
 import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInventorySnapshot;
 import com.harusari.chainware.warehouse.command.domain.repository.WarehouseInventorySnapshotRepository;
 import com.harusari.chainware.warehouse.command.infrastructure.repository.JpaWarehouseInventorySnapshotRepository;
-import com.harusari.chainware.warehouse.common.mapper.WarehouseInventorySnapshotQueryMapper;
+import com.harusari.chainware.warehouse.command.mapper.WarehouseInventorySnapshotQueryMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

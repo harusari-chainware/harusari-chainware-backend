@@ -3,7 +3,7 @@ package com.harusari.chainware.franchise.command.application.service;
 import com.harusari.chainware.franchise.command.domain.aggregate.Franchise;
 import com.harusari.chainware.franchise.command.domain.repository.FranchiseRepository;
 import com.harusari.chainware.common.infrastructure.storage.StorageUploader;
-import com.harusari.chainware.franchise.common.mapper.FranchiseMapStruct;
+import com.harusari.chainware.franchise.common.mapstruct.FranchiseMapStruct;
 import com.harusari.chainware.member.command.application.dto.request.franchise.MemberWithFranchiseRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

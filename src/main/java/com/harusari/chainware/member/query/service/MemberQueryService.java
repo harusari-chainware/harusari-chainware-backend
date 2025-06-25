@@ -2,6 +2,7 @@ package com.harusari.chainware.member.query.service;
 
 import com.harusari.chainware.member.command.application.dto.response.EmailExistsResponse;
 import com.harusari.chainware.member.query.dto.request.MemberSearchRequest;
+import com.harusari.chainware.member.query.dto.response.LoginHistoryResponse;
 import com.harusari.chainware.member.query.dto.response.MemberSearchDetailResponse;
 import com.harusari.chainware.member.query.dto.response.MemberSearchResponse;
 import org.springframework.data.domain.Page;
@@ -14,5 +15,7 @@ public interface MemberQueryService {
     Page<MemberSearchResponse> searchMembers(MemberSearchRequest memberSearchRequest, Pageable pageable);
 
     MemberSearchDetailResponse getMemberDetail(Long memberId);
+
+    Page<LoginHistoryResponse> searchMemberLoginHistory(Long memberId, Pageable pageable);
 
 }

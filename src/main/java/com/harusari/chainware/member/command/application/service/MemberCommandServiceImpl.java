@@ -15,11 +15,11 @@ import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityTyp
 import com.harusari.chainware.member.command.domain.repository.AuthorityCommandRepository;
 import com.harusari.chainware.member.command.domain.repository.MemberCommandRepository;
 import com.harusari.chainware.member.command.domain.repository.MemberCommandRepositoryCustom;
-import com.harusari.chainware.member.common.mapper.MemberMapStruct;
+import com.harusari.chainware.member.common.mapstruct.MemberMapStruct;
 import com.harusari.chainware.vendor.command.application.service.VendorCommandService;
 import com.harusari.chainware.warehouse.command.domain.aggregate.Warehouse;
 import com.harusari.chainware.warehouse.command.domain.repository.WarehouseRepository;
-import com.harusari.chainware.warehouse.common.mapper.WarehouseMapStruct;
+import com.harusari.chainware.warehouse.common.mapstruct.WarehouseMapStruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
