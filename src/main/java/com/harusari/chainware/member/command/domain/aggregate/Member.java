@@ -1,5 +1,6 @@
 package com.harusari.chainware.member.command.domain.aggregate;
 
+import com.harusari.chainware.member.command.application.dto.request.UpdateMemberRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -72,6 +73,15 @@ public class Member {
 
     public void updateAuthorityId(Integer authorityId) {
         this.authorityId = authorityId;
+    }
+
+    public void updateMember(Integer authorityId, UpdateMemberRequest updateMemberRequest) {
+        this.authorityId = authorityId;
+        this.name = updateMemberRequest.name();
+        this.phoneNumber = updateMemberRequest.phoneNumber();
+        this.position = updateMemberRequest.position();
+        this.modifiedAt = LocalDateTime.now().withNano(0);
+        this.isDeleted = updateMemberRequest.isDeleted();
     }
 
 }

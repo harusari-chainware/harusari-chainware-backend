@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.harusari.chainware.product.query.mapper.ProductMapper">
+
+    <select id="findProductsByConditions" resultType="com.harusari.chainware.product.query.dto.response.ProductDto">
+        SELECT
+        product_id,
+        product_name,
+        product_code,
+        category_id,
+        base_price,
+        unit_quantity,
+        unit_spec,
+        store_type,
+        safety_stock,
+        origin,
+        shelf_life,
+        product_status
+        FROM product
+        WHERE is_deleted = false
+
+        <if test="productName != null and productName != ''">
+            AND product_name LIKE CONCAT('%', #{productName}, '%')
+        </if>
+        <if test="productCode != null and productCode != ''">
+            AND product_code LIKE CONCAT('%', #{productCode}, '%')
+        </if>
+        <if test="categoryId != null">
+            AND category_id = #{categoryId}
+        </if>
+
+        <choose>
+            <when test="productStatusFilter.name() == 'ACTIVE_ONLY'">
+                AND product_status = true
+            </when>
+            <when test="productStatusFilter.name() == 'INACTIVE_ONLY'">
+                AND product_status = false
+            </when>
+        </choose>
+    </select>
+</mapper>

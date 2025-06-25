@@ -1,9 +1,11 @@
 package com.harusari.chainware.member.command.application.service;
 
+import com.harusari.chainware.exception.auth.MemberNotFoundException;
 import com.harusari.chainware.exception.member.*;
 import com.harusari.chainware.franchise.command.application.service.FranchiseCommandService;
 import com.harusari.chainware.member.command.application.dto.request.MemberCreateRequest;
 import com.harusari.chainware.member.command.application.dto.request.PasswordChangeRequest;
+import com.harusari.chainware.member.command.application.dto.request.UpdateMemberRequest;
 import com.harusari.chainware.member.command.application.dto.request.franchise.MemberWithFranchiseRequest;
 import com.harusari.chainware.member.command.application.dto.request.vendor.MemberWithVendorRequest;
 import com.harusari.chainware.member.command.application.dto.request.warehouse.MemberWithWarehouseRequest;
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import static com.harusari.chainware.exception.auth.AuthErrorCode.MEMBER_NOT_FOUND_EXCEPTION;
 import static com.harusari.chainware.exception.member.MemberErrorCode.*;
 import static com.harusari.chainware.member.common.constants.EmailValidationConstant.EMAIL_VALIDATION_PREFIX;
 
@@ -110,6 +113,16 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
         String encodedPassword = passwordEncoder.encode(passwordChangeRequest.newPassword());
         member.updateEncodedPassword(encodedPassword);
+    }
+
+    @Override
+    public void updateMemberRequest(Long memberId, UpdateMemberRequest updateMemberRequest) {
+        Member member = memberCommandRepository.findMemberByMemberId(memberId)
+                .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND_EXCEPTION));
+
+        Authority authority = authorityCommandRepository.findByAuthorityName(updateMemberRequest.authorityName());
+
+        member.updateMember(authority.getAuthorityId(), updateMemberRequest);
     }
 
     private Member registerMember(MemberCreateRequest memberCreateRequest) {
