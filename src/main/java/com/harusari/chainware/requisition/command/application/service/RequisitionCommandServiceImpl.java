@@ -87,10 +87,12 @@ public class RequisitionCommandServiceImpl implements RequisitionCommandService 
         return requisitionId;
     }
 
-    /*
+
+
+
     @Override
     @Transactional
-    public void update(Long requisitionId, UpdateRequisitionRequest request, Long memberId) {
+    public void updateRequisition(Long requisitionId, UpdateRequisitionRequest request, Long memberId) {
         // 1. 품의서 조회
         Requisition requisition = requisitionRepository.findById(requisitionId)
                 .orElseThrow(() -> new RequisitionException(RequisitionErrorCode.REQUISITION_NOT_FOUND));
@@ -105,12 +107,21 @@ public class RequisitionCommandServiceImpl implements RequisitionCommandService 
             throw new RequisitionException(RequisitionErrorCode.REQUISITION_INVALID_STATUS_UPDATE);
         }
 
+        // 품목 계산
+        int productCount = request.getItems().size();
+        int totalQuantity = request.getItems().stream()
+                .mapToInt(RequisitionItemRequest::getQuantity)
+                .sum();
+        long totalPrice = request.getItems().stream()
+                .mapToLong(item -> item.getQuantity() * item.getUnitPrice())
+                .sum();
+
         // 4. requisition 정보 업데이트
         requisition.update(
                 request.getApprovedMemberId(),
-                request.getProductCount(),
-                request.getTotalQuantity(),
-                request.getTotalPrice()
+                productCount,
+                totalQuantity,
+                totalPrice
         );
 
         // 5. 기존 품목 삭제 후 재등록
@@ -128,7 +139,10 @@ public class RequisitionCommandServiceImpl implements RequisitionCommandService 
 
         requisitionDetailRepository.saveAll(newDetails);
     }
-*/
+
+
+
+
     @Override
     @Transactional
     public void submitRequisition(Long memberId, Long requisitionId) {

@@ -81,14 +81,14 @@ public class RequisitionCommandController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{requisitionId}")
     @Operation(summary = "품의서 수정", description = "작성자가 SUBMITTED 이전 상태의 품의서를 수정합니다.")
     public ResponseEntity<ApiResponse<Void>> updateRequisition(
-            @PathVariable Long id,
+            @PathVariable Long requisitionId,
             @RequestBody @Valid UpdateRequisitionRequest request,
-            @AuthenticationPrincipal CustomUserDetails user
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        requisitionCommandService.update(id, request, user.getMemberId());
+        requisitionCommandService.updateRequisition(requisitionId, request, userDetails.getMemberId());
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 }

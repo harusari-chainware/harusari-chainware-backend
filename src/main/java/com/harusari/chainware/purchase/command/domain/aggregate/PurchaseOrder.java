@@ -86,4 +86,10 @@ public class PurchaseOrder {
         this.rejectReason = cancelReason; // 사유 저장 재활용
         this.modifiedAt = LocalDateTime.now();
     }
+
+    public void updateTotalAmount(Long totalAmount) {
+        this.totalAmount = totalAmount;
+        this.modifiedAt = LocalDateTime.now();
+    }
+
 }

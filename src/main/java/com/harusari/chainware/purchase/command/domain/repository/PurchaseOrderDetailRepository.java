@@ -4,4 +4,6 @@ import com.harusari.chainware.purchase.command.domain.aggregate.PurchaseOrderDet
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PurchaseOrderDetailRepository extends JpaRepository<PurchaseOrderDetail, Long> {
+    void deleteByPurchaseOrderId(Long requisitionId);
+
 }

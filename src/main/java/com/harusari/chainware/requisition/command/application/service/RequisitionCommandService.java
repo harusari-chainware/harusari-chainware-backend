@@ -21,6 +21,6 @@ public interface RequisitionCommandService {
     void deleteRequisition(Long memberId, Long requisitionId);
 
 
-    void update(Long requisitionId, UpdateRequisitionRequest request, Long memberId);
+    void updateRequisition(Long requisitionId, UpdateRequisitionRequest request, Long memberId);
 
 }

@@ -25,7 +25,7 @@ public class SecurityPolicy {
 
     protected static final String[] GENERAL_MANAGER_URLS = {
             // orders
-            "/api/v1/orders/{orderId}/approve",
+            "/api/v1/orders/{orderId}/approvePurchaseOrder",
             "/api/v1/orders/{orderId}/reject",
 
             // warehouse
@@ -55,7 +55,7 @@ public class SecurityPolicy {
             "/api/v1/requisitions/{requisitionID}",
             "/api/v1/purchases",
             "/api/v1/purchases/{purchaseOrderId}",
-            "/api/v1/purchases/{purchaseOrderId}/cancel"
+            "/api/v1/purchases/{purchaseOrderId}/cancel",
 
 
             "/api/v1/statistics/total-sales",
@@ -63,7 +63,7 @@ public class SecurityPolicy {
 
     protected static final String[] SENIOR_MANAGER_URLS = {
             // orders
-            "/api/v1/orders/{orderId}/approve",
+            "/api/v1/orders/{orderId}/approvePurchaseOrder",
             "/api/v1/orders/{orderId}/reject",
 
             // warehouse
@@ -72,7 +72,7 @@ public class SecurityPolicy {
             // requisitions
             "/api/v1/requisitions",
             "/api/v1/requisitions/{requisitionID}",
-            "/api/v1/requisitions/{requisitionId}/approve",
+            "/api/v1/requisitions/{requisitionId}/approvePurchaseOrder",
             "/api/v1/requisitions/{requisitionId}/reject",
 
             // purchases
@@ -90,7 +90,7 @@ public class SecurityPolicy {
             "/api/v1/statistics/patterns",
             "/api/v1/statistics/store-order",
             "/api/v1/statistics/total-sales",
-            "/api/v1/orders/{orderId}/approve",
+            "/api/v1/orders/{orderId}/approvePurchaseOrder",
             "/api/v1/orders/{orderId}/reject",
             "/api/v1/requisitions/create",
             "/api/v1/requisitions/{requisitionId}/submit",
@@ -125,8 +125,8 @@ public class SecurityPolicy {
             // member
             "/api/v1/auth/logout",
             "/api/v1/members/password",
-            "/api/v1/purchases/{purchaseOrderId}/approve",
-            "/api/v1/purchases/{purchaseOrderId}/reject"
+            "/api/v1/purchases/{purchaseOrderId}/approvePurchaseOrder",
+            "/api/v1/purchases/{purchaseOrderId}/reject",
 
             // requisitions
             "/api/v1/requisitions/**",

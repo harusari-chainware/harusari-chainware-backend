@@ -5,6 +5,7 @@ import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.purchase.command.application.dto.request.CancelPurchaseOrderRequest;
 import com.harusari.chainware.purchase.command.application.dto.request.RejectPurchaseOrderRequest;
+import com.harusari.chainware.purchase.command.application.dto.request.UpdatePurchaseOrderRequest;
 import com.harusari.chainware.purchase.command.application.service.PurchaseOrderCommandService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -25,7 +26,7 @@ public class PurchaseOrderCommandController {
             @PathVariable("purchaseOrderId") Long purchaseOrderId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        purchaseOrderCommandService.approve(purchaseOrderId, userDetails.getMemberId());
+        purchaseOrderCommandService.approvePurchaseOrder(purchaseOrderId, userDetails.getMemberId());
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
@@ -60,6 +61,18 @@ public class PurchaseOrderCommandController {
         );
         return ResponseEntity.ok(ApiResponse.success(null));
     }
+
+    @PutMapping("/{purchaseOrderId}")
+    @Operation(summary = "발주서 수정", description = "REQUESTED 상태일 때만 발주서를 수정할 수 있습니다.")
+    public ResponseEntity<ApiResponse<Void>> updatePurchaseOrder(
+            @PathVariable Long purchaseOrderId,
+            @RequestBody @Valid UpdatePurchaseOrderRequest request,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        purchaseOrderCommandService.updatePurchaseOrder(purchaseOrderId, request, user.getMemberId());
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
 
 
 }
