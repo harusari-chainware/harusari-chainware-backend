@@ -1,15 +1,9 @@
 package com.harusari.chainware.order.query.repository;
 
-import com.harusari.chainware.delivery.command.domain.aggregate.QDelivery;
 import com.harusari.chainware.franchise.command.domain.aggregate.FranchiseStatus;
-import com.harusari.chainware.franchise.command.domain.aggregate.QFranchise;
-import com.harusari.chainware.member.command.domain.aggregate.QMember;
 import com.harusari.chainware.order.command.domain.aggregate.OrderStatus;
-import com.harusari.chainware.order.command.domain.aggregate.QOrder;
-import com.harusari.chainware.order.command.domain.aggregate.QOrderDetail;
 import com.harusari.chainware.order.query.dto.request.OrderSearchRequest;
 import com.harusari.chainware.order.query.dto.response.*;
-import com.harusari.chainware.product.command.domain.aggregate.QProduct;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -24,18 +18,18 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+import static com.harusari.chainware.delivery.command.domain.aggregate.QDelivery.delivery;
+import static com.harusari.chainware.franchise.command.domain.aggregate.QFranchise.franchise;
+import static com.harusari.chainware.member.command.domain.aggregate.QMember.member;
+import static com.harusari.chainware.order.command.domain.aggregate.QOrder.order;
+import static com.harusari.chainware.order.command.domain.aggregate.QOrderDetail.orderDetail;
+import static com.harusari.chainware.product.command.domain.aggregate.QProduct.product;
+
 @Repository
 @RequiredArgsConstructor
 public class OrderQueryRepositoryImpl implements OrderQueryRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
-
-    private final QOrder order = QOrder.order;
-    private final QFranchise franchise = QFranchise.franchise;
-    private final QDelivery delivery = QDelivery.delivery;
-    private final QMember member = QMember.member;
-    private final QOrderDetail orderDetail = QOrderDetail.orderDetail;
-    private final QProduct product = QProduct.product;
 
     @Override
     public Page<OrderSearchResponse> searchOrders(OrderSearchRequest request, Pageable pageable) {
