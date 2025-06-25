@@ -1,119 +1,78 @@
 package com.harusari.chainware.config.security;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpMethod;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class SecurityPolicy {
+import java.util.List;
 
-    protected static final String[] PUBLIC_URLS = {
-            // member
-            "/api/v1/auth/login",
-            "/api/v1/auth/refresh",
-    };
+import static com.harusari.chainware.config.security.AccessType.*;
+import static com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType.*;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
 
-    protected static final String[] MASTER_ONLY_URLS = {
-            // member
-            "/api/v1/members/email-exists",
-            "/api/v1/members/headquarters",
-            "/api/v1/members/franchise",
-            "/api/v1/members/vendor",
-            "/api/v1/members/warehouse",
-            "/api/v1/members",
-            "/api/v1/members/{memberId}",
-    };
+@Getter
+@RequiredArgsConstructor
+public enum SecurityPolicy {
 
-    protected static final String[] GENERAL_MANAGER_URLS = {
-            // orders
-            "/api/v1/orders/{orderId}/approve",
-            "/api/v1/orders/{orderId}/reject",
+    /* Member */
+    // Role Based
+    EMAIL_EXISTS_GET("/api/v1/members/email-exists", GET, ROLE_BASED, List.of(MASTER)), // 이메일 중복 확인
+    MEMBER_HEADQUARTERS_POST("/api/v1/members/headquarters", POST, ROLE_BASED, List.of(MASTER)), // 본사 직원 회원가입
+    MEMBER_FRANCHISE_POST("/api/v1/members/franchise", POST, ROLE_BASED, List.of(MASTER)), // 가맹점 회원가입
+    MEMBER_VENDOR_POST("/api/v1/members/vendor", POST, ROLE_BASED, List.of(MASTER)), // 거래처 회원가입
+    MEMBER_WAREHOUSE_POST("/api/v1/members/warehouse", POST, ROLE_BASED, List.of(MASTER)),
+    MEMBERS_GET("/api/v1/members", GET, ROLE_BASED, List.of(MASTER)), // 회원 정보 조회
+    MEMBERS_DETAIL_GET("/api/v1/members/{memberId}", GET, ROLE_BASED, List.of(MASTER)), // 회원 정보 상세 조회
 
-            // warehouse
-            "/api/v1/warehouse/{warehouseId}",
+    // Permit All
+    LOGIN_POST("/api/v1/auth/login", POST, PERMIT_ALL, List.of()), // 로그인
+    REFRESH_POST("/api/v1/auth/refresh", POST, PERMIT_ALL, List.of()), // 리프레시 토큰 재발급
 
-            // requisition
-            "/api/v1/requisitions",
-            "/api/v1/requisitions/create",
-            "/api/v1/requisitions/{requisitionID}",
-            "/api/v1/requisitions/{requisitionId}/submit",
+    // Authenticated
+    LOGOUT_POST("/api/v1/auth/logout", POST, AUTHENTICATED, List.of()), // 로그아웃
+    PASSWORD_POST("/api/v1/auth/password", POST, AUTHENTICATED, List.of()); // 비밀번호 변경
 
-            // purchase
-            "/api/v1/purchases",
-            "/api/v1/purchases/{purchaseOrderId}",
+    /* Product */
 
-            // statistics
-            "/api/v1/statistics/disposal-rate",
-            "/api/v1/statistics/inventory-turnover",
-            "/api/v1/statistics/menu-sales",
-            "/api/v1/statistics/purchase-order",
-            "/api/v1/statistics/patterns",
-            "/api/v1/statistics/store-order",
-            "/api/v1/statistics/total-sales",
-    };
 
-    protected static final String[] SENIOR_MANAGER_URLS = {
-            // orders
-            "/api/v1/orders/{orderId}/approve",
-            "/api/v1/orders/{orderId}/reject",
+    /* Franchise */
 
-            // warehouse
-            "/api/v1/warehouse/{warehouseId}",
 
-            // requisitions
-            "/api/v1/requisitions",
-            "/api/v1/requisitions/{requisitionID}",
-            "/api/v1/requisitions/{requisitionId}/approve",
-            "/api/v1/requisitions/{requisitionId}/reject",
+    /* Vendor */
 
-            // purchases
-            "/api/v1/purchases",
-            "/api/v1/purchases/{purchaseOrderId}",
 
-            // vendors
-            "/api/v1/vendors/{vendorId}",
+    /* Warehouse */
 
-            // statistics
-            "/api/v1/statistics/disposal-rate",
-            "/api/v1/statistics/inventory-turnover",
-            "/api/v1/statistics/menu-sales",
-            "/api/v1/statistics/purchase-order",
-            "/api/v1/statistics/patterns",
-            "/api/v1/statistics/store-order",
-            "/api/v1/statistics/total-sales",
-    };
 
-    protected static final String[] WAREHOUSE_MANAGER_URLS = {
-            // delivery
-            "/api/v1/delivery/{deliveryId}/start",
+    /* Order */
 
-            // warehouse
-            "/api/v1/warehouse/{warehouseId}/inventory",
-            "/api/v1/warehouse/inventory/{inventoryId}",
-    };
 
-    protected static final String[] FRANCHISE_MANAGER_URLS = {
-            // orders
-            "/api/v1/orders",
-            "/api/v1/orders/{orderId}",
-            "/api/v1/orders/{orderId}/cancel",
+    /* Requisition */
 
-            // delivery
-            "/api/v1/delivery/{deliveryId}/complete",
-    };
 
-    protected static final String[] VENDOR_MANAGER_URLS = {
-            // member
-            "/api/v1/auth/logout",
-            "/api/v1/members/password",
+    /* Delivery */
 
-            // requisitions
-            "/api/v1/requisitions/**",
-    };
 
-    protected static final String[] AUTHENTICATED_URLS = {
-            "/api/v1/auth/logout",
-            "/api/v1/members/password",
-            "/api/v1/requisitions/**",
-    };
+    /* Purchase Order */
+
+
+    /* Take Back */
+
+
+    /* Notification */
+
+
+    /* Disposal */
+
+
+    /* Statistics */
+
+
+    private final String path;
+    private final HttpMethod method;
+    private final AccessType accessType;
+    private final List<MemberAuthorityType> memberAuthorities;
 
 }
