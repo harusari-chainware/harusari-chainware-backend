@@ -1,4 +1,4 @@
-package com.harusari.chainware.franchise.common.mapper;
+package com.harusari.chainware.franchise.common.mapstruct;
 
 import com.harusari.chainware.franchise.command.domain.aggregate.Franchise;
 import com.harusari.chainware.member.command.application.dto.request.franchise.FranchiseCreateRequest;
@@ -6,8 +6,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
 @Mapper(
-        unmappedSourcePolicy =  ReportingPolicy.WARN,
-        unmappedTargetPolicy = ReportingPolicy.WARN
+        unmappedSourcePolicy =  ReportingPolicy.IGNORE,
+        unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
 public interface FranchiseMapStruct {
 

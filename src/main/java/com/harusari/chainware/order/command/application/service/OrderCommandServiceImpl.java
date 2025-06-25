@@ -13,6 +13,9 @@ import com.harusari.chainware.order.command.domain.repository.OrderDetailReposit
 import com.harusari.chainware.order.command.domain.repository.OrderRepository;
 import com.harusari.chainware.order.exception.OrderErrorCode;
 import com.harusari.chainware.order.exception.OrderException;
+import com.harusari.chainware.product.command.domain.aggregate.Product;
+import com.harusari.chainware.product.command.domain.repository.ProductRepository;
+import com.harusari.chainware.product.command.infrastructure.JpaProductRepository;
 import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInventory;
 import com.harusari.chainware.warehouse.command.infrastructure.repository.JpaWarehouseInventoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +43,8 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
     private final DeliveryRepository deliveryRepository;
     private final JpaWarehouseInventoryRepository jpaWarehouseInventoryRepository;
+    private final JpaProductRepository jpaProductRepository;
+    private final ProductRepository ProductRepository;
 
     private final RedissonClient redissonClient;
 
@@ -81,9 +86,9 @@ public class OrderCommandServiceImpl implements OrderCommandService {
                 }
 
                 // 1-3. 제품 단가에 대한 가격 계산
-                // TODO: productService 등으로 상품 가격 조회
-                // int unitPrice = getProductPrice(d.getProductId());
-                int unitPrice = 1500;
+                Product product = ProductRepository.findById(d.getProductId())
+                        .orElseThrow(() -> new OrderException(OrderErrorCode.PRODUCT_NOT_FOUND));
+                int unitPrice = product.getBasePrice();
                 long itemTotalPrice = (long) unitPrice * quantity;
                 totalQuantity += quantity;
                 totalPrice += itemTotalPrice;
@@ -183,9 +188,9 @@ public class OrderCommandServiceImpl implements OrderCommandService {
             }
 
             // 4-3. 제품 단가에 대한 가격 계산
-            // TODO: productService 등으로 상품 가격 조회
-            // int unitPrice = getProductPrice(d.getProductId());
-            int unitPrice = 1500;
+            Product product = ProductRepository.findById(d.getProductId())
+                    .orElseThrow(() -> new OrderException(OrderErrorCode.PRODUCT_NOT_FOUND));
+            int unitPrice = product.getBasePrice();
             long itemTotalPrice = (long) unitPrice * quantity;
             totalQuantity += quantity;
             totalPrice += itemTotalPrice;

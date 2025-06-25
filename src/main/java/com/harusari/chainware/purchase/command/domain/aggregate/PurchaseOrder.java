@@ -1,5 +1,6 @@
 package com.harusari.chainware.purchase.command.domain.aggregate;
 
+import com.harusari.chainware.requisition.command.application.exception.InvalidStatusException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -64,4 +65,31 @@ public class PurchaseOrder {
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
     }
+
+
+    // 발주 승인
+    public void approve() {
+        this.purchaseOrderStatus = PurchaseOrderStatus.APPROVED;
+        this.modifiedAt = LocalDateTime.now();
+    }
+
+    // 발주 거절
+    public void reject(String rejectReason) {
+        this.purchaseOrderStatus = PurchaseOrderStatus.REJECTED;
+        this.rejectReason = rejectReason;
+        this.modifiedAt = LocalDateTime.now();
+    }
+
+    // 발주 요청 취소
+    public void cancel(String cancelReason) {
+        this.purchaseOrderStatus = PurchaseOrderStatus.CANCELLED;
+        this.rejectReason = cancelReason; // 사유 저장 재활용
+        this.modifiedAt = LocalDateTime.now();
+    }
+
+    public void updateTotalAmount(Long totalAmount) {
+        this.totalAmount = totalAmount;
+        this.modifiedAt = LocalDateTime.now();
+    }
+
 }

@@ -24,6 +24,7 @@ public enum SecurityPolicy {
     MEMBER_WAREHOUSE_POST("/api/v1/members/warehouse", POST, ROLE_BASED, List.of(MASTER)),
     MEMBERS_GET("/api/v1/members", GET, ROLE_BASED, List.of(MASTER)), // 회원 정보 조회
     MEMBERS_DETAIL_GET("/api/v1/members/{memberId}", GET, ROLE_BASED, List.of(MASTER)), // 회원 정보 상세 조회
+    LOGIN_HISTORY_GET("/api/v1/members/{memberId}/login-history", GET, ROLE_BASED, List.of(MASTER)),
 
     // Permit All
     LOGIN_POST("/api/v1/auth/login", POST, PERMIT_ALL, List.of()), // 로그인
@@ -32,7 +33,7 @@ public enum SecurityPolicy {
     // Authenticated
     LOGOUT_POST("/api/v1/auth/logout", POST, AUTHENTICATED, List.of()), // 로그아웃
     PASSWORD_POST("/api/v1/auth/password", POST, AUTHENTICATED, List.of()), // 비밀번호 변경
-
+  
     /* Category */
     CATEGORY_POST("/api/v1/category", POST, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 카테고리 등록
     CATEGORY_PUT("/api/v1/category/{categoryId}", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 카테고리 수정
@@ -60,7 +61,7 @@ public enum SecurityPolicy {
 
     // Product Query (수정 필요)
     PRODUCT_LIST_GET("/api/v1/products", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, FRANCHISE_MANAGER)), // 전체 제품 목록 조회
-    PRODUCT_DETAIL_GET("/api/v1/products/{productId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, FRANCHISE_MANAGER)); // 제품 상세 정보 조회
+    PRODUCT_DETAIL_GET("/api/v1/products/{productId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, FRANCHISE_MANAGER)), // 제품 상세 정보 조회
 
     /* Franchise */
 
@@ -69,19 +70,41 @@ public enum SecurityPolicy {
 
 
     /* Warehouse */
-
+    WAREHOUSE_UPDATE("/api/v1/warehouse/{warehouseId}", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 창고 마스터 수정
+    WAREHOUSE_DELETE("/api/v1/warehouse/{warehouseId}", DELETE, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 창고 마스터 삭제
+    WAREHOUSE_INVENTORY_REGISTER("/api/v1/warehouse/{warehouseId}/inventory", POST, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 보유 재고 등록
+    WAREHOUSE_INVENTORY_UPDATE("/api/v1/warehouse/inventory/{inventoryId}", PUT, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 보유 재고 수정
+    WAREHOUSE_INVENTORY_DELETE("/api/v1/warehouse/inventory/{inventoryId}", PUT, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 보유 재고 삭제
 
     /* Order */
-
+    ORDER_CREATE("/api/v1/orders", POST, ROLE_BASED, List.of(FRANCHISE_MANAGER)), // 주문 등록
+    ORDER_UPDATE("/api/v1/orders/{orderId}", PUT, ROLE_BASED, List.of(FRANCHISE_MANAGER)), // 주문 수정
+    ORDER_CANCEL("/api/v1/orders/{orderId}/cancel", PUT, ROLE_BASED, List.of(FRANCHISE_MANAGER)), // 주문 수정
+    ORDER_APPROVE("/api/v1/orders/{orderId}/approve", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 주문 승인
+    ORDER_REJECT("/api/v1/orders/{orderId}/reject", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 주문 반려
+    ORDER_LIST_GET("/api/v1/orders", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, FRANCHISE_MANAGER)), // 주문 목록 조회
+    ORDER_DETAIL_GET("/api/v1/orders/{orderId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, FRANCHISE_MANAGER)), // 주문 상세 조회
 
     /* Requisition */
-
+    REQUISITION_CREATE_POST("/api/v1/requisitions", POST, ROLE_BASED, List.of(GENERAL_MANAGER)), // 품의서 작성
+    REQUISITION_SUBMIT_PUT("/api/v1/requisitions/{requisitionId}/submit", PUT, ROLE_BASED, List.of(GENERAL_MANAGER)), // 품의서 상신
+    REQUISITION_DELETE("/api/v1/requisitions/{requisitionId}", DELETE, ROLE_BASED, List.of(GENERAL_MANAGER)), // 품의서 삭제
+    REQUISITION_APPROVE_PUT("/api/v1/requisitions/{requisitionId}/approve", PUT, ROLE_BASED, List.of(SENIOR_MANAGER)), // 품의서 승인
+    REQUISITION_REJECT_PUT("/api/v1/requisitions/{requisitionId}/reject", PUT, ROLE_BASED, List.of(SENIOR_MANAGER)), // 품의서 반려
+    REQUISITION_GET("/api/v1/requisitions", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 품의서 목록 조회
+    REQUISITION_DETAIL_GET("/api/v1/requisitions/{requisitionId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 품의서 상세 조회
 
     /* Delivery */
-
+    DELIVERY_START("/api/v1/delivery/{deliveryId}/start", PUT, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 배송 시작
+    DELIVERY_COMPLETE("/api/v1/delivery/{deliveryId}/complete", PUT, ROLE_BASED, List.of(FRANCHISE_MANAGER)), // 배송 완료
 
     /* Purchase Order */
-
+    PURCHASE_GET("/api/v1/purchases", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, VENDOR_MANAGER)), // 발주 목록 조회
+    PURCHASE_DETAIL_GET("/api/v1/purchases/{purchaseOrderId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 발주 상세 조회
+    PURCHASE_CANCEL_PUT("/api/v1/purchases/{purchaseOrderId}/cancel", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 발주 취소
+    PURCHASE_UPDATE_PUT("/api/v1/purchases/{purchaseOrderId}", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 발주 수정
+    PURCHASE_APPROVE_PUT("/api/v1/purchases/{purchaseOrderId}/approve", PUT, ROLE_BASED, List.of(VENDOR_MANAGER )), // 발주 승인
+    PURCHASE_REJECT_PUT("/api/v1/purchases/{purchaseOrderId}/reject", PUT, ROLE_BASED, List.of(VENDOR_MANAGER)), // 발주 거절
 
     /* Take Back */
 
@@ -94,6 +117,13 @@ public enum SecurityPolicy {
 
     /* Statistics */
 
+
+    /* Swagger */
+    SWAGGER_UI("/swagger-ui/**", GET, PERMIT_ALL, List.of()),
+    SWAGGER_RESOURCE("/swagger-resources/**", GET, PERMIT_ALL, List.of()),
+    SWAGGER_DOCS("/v3/api-docs/**", GET, PERMIT_ALL, List.of()),
+    SWAGGER_CONFIG("/v3/api-docs/swagger-config", GET, PERMIT_ALL, List.of()),
+    SWAGGER_WEBJARS("/webjars/**", GET, PERMIT_ALL, List.of());
 
     private final String path;
     private final HttpMethod method;

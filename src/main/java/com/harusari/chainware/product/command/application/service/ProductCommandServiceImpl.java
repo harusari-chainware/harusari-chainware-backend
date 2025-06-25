@@ -6,7 +6,7 @@ import com.harusari.chainware.exception.product.ProductNotFoundException;
 import com.harusari.chainware.product.command.application.dto.request.ProductCreateRequest;
 import com.harusari.chainware.product.command.application.dto.request.ProductUpdateRequest;
 import com.harusari.chainware.product.command.application.dto.response.ProductCommandResponse;
-import com.harusari.chainware.product.command.application.mapper.ProductMapper;
+import com.harusari.chainware.product.common.mapstruct.ProductMapStruct;
 import com.harusari.chainware.product.command.domain.aggregate.Product;
 import com.harusari.chainware.product.command.domain.aggregate.StoreType;
 import com.harusari.chainware.product.command.domain.repository.ProductRepository;
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductCommandServiceImpl implements ProductCommandService {
 
     private final ProductRepository productRepository;
-    private final ProductMapper productMapper;
+    private final ProductMapStruct productMapstruct;
 
     /* 상품 등록 */
     @Transactional
@@ -32,7 +32,7 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
         String productCode = generateProductCode(request.getCategoryCode());
 
-        Product newProduct = productMapper.toEntity(request);
+        Product newProduct = productMapstruct.toEntity(request);
 
         Product productWithCode = Product.builder()
                 .categoryId(newProduct.getCategoryId())

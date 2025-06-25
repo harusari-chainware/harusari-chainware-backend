@@ -1,5 +1,13 @@
 package com.harusari.chainware.purchase.command.application.service;
 
+import com.harusari.chainware.exception.purchase.PurchaseOrderErrorCode;
+import com.harusari.chainware.exception.purchase.PurchaseOrderException;
+import com.harusari.chainware.exception.requisition.RequisitionErrorCode;
+import com.harusari.chainware.exception.requisition.RequisitionException;
+import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
+import com.harusari.chainware.purchase.command.application.dto.request.CancelPurchaseOrderRequest;
+import com.harusari.chainware.purchase.command.application.dto.request.RejectPurchaseOrderRequest;
+import com.harusari.chainware.purchase.command.application.dto.request.UpdatePurchaseOrderRequest;
 import com.harusari.chainware.purchase.command.domain.aggregate.PurchaseOrder;
 import com.harusari.chainware.purchase.command.domain.aggregate.PurchaseOrderDetail;
 import com.harusari.chainware.purchase.command.domain.aggregate.PurchaseOrderStatus;
@@ -31,13 +39,13 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
         // 1. 품의서 전체 정보 조회 (승인자, 거래처 등)
         RequisitionDetailResponse requisition = requisitionQueryMapper.findRequisitionById(requisitionId, memberId);
         if (requisition == null) {
-            throw new IllegalArgumentException("존재하지 않는 품의서입니다.");
+            throw new RequisitionException(RequisitionErrorCode.REQUISITION_NOT_FOUND);
         }
 
         // 2. 품의서 품목 리스트 조회
         List<RequisitionItemResponse> items = requisitionQueryMapper.findItemsByRequisitionId(requisitionId);
         if (items.isEmpty()) {
-            throw new IllegalStateException("품의서에 품목이 존재하지 않습니다.");
+            throw new RequisitionException(RequisitionErrorCode.REQUISITION_ITEM_NOT_FOUND);
         }
 
         // 3. 총 금액 계산
@@ -76,4 +84,98 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
 
         return order.getPurchaseOrderId();
     }
+
+
+
+    @Override
+    @Transactional
+    public void updatePurchaseOrder(Long purchaseOrderId, UpdatePurchaseOrderRequest request, Long memberId) {
+        // 1. 발주 조회
+        PurchaseOrder order = purchaseOrderRepository.findById(purchaseOrderId)
+                .orElseThrow(() -> new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_NOT_FOUND));
+
+        // 2. 수정 권한 확인
+        if (!order.getCreatedMemberId().equals(memberId)) {
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_UNAUTHORIZED_WRITER);
+        }
+
+        // 3. 수정 가능 상태 확인
+        if (!order.getPurchaseOrderStatus().equals(PurchaseOrderStatus.REQUESTED)) {
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_UPDATE_INVALID_STATUS);
+        }
+
+        // 4. 총 금액 계산
+        long totalAmount = request.getItems().stream()
+                .mapToLong(item -> (long) item.getUnitPrice() * item.getQuantity())
+                .sum();
+
+        // 5. 발주 정보 업데이트
+        order.updateTotalAmount(totalAmount);
+
+        // 6. 기존 품목 삭제 후 재등록
+        purchaseOrderDetailRepository.deleteByPurchaseOrderId(purchaseOrderId);
+
+        List<PurchaseOrderDetail> newDetails = request.getItems().stream()
+                .map(item -> PurchaseOrderDetail.builder()
+                        .purchaseOrderId(purchaseOrderId)
+                        .productId(item.getProductId())
+                        .quantity(item.getQuantity())
+                        .unitPrice(item.getUnitPrice())
+//                        .totalPrice((long) item.getUnitPrice() * item.getQuantity())
+                        .build())
+                .toList();
+
+        purchaseOrderDetailRepository.saveAll(newDetails);
+    }
+
+
+    @Override
+    @Transactional
+    public void approvePurchaseOrder(Long purchaseOrderId, Long memberId) {
+        PurchaseOrder order = purchaseOrderRepository.findById(purchaseOrderId)
+                .orElseThrow(() -> new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_UNAUTHORIZED_VENDOR));
+
+        if (!order.getPurchaseOrderStatus().equals(PurchaseOrderStatus.REQUESTED)) {
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_APPROVE_INVALID_STATUS);
+        }
+
+        order.approve();
+    }
+
+
+    @Override
+    @Transactional
+    public void rejectPurchaseOrder(Long memberId, Long purchaseOrderId, RejectPurchaseOrderRequest request) {
+        PurchaseOrder order = purchaseOrderRepository.findById(purchaseOrderId)
+                .orElseThrow(() -> new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_NOT_FOUND));
+
+        if (!order.getVendorMemberId().equals(memberId)) {
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_UNAUTHORIZED_VENDOR);
+        }
+
+        if (!order.getPurchaseOrderStatus().equals(PurchaseOrderStatus.REQUESTED)) {
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_REJECT_INVALID_STATUS);
+        }
+
+        order.reject(request.getRejectReason());
+    }
+
+
+    @Override
+    @Transactional
+    public void cancelPurchaseOrder(Long memberId, Long purchaseOrderId, CancelPurchaseOrderRequest request, MemberAuthorityType authorityType) {
+        PurchaseOrder order = purchaseOrderRepository.findById(purchaseOrderId)
+                .orElseThrow(() -> new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_NOT_FOUND));
+
+        if (!(authorityType == MemberAuthorityType.GENERAL_MANAGER || authorityType == MemberAuthorityType.SENIOR_MANAGER)) {
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_UNAUTHORIZED_WRITER);
+        }
+
+        if (order.getPurchaseOrderStatus() != PurchaseOrderStatus.REQUESTED) {
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_CANCEL_INVALID_STATUS);
+        }
+
+        order.cancel(request.getCancelReason());
+    }
+
 }
