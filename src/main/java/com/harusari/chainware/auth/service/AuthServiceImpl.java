@@ -6,9 +6,12 @@ import com.harusari.chainware.auth.dto.response.TokenResponse;
 import com.harusari.chainware.auth.jwt.JwtTokenProvider;
 import com.harusari.chainware.exception.auth.*;
 import com.harusari.chainware.member.command.domain.aggregate.Authority;
+import com.harusari.chainware.member.command.domain.aggregate.LoginHistory;
 import com.harusari.chainware.member.command.domain.aggregate.Member;
 import com.harusari.chainware.member.command.domain.repository.AuthorityCommandRepository;
+import com.harusari.chainware.member.command.domain.repository.LoginHistoryCommandRepository;
 import com.harusari.chainware.member.query.repository.MemberQueryRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,19 +28,28 @@ import static com.harusari.chainware.exception.auth.AuthErrorCode.*;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
+    private static final String HEADER_X_FORWARDED_FOR = "X-Forwarded-For";
+    private static final String HEADER_USER_AGENT = "User-Agent";
+    private static final String IP_DELIMITER = ",";
+
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberQueryRepository memberQueryRepository;
     private final AuthorityCommandRepository authorityCommandRepository;
+    private final LoginHistoryCommandRepository loginHistoryCommandRepository;
     private final RedisTemplate<String, RefreshTokenDTO> refreshTokenRedisTemplate;
 
+    @Transactional
     @Override
-    public TokenResponse login(LoginRequest loginRequest) {
+    public TokenResponse login(LoginRequest loginRequest, HttpServletRequest httpServletRequest) {
         Member member = findAndValidateMember(loginRequest);
         Authority authority = loadAuthority(member.getAuthorityId());
 
         TokenResponse tokenResponse = generateTokens(member, authority);
         storeRefreshToken(member.getEmail(), tokenResponse.refreshToken());
+
+        saveLoginHistory(member, httpServletRequest);
+
         return tokenResponse;
     }
 
@@ -118,6 +130,24 @@ public class AuthServiceImpl implements AuthService {
         if (storedRefreshToken.expiryDate().before(new Date())) {
             throw new RefreshTokenExpiredException(REFRESH_TOKEN_EXPIRED_EXCEPTION);
         }
+    }
+
+    private void saveLoginHistory(Member member, HttpServletRequest request) {
+        String ipAddress = extractClientIp(request);
+        String browser = request.getHeader(HEADER_USER_AGENT);
+
+        LoginHistory loginHistory = LoginHistory.builder()
+                .memberId(member.getMemberId())
+                .ipAddress(ipAddress)
+                .browser(browser)
+                .build();
+
+        loginHistoryCommandRepository.save(loginHistory);
+    }
+
+    private String extractClientIp(HttpServletRequest request) {
+        String forwarded = request.getHeader(HEADER_X_FORWARDED_FOR);
+        return forwarded != null ? forwarded.split(IP_DELIMITER)[0].trim() : request.getRemoteAddr();
     }
 
 }
