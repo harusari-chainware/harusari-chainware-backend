@@ -17,6 +17,9 @@ import com.harusari.chainware.purchase.command.infrastructure.PurchaseOrderCodeG
 import com.harusari.chainware.requisition.query.dto.response.RequisitionDetailResponse;
 import com.harusari.chainware.requisition.query.dto.response.RequisitionItemResponse;
 import com.harusari.chainware.requisition.query.mapper.RequisitionQueryMapper;
+import com.harusari.chainware.vendor.query.dto.VendorDetailDto;
+import com.harusari.chainware.vendor.query.mapper.VendorQueryMapper;
+import com.harusari.chainware.vendor.query.service.VendorQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +35,7 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
     private final PurchaseOrderDetailRepository purchaseOrderDetailRepository;
     private final PurchaseOrderCodeGenerator codeGenerator;
     private final RequisitionQueryMapper requisitionQueryMapper;
+    private final VendorQueryService vendorQueryService;
 
     @Override
     @Transactional
@@ -53,6 +57,10 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
                 .mapToLong(item -> item.getUnitPrice() * item.getQuantity())
                 .sum();
 
+        VendorDetailDto vendorDetail = vendorQueryService.getVendorDetail(requisition.getVendorId()).getVendor();
+        Long vendorMemberId = vendorDetail.getMemberId();
+
+
         // 4. 발주 생성
         String code = codeGenerator.generate();
 
@@ -60,7 +68,8 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
                 .requisitionId(requisitionId)
                 .vendorId(requisition.getVendorId())
                 .createdMemberId(requisition.getCreatedMemberId())
-                .vendorMemberId(requisition.getApprovedMemberId()) // 결재자를 거래처 담당자로 사용
+//                .vendorMemberId(requisition.getApprovedMemberId()) // 결재자를 거래처 담당자로 사용
+                .vendorMemberId(vendorMemberId)
                 .purchaseOrderCode(code)
                 .totalAmount(totalAmount)
                 .purchaseOrderStatus(PurchaseOrderStatus.REQUESTED)
