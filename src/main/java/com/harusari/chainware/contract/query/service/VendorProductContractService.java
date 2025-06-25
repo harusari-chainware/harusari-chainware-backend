@@ -8,5 +8,5 @@ public interface VendorProductContractService {
 
     List<VendorProductContractDto> getAllContracts();
 
-    public List<VendorProductContractDto> getContractsByVendorId(Long vendorId);
+    List<VendorProductContractDto> getContractsByVendorId(Long vendorId);
 }
