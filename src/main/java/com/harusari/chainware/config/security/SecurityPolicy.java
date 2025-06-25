@@ -9,8 +9,7 @@ import java.util.List;
 
 import static com.harusari.chainware.config.security.AccessType.*;
 import static com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType.*;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.*;
 
 @Getter
 @RequiredArgsConstructor
@@ -32,7 +31,7 @@ public enum SecurityPolicy {
 
     // Authenticated
     LOGOUT_POST("/api/v1/auth/logout", POST, AUTHENTICATED, List.of()), // 로그아웃
-    PASSWORD_POST("/api/v1/auth/password", POST, AUTHENTICATED, List.of()); // 비밀번호 변경
+    PASSWORD_POST("/api/v1/auth/password", POST, AUTHENTICATED, List.of()), // 비밀번호 변경
 
     /* Product */
 
@@ -44,15 +43,30 @@ public enum SecurityPolicy {
 
 
     /* Warehouse */
+    WAREHOUSE_UPDATE("/api/v1/warehouse/{warehouseId}", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 창고 마스터 수정
+    WAREHOUSE_DELETE("/api/v1/warehouse/{warehouseId}", DELETE, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 창고 마스터 삭제
+    WAREHOUSE_INVENTORY_REGISTER("/api/v1/warehouse/{warehouseId}/inventory", POST, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 보유 재고 등록
+    WAREHOUSE_INVENTORY_UPDATE("/api/v1/warehouse/inventory/{inventoryId}", PUT, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 보유 재고 수정
+    WAREHOUSE_INVENTORY_DELETE("/api/v1/warehouse/inventory/{inventoryId}", PUT, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 보유 재고 삭제
 
 
     /* Order */
+    ORDER_CREATE("/api/v1/orders", POST, ROLE_BASED, List.of(FRANCHISE_MANAGER)), // 주문 등록
+    ORDER_UPDATE("/api/v1/orders/{orderId}", PUT, ROLE_BASED, List.of(FRANCHISE_MANAGER)), // 주문 수정
+    ORDER_CANCEL("/api/v1/orders/{orderId}/cancel", PUT, ROLE_BASED, List.of(FRANCHISE_MANAGER)), // 주문 수정
+    ORDER_APPROVE("/api/v1/orders/{orderId}/approve", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 주문 승인
+    ORDER_REJECT("/api/v1/orders/{orderId}/reject", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 주문 반려
+
+    ORDER_LIST_GET("/api/v1/orders", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, FRANCHISE_MANAGER)), // 주문 목록 조회
+    ORDER_DETAIL_GET("/api/v1/orders/{orderId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, FRANCHISE_MANAGER)), // 주문 상세 조회
 
 
     /* Requisition */
 
 
     /* Delivery */
+    DELIVERY_START("/api/v1/delivery/{deliveryId}/start", PUT, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 배송 시작
+    DELIVERY_COMPLETE("/api/v1/delivery/{deliveryId}/complete", PUT, ROLE_BASED, List.of(FRANCHISE_MANAGER)), // 배송 완료
 
 
     /* Purchase Order */
@@ -68,6 +82,11 @@ public enum SecurityPolicy {
 
 
     /* Statistics */
+
+
+    /* Swagger */
+    SWAGGER_UI("/api/v1/swagger-ui/**", POST, PERMIT_ALL, List.of()),
+    SWAGGER_RESOURCE("/api/v1/swagger-resources/**", POST, PERMIT_ALL, List.of());
 
 
     private final String path;
