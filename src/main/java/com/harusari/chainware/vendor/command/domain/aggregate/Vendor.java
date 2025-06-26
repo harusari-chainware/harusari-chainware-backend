@@ -1,5 +1,6 @@
 package com.harusari.chainware.vendor.command.domain.aggregate;
 
+import com.harusari.chainware.common.domain.vo.Address;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -32,8 +33,13 @@ public class Vendor {
     )
     private VendorType vendorType;
 
-    @Column(name = "vendor_address")
-    private String vendorAddress;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "zipcode", column = @Column(name = "vendor_zipcode")),
+            @AttributeOverride(name = "addressRoad", column = @Column(name = "vendor_address_road")),
+            @AttributeOverride(name = "addressDetail", column = @Column(name = "vendor_address_detail"))
+    })
+    private Address vendorAddress;
 
     @Column(name = "vendor_tax_id")
     private String vendorTaxId;
@@ -68,7 +74,7 @@ public class Vendor {
 
     @Builder
     public Vendor(
-            Long memberId, String vendorName, VendorType vendorType, String vendorAddress,
+            Long memberId, String vendorName, VendorType vendorType, Address vendorAddress,
             String vendorTaxId, String vendorMemo, VendorStatus vendorStatus, String agreementFilePath,
             String agreementOriginalFileName, long agreementFileSize, LocalDateTime agreementUploadedAt,
             LocalDate vendorStartDate, LocalDate vendorEndDate
