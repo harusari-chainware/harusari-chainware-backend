@@ -1,5 +1,6 @@
 package com.harusari.chainware.product.query.controller;
 
+import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.product.query.dto.request.ProductSearchRequest;
 import com.harusari.chainware.product.query.dto.request.ProductStatusFilter;
 import com.harusari.chainware.product.query.dto.response.ProductDto;
@@ -18,7 +19,7 @@ public class ProductQueryController {
     private final ProductQueryService productQueryService;
 
     @GetMapping
-    public ResponseEntity<List<ProductDto>> getProducts(
+    public ResponseEntity<ApiResponse<List<ProductDto>>> getProducts(
             @RequestParam(required = false) String productName,
             @RequestParam(required = false) String productCode,
             @RequestParam(required = false) Long categoryId,
@@ -31,11 +32,11 @@ public class ProductQueryController {
                 .productStatusFilter(productStatusFilter)
                 .build();
 
-        return ResponseEntity.ok(productQueryService.getProducts(request));
+        return ResponseEntity.ok(ApiResponse.success(productQueryService.getProducts(request)));
     }
 
     @GetMapping("/{productId}")
-    public ResponseEntity<ProductDto> getProductById(@PathVariable Long productId) {
-        return ResponseEntity.ok(productQueryService.getProductById(productId));
+    public ResponseEntity<ApiResponse<ProductDto>> getProductById(@PathVariable Long productId) {
+        return ResponseEntity.ok(ApiResponse.success(productQueryService.getProductById(productId)));
     }
 }
