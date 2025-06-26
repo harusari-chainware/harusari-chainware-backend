@@ -54,7 +54,7 @@ public class ProductQueryServiceImpl implements ProductQueryService {
         // 관리자는 계약/거래처 정보도 함께 반환
         if (Set.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER).contains(authorityType)) {
             List<VendorProductContractDto> contracts = productQueryMapper.findVendorContractsByProductId(productId);
-            List<VendorDetailDto> vendors = vendorQueryMapper.findVendorsByProductId(productId);
+            List<VendorDetailDto> vendors = productQueryMapper.findVendorsByProductId(productId);
 
             return ProductDetailResponse.builder()
                     .product(product)

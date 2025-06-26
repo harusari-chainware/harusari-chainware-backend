@@ -16,5 +16,4 @@ public interface VendorQueryMapper {
 
     VendorDetailDto findVendorDetailById(Long vendorId);
 
-    List<VendorDetailDto> findVendorsByProductId(Long productId);
 }

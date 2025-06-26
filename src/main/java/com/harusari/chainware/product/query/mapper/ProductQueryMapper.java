@@ -3,6 +3,7 @@ package com.harusari.chainware.product.query.mapper;
 import com.harusari.chainware.contract.query.dto.response.VendorProductContractDto;
 import com.harusari.chainware.product.query.dto.request.ProductSearchRequest;
 import com.harusari.chainware.product.query.dto.response.ProductDto;
+import com.harusari.chainware.vendor.query.dto.VendorDetailDto;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -17,4 +18,6 @@ public interface ProductQueryMapper {
     long countProductsByConditions(ProductSearchRequest request);
 
     List<VendorProductContractDto> findVendorContractsByProductId(Long productId);
+
+    List<VendorDetailDto> findVendorsByProductId(Long productId);
 }
