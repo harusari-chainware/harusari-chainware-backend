@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Mapper
-public interface ProductMapper {
+public interface ProductQueryMapper {
     List<ProductDto> findProductsByConditions(ProductSearchRequest request);
     Optional<ProductDto> findProductById(Long productId);
 }

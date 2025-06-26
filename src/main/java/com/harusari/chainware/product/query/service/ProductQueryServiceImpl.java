@@ -4,7 +4,7 @@ import com.harusari.chainware.exception.product.ProductErrorCode;
 import com.harusari.chainware.exception.product.ProductNotFoundException;
 import com.harusari.chainware.product.query.dto.request.ProductSearchRequest;
 import com.harusari.chainware.product.query.dto.response.ProductDto;
-import com.harusari.chainware.product.query.mapper.ProductMapper;
+import com.harusari.chainware.product.query.mapper.ProductQueryMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductQueryServiceImpl implements ProductQueryService {
 
-    private final ProductMapper productMapper;
+    private final ProductQueryMapper productMapper;
 
     @Override
     @Transactional
