@@ -5,4 +5,5 @@ import com.harusari.chainware.takeback.command.application.dto.response.TakeBack
 
 public interface TakeBackCommandService {
     TakeBackCommandResponse createTakeBack(TakeBackCreateRequest request);
+    TakeBackCommandResponse cancelTakeBack(Long takeBackId);
 }

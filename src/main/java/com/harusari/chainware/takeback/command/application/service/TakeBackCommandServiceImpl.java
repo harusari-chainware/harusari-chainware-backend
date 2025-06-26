@@ -4,8 +4,11 @@ import com.harusari.chainware.takeback.command.application.dto.request.TakeBackC
 import com.harusari.chainware.takeback.command.application.dto.response.TakeBackCommandResponse;
 import com.harusari.chainware.takeback.command.domain.aggregate.TakeBack;
 import com.harusari.chainware.takeback.command.domain.aggregate.TakeBackDetail;
+import com.harusari.chainware.takeback.command.domain.aggregate.TakeBackStatus;
 import com.harusari.chainware.takeback.command.domain.repository.TakeBackDetailRepository;
 import com.harusari.chainware.takeback.command.domain.repository.TakeBackRepository;
+import com.harusari.chainware.takeback.exception.TakeBackErrorCode;
+import com.harusari.chainware.takeback.exception.TakeBackException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +47,26 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
                 .toList();
 
         takeBackDetailRepository.saveAll(details);
+
+        return TakeBackCommandResponse.builder()
+                .takeBackId(takeBack.getTakeBackId())
+                .takeBackStatus(takeBack.getTakeBackStatus())
+                .build();
+    }
+
+    @Override
+    public TakeBackCommandResponse cancelTakeBack(Long takeBackId) {
+        // 1. 반품 조회
+        TakeBack takeBack = takeBackRepository.findById(takeBackId)
+                .orElseThrow(() -> new TakeBackException(TakeBackErrorCode.TAKE_BACK_NOT_FOUND));
+
+        // 2. 상태 검증 (REQUESTED 상태만 취소 가능)
+        if (!TakeBackStatus.REQUESTED.equals(takeBack.getTakeBackStatus())) {
+            throw new TakeBackException(TakeBackErrorCode.INVALID_TAKE_BACK_STATUS_FOR_CANCEL);
+        }
+
+        // 3. 상태 변경
+        takeBack.cancel();
 
         return TakeBackCommandResponse.builder()
                 .takeBackId(takeBack.getTakeBackId())

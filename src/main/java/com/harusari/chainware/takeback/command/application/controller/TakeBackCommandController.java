@@ -7,10 +7,7 @@ import com.harusari.chainware.takeback.command.application.service.TakeBackComma
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -30,7 +27,14 @@ public class TakeBackCommandController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    // 반품 취소: "/api/v1/takeback/{takebackId}", DELETE
+    // 반품 취소
+    @PutMapping("/{takeBackId}/cancel")
+    public ResponseEntity<ApiResponse<TakeBackCommandResponse>> cancelTakeBack(
+            @PathVariable Long takeBackId
+    ) {
+        TakeBackCommandResponse response = takeBackCommandService.cancelTakeBack(takeBackId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
 
     // 반품 수거: "/api/v1/takeback/{takebackId}/warehoused", PUT
 
