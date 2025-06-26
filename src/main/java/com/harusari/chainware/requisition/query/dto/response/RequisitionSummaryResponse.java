@@ -12,6 +12,8 @@ public class RequisitionSummaryResponse {
     private Long requisitionId;
     private String requisitionCode;
     private RequisitionStatus requisitionStatus;
+    private Long vendorId;
+    private Long warehouseId;
     private int productCount;
     private int totalQuantity;
     private Long totalPrice;

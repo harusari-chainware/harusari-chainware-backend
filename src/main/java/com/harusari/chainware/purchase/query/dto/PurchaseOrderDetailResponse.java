@@ -13,6 +13,7 @@ public class PurchaseOrderDetailResponse {
     private Long purchaseOrderId;
     private String purchaseOrderCode;
     private String vendorName;
+    private Long warehouseId;
     private String status;
     private Long totalAmount;
     private LocalDateTime createdAt;
