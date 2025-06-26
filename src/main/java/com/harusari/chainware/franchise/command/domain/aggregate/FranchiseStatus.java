@@ -6,6 +6,6 @@ import lombok.Getter;
 public enum FranchiseStatus {
 
     ACTIVE,
-    EXPIRE
+    EXPIRED
 
 }

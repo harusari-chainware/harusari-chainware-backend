@@ -5,7 +5,7 @@ import com.harusari.chainware.disposal.query.dto.DisposalListDto;
 import com.harusari.chainware.disposal.query.dto.DisposalListResponseDto;
 import com.harusari.chainware.disposal.query.dto.DisposalSearchRequestDto;
 import com.harusari.chainware.disposal.query.mapper.DisposalQueryMapper;
-import com.harusari.chainware.franchise.command.infrastructure.repository.JpaFranchiseRepository;
+import com.harusari.chainware.franchise.command.domain.repository.FranchiseRepository;
 import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
 import com.harusari.chainware.warehouse.command.infrastructure.repository.JpaWarehouseRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import java.util.List;
 public class DisposalQueryServiceImpl implements DisposalQueryService {
 
     private final DisposalQueryMapper mapper;
-    private final JpaFranchiseRepository franchiseRepository;
+    private final FranchiseRepository franchiseRepository;
     private final JpaWarehouseRepository warehouseRepository;
 
     @Override
