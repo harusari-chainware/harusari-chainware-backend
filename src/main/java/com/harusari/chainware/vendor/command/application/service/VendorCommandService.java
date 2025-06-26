@@ -11,6 +11,6 @@ public interface VendorCommandService {
     Long createVendor(VendorCreateRequestDto requestDto);
     void updateVendor(Long vendorId, VendorUpdateRequestDto dto);
     void changeVendorStatus(Long vendorId, VendorStatusChangeRequestDto dto);
-    void createFranchiseWithAgreement(Long memberId, MemberWithVendorRequest memberWithVendorRequest, MultipartFile agreementFile);
+    void createVendorWithAgreement(Long memberId, MemberWithVendorRequest memberWithVendorRequest, MultipartFile agreementFile);
 
 }

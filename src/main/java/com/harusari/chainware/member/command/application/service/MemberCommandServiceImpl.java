@@ -81,7 +81,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
         if (memberCreateRequest.authorityName() == MemberAuthorityType.VENDOR_MANAGER) {
             Member member = registerMember(memberCreateRequest);
-            vendorCommandService.createFranchiseWithAgreement(member.getMemberId(), memberWithVendorRequest, agreementFile);
+            vendorCommandService.createVendorWithAgreement(member.getMemberId(), memberWithVendorRequest, agreementFile);
             deleteEmailVerificationToken(memberCreateRequest.validationToken());
         } else {
             throw new InvalidMemberAuthorityException(MemberErrorCode.INVALID_MEMBER_AUTHORITY);

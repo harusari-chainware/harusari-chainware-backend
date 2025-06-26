@@ -1,5 +1,6 @@
 package com.harusari.chainware.member.command.application.dto.request.franchise;
 
+import com.harusari.chainware.common.dto.AddressRequest;
 import lombok.Builder;
 
 import java.time.LocalDate;
@@ -7,6 +8,6 @@ import java.time.LocalDate;
 @Builder
 public record FranchiseCreateRequest(
         String franchiseName, String franchiseContact, String franchiseTaxId,
-        String franchiseAddress, LocalDate contractStartDate, LocalDate contractEndDate
+        AddressRequest addressRequest, LocalDate contractStartDate, LocalDate contractEndDate
 ) {
 }
