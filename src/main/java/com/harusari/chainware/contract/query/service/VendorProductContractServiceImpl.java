@@ -13,15 +13,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VendorProductContractServiceImpl implements VendorProductContractService {
 
-    private final VendorProductContractMapper contractMapper;
+    private final VendorProductContractMapper vendorProductContractMapper;
 
     @Override
     public List<VendorProductContractDto> getAllContracts() {
-        return contractMapper.findAllVendorProductContracts();
+        return vendorProductContractMapper.findAllVendorProductContracts();
     }
 
     @Override
     public List<VendorProductContractDto> getContractsByVendorId(Long vendorId) {
-        return contractMapper.findVendorProductContractsByVendorId(vendorId);
+        return vendorProductContractMapper.findVendorProductContractsByVendorId(vendorId);
     }
 }

@@ -14,5 +14,27 @@ public class ProductSearchRequest {
     private String origin;
     private Integer shelfLife;
     private Boolean includeInactive;
-    private final ProductStatusFilter productStatusFilter;
+
+    @Builder.Default
+    private ProductStatusFilter productStatusFilter = ProductStatusFilter.ACTIVE_ONLY;
+
+
+    private Integer page;
+    private Integer size;
+
+    public int getOffset() {
+        return (page != null && size != null) ? (page - 1) * size : 0;
+    }
+
+    public int getLimit() {
+        return size != null ? size : 10;
+    }
+
+    public int getPage() {
+        return page != null ? page : 1;
+    }
+
+    public int getSize() {
+        return size != null ? size : 10;
+    }
 }

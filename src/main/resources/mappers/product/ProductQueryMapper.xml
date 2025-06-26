@@ -33,13 +33,16 @@
         </if>
 
         <choose>
-            <when test="productStatusFilter.name() == 'ACTIVE_ONLY'">
+            <when test="productStatusFilter != null and productStatusFilter.name() == 'ACTIVE_ONLY'">
                 AND product_status = true
             </when>
-            <when test="productStatusFilter.name() == 'INACTIVE_ONLY'">
+            <when test="productStatusFilter != null and productStatusFilter.name() == 'INACTIVE_ONLY'">
                 AND product_status = false
             </when>
         </choose>
+        ORDER BY product_id DESC
+        LIMIT #{limit}
+        OFFSET #{offset}
     </select>
 
     <select id="findProductById" resultType="com.harusari.chainware.product.query.dto.response.ProductDto">
@@ -60,5 +63,106 @@
         WHERE is_deleted = false
         AND product_id = #{productId}
     </select>
+
+    <select id="countProductsByConditions"
+            parameterType="com.harusari.chainware.product.query.dto.request.ProductSearchRequest"
+            resultType="long">
+        SELECT COUNT(*)
+        FROM product
+        WHERE is_deleted = false
+
+        <if test="productName != null and productName != ''">
+            AND product_name LIKE CONCAT('%', #{productName}, '%')
+        </if>
+        <if test="productCode != null and productCode != ''">
+            AND product_code LIKE CONCAT('%', #{productCode}, '%')
+        </if>
+        <if test="categoryId != null">
+            AND category_id = #{categoryId}
+        </if>
+
+        <choose>
+            <when test="productStatusFilter != null and productStatusFilter.name() == 'ACTIVE_ONLY'">
+                AND product_status = true
+            </when>
+            <when test="productStatusFilter != null and productStatusFilter.name() == 'INACTIVE_ONLY'">
+                AND product_status = false
+            </when>
+        </choose>
+    </select>
+
+    <resultMap id="VendorProductContractMap" type="com.harusari.chainware.contract.query.dto.response.VendorProductContractDto">
+        <!-- Vendor -->
+        <result column="vendor_id" property="vendorId" />
+        <result column="vendor_name" property="vendorName" />
+        <result column="vendor_type" property="vendorType" />
+        <result column="vendor_tax_id" property="vendorTaxId" />
+        <result column="vendor_status" property="vendorStatus" />
+
+        <!-- Product -->
+        <result column="product_id" property="productId" />
+        <result column="product_name" property="productName" />
+        <result column="top_category_id" property="topCategoryId" />
+        <result column="top_category_name" property="topCategoryName" />
+        <result column="category_id" property="categoryId" />
+        <result column="category_name" property="categoryName" />
+        <result column="store_type" property="storeType" />
+        <result column="base_price" property="basePrice" />
+        <result column="unit_quantity" property="unitQuantity" />
+        <result column="unit_spec" property="unitSpec" />
+
+        <!-- Contract -->
+        <result column="contract_id" property="contractId" />
+        <result column="contract_price" property="contractPrice" />
+        <result column="min_order_qty" property="minOrderQty" />
+        <result column="lead_time" property="leadTime" />
+        <result column="contract_start_date" property="contractStartDate" javaType="java.time.LocalDate"/>
+        <result column="contract_end_date" property="contractEndDate" javaType="java.time.LocalDate"/>
+        <result column="contract_status" property="contractStatus" />
+        <result column="created_at" property="createdAt" javaType="java.time.LocalDateTime"/>
+        <result column="modified_at" property="modifiedAt" javaType="java.time.LocalDateTime"/>
+    </resultMap>
+
+    <select id="findVendorContractsByProductId"
+            resultMap="VendorProductContractMap">
+        SELECT
+        c.contract_id,
+        c.contract_price,
+        c.min_order_qty,
+        c.lead_time,
+        c.contract_start_date,
+        c.contract_end_date,
+        c.contract_status,
+        c.created_at,
+        c.modified_at,
+
+        p.product_id,
+        p.product_name,
+        p.base_price,
+        p.unit_quantity,
+        p.unit_spec,
+        p.category_id,
+        p.store_type,
+
+        v.vendor_id,
+        v.vendor_name,
+        v.vendor_type,
+        v.vendor_tax_id,
+        v.vendor_status,
+
+        tc.top_category_id,
+        tc.top_category_name,
+        c2.category_id AS category_id,
+        c2.category_name AS category_name
+
+        FROM contract c
+        JOIN product p ON c.product_id = p.product_id
+        JOIN vendor v ON c.vendor_id = v.vendor_id
+        JOIN category c2 ON p.category_id = c2.category_id
+        JOIN top_category tc ON c2.top_category_id = tc.top_category_id
+        WHERE c.product_id = #{productId}
+        AND c.is_deleted = false
+    </select>
+
 
 </mapper>

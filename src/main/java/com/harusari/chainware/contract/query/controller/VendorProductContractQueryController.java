@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/contracts")
-public class VendorProductContractController {
+public class VendorProductContractQueryController{
 
     private final VendorProductContractService contractService;
 

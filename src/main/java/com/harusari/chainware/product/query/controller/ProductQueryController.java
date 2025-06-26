@@ -1,15 +1,15 @@
 package com.harusari.chainware.product.query.controller;
 
+import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.product.query.dto.request.ProductSearchRequest;
-import com.harusari.chainware.product.query.dto.request.ProductStatusFilter;
-import com.harusari.chainware.product.query.dto.response.ProductDto;
+import com.harusari.chainware.product.query.dto.response.ProductDetailResponse;
+import com.harusari.chainware.product.query.dto.response.ProductListResponse;
 import com.harusari.chainware.product.query.service.ProductQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -19,24 +19,22 @@ public class ProductQueryController {
     private final ProductQueryService productQueryService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ProductDto>>> getProducts(
-            @RequestParam(required = false) String productName,
-            @RequestParam(required = false) String productCode,
-            @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false, defaultValue = "ACTIVE_ONLY") ProductStatusFilter productStatusFilter
+    public ResponseEntity<ApiResponse<ProductListResponse>> getProducts(
+            @ModelAttribute ProductSearchRequest request
     ) {
-        ProductSearchRequest request = ProductSearchRequest.builder()
-                .productName(productName)
-                .productCode(productCode)
-                .categoryId(categoryId)
-                .productStatusFilter(productStatusFilter)
-                .build();
-
         return ResponseEntity.ok(ApiResponse.success(productQueryService.getProducts(request)));
     }
 
     @GetMapping("/{productId}")
-    public ResponseEntity<ApiResponse<ProductDto>> getProductById(@PathVariable Long productId) {
-        return ResponseEntity.ok(ApiResponse.success(productQueryService.getProductById(productId)));
+    public ResponseEntity<ApiResponse<ProductDetailResponse>> getProductById(
+            @PathVariable Long productId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(
+                productQueryService.getProductDetailByAuthority(
+                        productId,
+                        userDetails.getMemberAuthorityType()
+                )
+        ));
     }
 }

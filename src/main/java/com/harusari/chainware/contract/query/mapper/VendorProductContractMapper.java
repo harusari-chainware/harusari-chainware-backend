@@ -8,7 +8,6 @@ import java.util.List;
 
 @Mapper
 public interface VendorProductContractMapper {
-
     List<VendorProductContractDto> findAllVendorProductContracts();
 
     List<VendorProductContractDto> findVendorProductContractsByVendorId(@Param("vendorId") Long vendorId);
