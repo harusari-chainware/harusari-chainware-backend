@@ -1,6 +1,11 @@
 package com.harusari.chainware.takeback.command.application.service;
 
+import com.harusari.chainware.delivery.command.domain.aggregate.Delivery;
+import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryMethod;
+import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryStatus;
+import com.harusari.chainware.delivery.command.domain.repository.DeliveryRepository;
 import com.harusari.chainware.takeback.command.application.dto.request.TakeBackCreateRequest;
+import com.harusari.chainware.takeback.command.application.dto.request.TakeBackRejectRequest;
 import com.harusari.chainware.takeback.command.application.dto.response.TakeBackCommandResponse;
 import com.harusari.chainware.takeback.command.domain.aggregate.TakeBack;
 import com.harusari.chainware.takeback.command.domain.aggregate.TakeBackDetail;
@@ -14,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -24,6 +30,8 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
 
     private final TakeBackRepository takeBackRepository;
     private final TakeBackDetailRepository takeBackDetailRepository;
+
+    private final DeliveryRepository deliveryRepository;
 
     @Override
     public TakeBackCommandResponse createTakeBack(TakeBackCreateRequest request) {
@@ -67,6 +75,77 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
 
         // 3. 상태 변경
         takeBack.cancel();
+
+        return TakeBackCommandResponse.builder()
+                .takeBackId(takeBack.getTakeBackId())
+                .takeBackStatus(takeBack.getTakeBackStatus())
+                .build();
+    }
+
+    @Override
+    public TakeBackCommandResponse collectTakeBack(Long takeBackId) {
+        // 1. 반품 조회
+        TakeBack takeBack = takeBackRepository.findById(takeBackId)
+                .orElseThrow(() -> new TakeBackException(TakeBackErrorCode.TAKE_BACK_NOT_FOUND));
+
+        // 2. 상태 검증 (REQUESTED 상태만 수거 가능)
+        if (!TakeBackStatus.REQUESTED.equals(takeBack.getTakeBackStatus())) {
+            throw new TakeBackException(TakeBackErrorCode.INVALID_TAKE_BACK_STATUS_FOR_COLLECT);
+        }
+
+        // 3. 상태 변경
+        takeBack.collect();
+
+        return TakeBackCommandResponse.builder()
+                .takeBackId(takeBack.getTakeBackId())
+                .takeBackStatus(takeBack.getTakeBackStatus())
+                .build();
+    }
+
+    @Override
+    public TakeBackCommandResponse approveTakeBack(Long takeBackId) {
+        // 1. 반품 조회
+        TakeBack takeBack = takeBackRepository.findById(takeBackId)
+                .orElseThrow(() -> new TakeBackException(TakeBackErrorCode.TAKE_BACK_NOT_FOUND));
+
+        // 2. 상태 검증 (COLLECTED 상태만 승인 가능)
+        if (!TakeBackStatus.COLLECTED.equals(takeBack.getTakeBackStatus())) {
+            throw new TakeBackException(TakeBackErrorCode.INVALID_TAKE_BACK_STATUS_FOR_APPROVE);
+        }
+
+        // 3. 상태 변경
+        takeBack.approve();
+
+        return TakeBackCommandResponse.builder()
+                .takeBackId(takeBack.getTakeBackId())
+                .takeBackStatus(takeBack.getTakeBackStatus())
+                .build();
+    }
+
+    @Override
+    public TakeBackCommandResponse rejectTakeBack(Long takeBackId, TakeBackRejectRequest request) {
+        // 1. 반품 조회
+        TakeBack takeBack = takeBackRepository.findById(takeBackId)
+                .orElseThrow(() -> new TakeBackException(TakeBackErrorCode.TAKE_BACK_NOT_FOUND));
+
+        // 2. 상태 검증 (COLLECTED 상태만 승인 가능)
+        if (!TakeBackStatus.COLLECTED.equals(takeBack.getTakeBackStatus())) {
+            throw new TakeBackException(TakeBackErrorCode.INVALID_TAKE_BACK_STATUS_FOR_REJECT);
+        }
+
+        // 3. 상태 변경
+        takeBack.reject(request.getRejectReason());
+
+        // 4. 재배송 생성
+        Delivery redelivery = Delivery.builder()
+                .orderId(takeBack.getOrderId())
+                .takeBackId(takeBack.getTakeBackId())
+                .deliveryMethod(DeliveryMethod.HEADQUARTERS)
+                .deliveryStatus(DeliveryStatus.REQUESTED)
+                .createdAt(LocalDateTime.now())
+                .modifiedAt(null)
+                .build();
+        deliveryRepository.save(redelivery);
 
         return TakeBackCommandResponse.builder()
                 .takeBackId(takeBack.getTakeBackId())

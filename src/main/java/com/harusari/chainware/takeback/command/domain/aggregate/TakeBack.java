@@ -29,6 +29,9 @@ public class TakeBack {
     @Column(name = "take_back_status", nullable = false)
     private TakeBackStatus takeBackStatus;
 
+    @Column(name = "reject_reason", nullable = false)
+    private String rejectReason;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -58,8 +61,9 @@ public class TakeBack {
         this.modifiedAt = LocalDateTime.now();
     }
 
-    public void reject() {
+    public void reject(String rejectReason) {
         this.takeBackStatus = TakeBackStatus.REJECTED;
+        this.rejectReason = rejectReason;
         this.modifiedAt = LocalDateTime.now();
     }
 }
