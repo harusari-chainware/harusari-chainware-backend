@@ -154,6 +154,8 @@
         JOIN top_category tc ON c2.top_category_id = tc.top_category_id
         WHERE c.product_id = #{productId}
         AND c.is_deleted = false
+        LIMIT #{limit}
+        OFFSET #{offset}
     </select>
 
     <select id="findVendorsByProductId"

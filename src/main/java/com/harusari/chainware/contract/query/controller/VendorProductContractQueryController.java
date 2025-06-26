@@ -26,27 +26,19 @@ public class VendorProductContractQueryController{
 
     private final VendorProductContractService contractService;
 
-    // 1. 전체 목록
-//    @GetMapping
-//    public ResponseEntity<ApiResponse<List<VendorProductContractDto>>> getAllContracts() {
-//        List<VendorProductContractDto> result = contractService.getAllContracts();
-//        return ResponseEntity.ok(ApiResponse.success(result));
-//    }
-//
+//     1. 전체 목록
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<VendorProductContractDto>>> getAllContracts() {
+        List<VendorProductContractDto> result = contractService.getAllContracts();
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
 //    @GetMapping
 //    public ResponseEntity<ApiResponse<VendorProductContractListResponse>> getAllContracts(
 //            @AuthenticationPrincipal CustomUserDetails userDetails,
+//            @RequestParam Long vendorId,
 //            @RequestParam(required = false) Integer page,
 //            @RequestParam(required = false) Integer size) {
-//
-//        MemberAuthorityType authority = userDetails.getMemberAuthorityType();
-//
-//        boolean isManager = List.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER)
-//                .contains(authority);
-//        boolean isVendorManager = authority.equals(VENDOR_MANAGER);
-//
-//        // vendorId는 관리자면 null, 벤더매니저면 본인 거래처로 고정
-////        Long vendorId = isVendorManager ? userDetails.getVendorId() : null;
 //
 //        VendorProductContractSearchRequest request = VendorProductContractSearchRequest.builder()
 //                .vendorId(vendorId)
@@ -54,9 +46,10 @@ public class VendorProductContractQueryController{
 //                .size(size != null ? size : 10)
 //                .build();
 //
-//        VendorProductContractListResponse result = contractService.getAllContracts(request, isManager);
+//        VendorProductContractListResponse result = contractService.getAllContracts(request, userDetails);
 //        return ResponseEntity.ok(ApiResponse.success(result));
 //    }
+
 
     // 2. 특정 거래처 ID 기준 목록
     @GetMapping("/{vendorId}")

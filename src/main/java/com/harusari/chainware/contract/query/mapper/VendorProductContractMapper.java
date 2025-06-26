@@ -9,17 +9,12 @@ import java.util.List;
 
 @Mapper
 public interface VendorProductContractMapper {
-//    List<VendorProductContractDto> findAllVendorProductContracts();
+    List<VendorProductContractDto> findVendorProductContracts(@Param("request") VendorProductContractSearchRequest request,
+                                                              @Param("isManager") boolean isManager);
 
-    List<VendorProductContractDto> findVendorProductContracts(
-            @Param("request") VendorProductContractSearchRequest request,
-            @Param("isManager") boolean isManager
-    );
-
-    long countVendorProductContracts(
-            @Param("request") VendorProductContractSearchRequest request,
-            @Param("isManager") boolean isManager
-    );
+    long countVendorProductContracts(@Param("request") VendorProductContractSearchRequest request,
+                                     @Param("isManager") boolean isManager);
 
     List<VendorProductContractDto> findVendorProductContractsByVendorId(@Param("vendorId") Long vendorId);
+
 }
