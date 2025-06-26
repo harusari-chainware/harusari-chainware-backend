@@ -69,6 +69,27 @@
         JOIN product p ON co.product_id = p.product_id AND p.is_deleted = 0
         JOIN category c ON p.category_id = c.category_id
         JOIN top_category tc ON c.top_category_id = tc.top_category_id
+        <where>
+            co.contract_status = 'ACTIVE'
+            <if test="!isManager">
+                AND v.vendor_id = #{request.vendorId}
+            </if>
+        </where>
+        ORDER BY co.contract_id DESC
+        LIMIT #{request.limit} OFFSET #{request.offset}
+    </select>
+
+    <select id="countVendorProductContracts" resultType="long">
+        SELECT COUNT(*)
+        FROM vendor v
+        JOIN contract co ON v.vendor_id = co.vendor_id AND co.is_deleted = 0
+        JOIN product p ON co.product_id = p.product_id AND p.is_deleted = 0
+        <where>
+            co.contract_status = 'ACTIVE'
+            <if test="!isManager">
+                AND v.vendor_id = #{request.vendorId}
+            </if>
+        </where>
     </select>
 
     <!-- 특정 거래처(vendor_id)에 대한 제품 목록 조회 -->
