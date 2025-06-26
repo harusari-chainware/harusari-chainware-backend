@@ -18,5 +18,5 @@ public interface PurchaseOrderCommandService {
 
     void updatePurchaseOrder(Long purchaseOrderId, UpdatePurchaseOrderRequest request, Long memberId);
 
-
+    void shippedPurchaseOrder(Long purchaseOrderId, Long memberId);
 }

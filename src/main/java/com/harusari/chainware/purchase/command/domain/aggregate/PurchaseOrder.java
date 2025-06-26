@@ -1,5 +1,6 @@
 package com.harusari.chainware.purchase.command.domain.aggregate;
 
+import com.harusari.chainware.exception.purchase.PurchaseOrderException;
 import com.harusari.chainware.requisition.command.application.exception.InvalidStatusException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -92,4 +93,9 @@ public class PurchaseOrder {
         this.modifiedAt = LocalDateTime.now();
     }
 
+    // 발주 출고
+    public void shipped() {
+        this.purchaseOrderStatus = PurchaseOrderStatus.SHIPPED;
+        this.modifiedAt = LocalDateTime.now();
+    }
 }

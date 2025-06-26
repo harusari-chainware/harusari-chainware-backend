@@ -13,13 +13,19 @@ import java.io.IOException;
 public class RestAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
-    public void handle(
-            HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException
-    ) throws IOException, ServletException {
+    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException ex)
+            throws IOException {
         response.setContentType("application/json;charset=UTF-8");
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403, 인가 실패
-        String jsonResponse = "{\"error\": \"Forbidden\", \"message\": \"" + accessDeniedException.getMessage() + "\"}";
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+
+        String message = "해당 계정의 권한으로는 접근할 수 없습니다.";
+        String jsonResponse = String.format("""
+            {
+                "error": "Forbidden",
+                "message": "%s"
+            }
+            """, message);
+
         response.getWriter().write(jsonResponse);
     }
-
 }

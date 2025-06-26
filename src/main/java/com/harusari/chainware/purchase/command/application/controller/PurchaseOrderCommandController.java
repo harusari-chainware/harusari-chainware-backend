@@ -81,9 +81,23 @@ public class PurchaseOrderCommandController {
     public ResponseEntity<ApiResponse<Void>> updatePurchaseOrder(
             @PathVariable Long purchaseOrderId,
             @RequestBody @Valid UpdatePurchaseOrderRequest request,
-            @AuthenticationPrincipal CustomUserDetails user
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        purchaseOrderCommandService.updatePurchaseOrder(purchaseOrderId, request, user.getMemberId());
+        purchaseOrderCommandService.updatePurchaseOrder(purchaseOrderId, request, userDetails.getMemberId());
         return ResponseEntity.ok(ApiResponse.success(null));
     }
+
+
+    @PutMapping("/{purchaseOrderId}/shipped")
+    @Operation(summary = "발주 요청 품목 출고 완료", description = "요청 받은 발주 출고 처리 완료.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "발주 출고 완료")    })
+    public ResponseEntity<ApiResponse<Void>> shippedPurchaseOrder(
+            @PathVariable Long purchaseOrderId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        purchaseOrderCommandService.shippedPurchaseOrder(purchaseOrderId, userDetails.getMemberId());
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
 }

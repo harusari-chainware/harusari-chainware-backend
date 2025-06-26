@@ -18,7 +18,6 @@ import com.harusari.chainware.requisition.query.dto.response.RequisitionDetailRe
 import com.harusari.chainware.requisition.query.dto.response.RequisitionItemResponse;
 import com.harusari.chainware.requisition.query.mapper.RequisitionQueryMapper;
 import com.harusari.chainware.vendor.query.dto.VendorDetailDto;
-import com.harusari.chainware.vendor.query.mapper.VendorQueryMapper;
 import com.harusari.chainware.vendor.query.service.VendorQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -68,7 +67,6 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
                 .requisitionId(requisitionId)
                 .vendorId(requisition.getVendorId())
                 .createdMemberId(requisition.getCreatedMemberId())
-//                .vendorMemberId(requisition.getApprovedMemberId()) // 결재자를 거래처 담당자로 사용
                 .vendorMemberId(vendorMemberId)
                 .purchaseOrderCode(code)
                 .totalAmount(totalAmount)
@@ -186,5 +184,20 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
 
         order.cancel(request.getCancelReason());
     }
+
+
+    @Override
+    @Transactional
+    public void shippedPurchaseOrder(Long purchaseOrderId, Long memberId) {
+        PurchaseOrder order = purchaseOrderRepository.findById(purchaseOrderId)
+                .orElseThrow(() -> new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_NOT_FOUND));
+
+        if (!order.getVendorMemberId().equals(memberId)) {
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_UNAUTHORIZED_VENDOR);
+        }
+
+        order.shipped();
+    }
+
 
 }
