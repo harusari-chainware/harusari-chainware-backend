@@ -1,5 +1,6 @@
 package com.harusari.chainware.product.query.mapper;
 
+import com.harusari.chainware.contract.query.dto.request.VendorByProductRequest;
 import com.harusari.chainware.contract.query.dto.response.VendorProductContractDto;
 import com.harusari.chainware.product.query.dto.request.ProductSearchRequest;
 import com.harusari.chainware.product.query.dto.response.ProductDto;
@@ -19,5 +20,7 @@ public interface ProductQueryMapper {
 
     List<VendorProductContractDto> findVendorContractsByProductId(Long productId);
 
-    List<VendorDetailDto> findVendorsByProductId(Long productId);
+    List<VendorDetailDto> findVendorsByProductId(VendorByProductRequest request);
+
+    long countVendorsByProductId(VendorByProductRequest request);
 }

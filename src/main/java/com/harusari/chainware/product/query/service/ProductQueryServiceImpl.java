@@ -1,6 +1,7 @@
 package com.harusari.chainware.product.query.service;
 
 import com.harusari.chainware.common.dto.Pagination;
+import com.harusari.chainware.contract.query.dto.request.VendorByProductRequest;
 import com.harusari.chainware.contract.query.dto.response.VendorProductContractDto;
 import com.harusari.chainware.exception.product.ProductErrorCode;
 import com.harusari.chainware.exception.product.ProductNotFoundException;
@@ -11,7 +12,6 @@ import com.harusari.chainware.product.query.dto.response.ProductDto;
 import com.harusari.chainware.product.query.dto.response.ProductListResponse;
 import com.harusari.chainware.product.query.mapper.ProductQueryMapper;
 import com.harusari.chainware.vendor.query.dto.VendorDetailDto;
-import com.harusari.chainware.vendor.query.mapper.VendorQueryMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +26,6 @@ import static com.harusari.chainware.member.command.domain.aggregate.MemberAutho
 public class ProductQueryServiceImpl implements ProductQueryService {
 
     private final ProductQueryMapper productQueryMapper;
-    private final VendorQueryMapper vendorQueryMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -47,23 +46,30 @@ public class ProductQueryServiceImpl implements ProductQueryService {
 
     @Override
     @Transactional
-    public ProductDetailResponse getProductDetailByAuthority(Long productId, MemberAuthorityType authorityType) {
+    public ProductDetailResponse getProductDetailByAuthority(Long productId, MemberAuthorityType authorityType, int page, int size) {
         ProductDto product = productQueryMapper.findProductById(productId)
                 .orElseThrow(() -> new ProductNotFoundException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
-        // 관리자는 계약/거래처 정보도 함께 반환
         if (Set.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER).contains(authorityType)) {
             List<VendorProductContractDto> contracts = productQueryMapper.findVendorContractsByProductId(productId);
-            List<VendorDetailDto> vendors = productQueryMapper.findVendorsByProductId(productId);
+
+            VendorByProductRequest vendorRequest = new VendorByProductRequest(productId, page, size);
+            List<VendorDetailDto> vendors = productQueryMapper.findVendorsByProductId(vendorRequest);
+            long totalCount = productQueryMapper.countVendorsByProductId(vendorRequest);
+            int totalPages = (int) Math.ceil((double) totalCount / size);
 
             return ProductDetailResponse.builder()
                     .product(product)
                     .contracts(contracts)
                     .vendors(vendors)
+                    .pagination(Pagination.builder()
+                            .currentPage(page)
+                            .totalPages(totalPages)
+                            .totalItems(totalCount)
+                            .build())
                     .build();
         }
 
-        // 그 외 권한자는 제품 정보만
         return ProductDetailResponse.builder()
                 .product(product)
                 .build();

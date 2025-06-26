@@ -94,10 +94,6 @@
     <resultMap id="VendorProductContractMap" type="com.harusari.chainware.contract.query.dto.response.VendorProductContractDto">
         <!-- Vendor -->
         <result column="vendor_id" property="vendorId" />
-        <result column="vendor_name" property="vendorName" />
-        <result column="vendor_type" property="vendorType" />
-        <result column="vendor_tax_id" property="vendorTaxId" />
-        <result column="vendor_status" property="vendorStatus" />
 
         <!-- Product -->
         <result column="product_id" property="productId" />
@@ -145,10 +141,6 @@
         p.store_type,
 
         v.vendor_id,
-        v.vendor_name,
-        v.vendor_type,
-        v.vendor_tax_id,
-        v.vendor_status,
 
         tc.top_category_id,
         tc.top_category_name,
@@ -170,8 +162,24 @@
         v.vendor_id,
         v.vendor_name,
         v.vendor_type,
+        v.vendor_address,
         v.vendor_tax_id,
-        v.vendor_status
+        v.vendor_memo,
+        v.vendor_status,
+        v.vendor_start_date,
+        v.vendor_end_date
+        FROM vendor v
+        JOIN contract c ON v.vendor_id = c.vendor_id
+        WHERE c.product_id = #{productId}
+        AND c.is_deleted = false
+        LIMIT #{limit}
+        OFFSET #{offset}
+    </select>
+
+    <select id="countVendorsByProductId"
+            parameterType="com.harusari.chainware.contract.query.dto.request.VendorByProductRequest"
+            resultType="long">
+        SELECT COUNT(*)
         FROM vendor v
         JOIN contract c ON v.vendor_id = c.vendor_id
         WHERE c.product_id = #{productId}

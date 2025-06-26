@@ -14,10 +14,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class VendorProductContractDto {
     private Long vendorId;
-    private String vendorName;
-    private String vendorType;
-    private String vendorTaxId;
-    private String vendorStatus;
 
     private Long productId;
     private String productName;

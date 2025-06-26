@@ -9,5 +9,5 @@ public interface ProductQueryService {
 
     ProductListResponse getProducts(ProductSearchRequest request);
 
-    ProductDetailResponse getProductDetailByAuthority(Long productId, MemberAuthorityType authorityType);
+    ProductDetailResponse getProductDetailByAuthority(Long productId, MemberAuthorityType authorityType, int page, int size);
 }

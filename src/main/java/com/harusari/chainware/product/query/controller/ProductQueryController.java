@@ -28,12 +28,16 @@ public class ProductQueryController {
     @GetMapping("/{productId}")
     public ResponseEntity<ApiResponse<ProductDetailResponse>> getProductById(
             @PathVariable Long productId,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
         return ResponseEntity.ok(ApiResponse.success(
                 productQueryService.getProductDetailByAuthority(
                         productId,
-                        userDetails.getMemberAuthorityType()
+                        userDetails.getMemberAuthorityType(),
+                        page,
+                        size
                 )
         ));
     }
