@@ -1,15 +1,13 @@
 package com.harusari.chainware.category.query.dto.response;
 
-import com.harusari.chainware.product.query.dto.response.ProductDto;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.util.List;
-
 @Getter
 @Builder
-public class CategoryWithProductsResponse {
+public class CategoryDetailInfoResponse {
     private Long categoryId;
     private String categoryName;
-    private List<ProductDto> products;
+    private Long topCategoryId;
+    private String topCategoryName;
 }

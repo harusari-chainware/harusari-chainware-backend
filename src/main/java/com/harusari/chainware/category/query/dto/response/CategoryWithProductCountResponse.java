@@ -1,13 +1,12 @@
 package com.harusari.chainware.category.query.dto.response;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
-public class CategoryResponse {
+@Builder
+public class CategoryWithProductCountResponse {
     private Long categoryId;
-    private Long topCategoryId;
     private String categoryName;
-    private int productCount;
+    private long productCount;
 }

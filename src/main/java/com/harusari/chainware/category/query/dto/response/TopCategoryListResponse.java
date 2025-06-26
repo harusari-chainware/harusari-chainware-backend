@@ -9,6 +9,6 @@ import java.util.List;
 @Getter
 @Builder
 public class TopCategoryListResponse {
-    private List<TopCategoryResponse> topCategories;
-    private Pagination pagination;
+private List<TopCategoryWithCategoriesResponse> topCategories;
+        private Pagination pagination;
 }
