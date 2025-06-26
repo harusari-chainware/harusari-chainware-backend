@@ -7,6 +7,8 @@ import com.harusari.chainware.requisition.query.dto.request.RequisitionSearchCon
 import com.harusari.chainware.requisition.query.dto.response.RequisitionDetailResponse;
 import com.harusari.chainware.requisition.query.dto.response.RequisitionSummaryResponse;
 import com.harusari.chainware.requisition.query.service.RequisitionQueryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,10 @@ public class RequisitionQueryController {
 
     // 품의서 목록 조회 ( 권한 별로 다르게 조회 )
     @GetMapping
+    @Operation(summary = "품의 목록 조회", description = "품의 목록을 조회합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "품의 목록 조회 성공")
+    })
     public ResponseEntity<ApiResponse<List<RequisitionSummaryResponse>>> getMyRequisitions(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @ModelAttribute RequisitionSearchCondition condition
@@ -41,6 +47,10 @@ public class RequisitionQueryController {
 
     // 품의서 상세 조회
     @GetMapping("/{requisitionId}")
+    @Operation(summary = "품의 상세 조회", description = "선택한 품의서의 상세 정보를 조회합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "품의 상세 조회 성공")
+    })
     public ResponseEntity<ApiResponse<RequisitionDetailResponse>> getRequisitionDetail(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long requisitionId

@@ -11,6 +11,7 @@ import java.time.LocalDate;
 public class VendorDetailDto {
 
     private Long vendorId;
+    private Long memberId;
     private String name;
     private String phoneNumber;
     private String vendorName;
