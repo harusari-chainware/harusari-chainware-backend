@@ -22,6 +22,9 @@ public class Delivery {
     @Column(name = "store_order_id", nullable = false)
     private Long orderId;
 
+    @Column(name = "warehouse_id", nullable = false)
+    private Long warehouseId;
+
     @Column(name = "take_back_id")
     private Long takeBackId;
 
@@ -52,11 +55,13 @@ public class Delivery {
     private LocalDateTime modifiedAt;
 
     @Builder
-    public Delivery(Long orderId, Long takeBackId, String trackingNumber, String carrier,
+    public Delivery(Long orderId, Long warehouseId, Long takeBackId,
+                    String trackingNumber, String carrier,
                     DeliveryMethod deliveryMethod, DeliveryStatus deliveryStatus,
                     LocalDateTime startedAt, LocalDateTime deliveredAt,
                     LocalDateTime createdAt, LocalDateTime modifiedAt) {
         this.orderId = orderId;
+        this.warehouseId = warehouseId;
         this.takeBackId = takeBackId;
         this.trackingNumber = trackingNumber;
         this.carrier = carrier;
