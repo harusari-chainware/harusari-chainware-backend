@@ -4,4 +4,5 @@ import java.time.LocalDate;
 
 public interface InventorySnapshotScheduler {
     void saveDailySnapshot(LocalDate snapshotDate);
+    void saveDailySnapshot();
 }
