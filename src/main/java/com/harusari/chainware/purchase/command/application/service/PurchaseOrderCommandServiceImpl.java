@@ -66,6 +66,7 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
         PurchaseOrder order = PurchaseOrder.builder()
                 .requisitionId(requisitionId)
                 .vendorId(requisition.getVendorId())
+                .warehouseId(requisition.getWarehouseId())
                 .createdMemberId(requisition.getCreatedMemberId())
                 .vendorMemberId(vendorMemberId)
                 .purchaseOrderCode(code)
