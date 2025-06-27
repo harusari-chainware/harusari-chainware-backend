@@ -81,7 +81,11 @@ public class Member {
         this.phoneNumber = updateMemberRequest.phoneNumber();
         this.position = updateMemberRequest.position();
         this.modifiedAt = LocalDateTime.now().withNano(0);
-        this.isDeleted = updateMemberRequest.isDeleted();
+    }
+
+    public void softDelete() {
+        this.isDeleted = true;
+        this.modifiedAt = LocalDateTime.now().withNano(0);
     }
 
 }
