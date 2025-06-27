@@ -65,6 +65,4 @@ public class TakeBackCommandController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    // 반품 폐기: "/api/v1/takeback/{takebackId}/disposal", PUT
-
 }

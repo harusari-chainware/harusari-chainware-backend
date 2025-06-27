@@ -33,6 +33,7 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
 
     private final DeliveryRepository deliveryRepository;
 
+    // 반품 신청
     @Override
     public TakeBackCommandResponse createTakeBack(TakeBackCreateRequest request) {
         // 1. 반품 엔티티 저장
@@ -62,6 +63,7 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
                 .build();
     }
 
+    // 반품 취소
     @Override
     public TakeBackCommandResponse cancelTakeBack(Long takeBackId) {
         // 1. 반품 조회
@@ -82,6 +84,7 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
                 .build();
     }
 
+    // 반품 수거
     @Override
     public TakeBackCommandResponse collectTakeBack(Long takeBackId) {
         // 1. 반품 조회
@@ -102,6 +105,7 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
                 .build();
     }
 
+    // 반품 승인
     @Override
     public TakeBackCommandResponse approveTakeBack(Long takeBackId) {
         // 1. 반품 조회
@@ -122,6 +126,7 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
                 .build();
     }
 
+    // 반품 반려
     @Override
     public TakeBackCommandResponse rejectTakeBack(Long takeBackId, TakeBackRejectRequest request) {
         // 1. 반품 조회
@@ -170,4 +175,5 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
 
         return "TB-" + datePart + sequencePart;
     }
+
 }
