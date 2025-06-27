@@ -50,7 +50,7 @@ public class FranchiseCommandServiceImpl implements FranchiseCommandService {
 
         franchise.updateFranchise(
                 updateFranchiseRequest.franchiseName(), updateFranchiseRequest.franchiseContact(),
-                updateFranchiseRequest.franchiseTaxId(), address
+                updateFranchiseRequest.franchiseTaxId(), updateFranchiseRequest.franchiseStatus(), address
         );
 
         if (agreementFile != null && !agreementFile.isEmpty()) {

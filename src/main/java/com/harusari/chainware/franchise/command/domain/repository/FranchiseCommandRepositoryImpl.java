@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-import static com.harusari.chainware.franchise.command.domain.aggregate.FranchiseStatus.ACTIVE;
+import static com.harusari.chainware.franchise.command.domain.aggregate.FranchiseStatus.OPERATING;
 import static com.harusari.chainware.franchise.command.domain.aggregate.QFranchise.franchise;
 
 @Repository
@@ -23,7 +23,7 @@ public class FranchiseCommandRepositoryImpl implements FranchiseCommandRepositor
                         .selectFrom(franchise)
                         .where(
                                 franchise.franchiseId.eq(franchiseId),
-                                franchise.franchiseStatus.eq(ACTIVE)
+                                franchise.franchiseStatus.eq(OPERATING)
                         )
                         .fetchOne()
         );
