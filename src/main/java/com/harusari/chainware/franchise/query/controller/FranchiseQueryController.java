@@ -3,6 +3,7 @@ package com.harusari.chainware.franchise.query.controller;
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.common.dto.PageResponse;
 import com.harusari.chainware.franchise.query.dto.request.FranchiseSearchRequest;
+import com.harusari.chainware.franchise.query.dto.resposne.FranchiseSearchDetailResponse;
 import com.harusari.chainware.franchise.query.dto.resposne.FranchiseSearchResponse;
 import com.harusari.chainware.franchise.query.service.FranchiseQueryService;
 import lombok.RequiredArgsConstructor;
@@ -11,10 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -34,6 +32,17 @@ public class FranchiseQueryController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(pageResponse));
+    }
+
+    @GetMapping("/franchises/{franchiseId}")
+    public ResponseEntity<ApiResponse<FranchiseSearchDetailResponse>> searchFranchise(
+        @PathVariable(name = "franchiseId") Long franchiseId
+    ) {
+        FranchiseSearchDetailResponse franchiseSearchDetailResponse = franchiseQueryService.getFranchiseDetail(franchiseId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(franchiseSearchDetailResponse));
     }
 
 }
