@@ -10,26 +10,13 @@ import java.util.List;
 @Getter
 public class TakeBackCreateRequest {
 
-    @NotNull
     private Long orderId;
-
-    @NotEmpty
-    private List<TakeBackDetailRequest> items;
+    private List<TakeBackItemRequest> items;
 
     @Getter
-    public static class TakeBackDetailRequest {
-        @NotNull
-        private Long productId;
-
-        @NotNull
-        private Integer quantity;
-
-        @NotNull
-        private Integer price;
-
-        @NotBlank
+    public static class TakeBackItemRequest {
+        private Long orderDetailId;
         private String takeBackReason;
-
         private String takeBackImage;
     }
 }

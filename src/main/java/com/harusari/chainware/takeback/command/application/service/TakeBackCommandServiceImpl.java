@@ -4,6 +4,8 @@ import com.harusari.chainware.delivery.command.domain.aggregate.Delivery;
 import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryMethod;
 import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryStatus;
 import com.harusari.chainware.delivery.command.domain.repository.DeliveryRepository;
+import com.harusari.chainware.order.command.domain.aggregate.OrderDetail;
+import com.harusari.chainware.order.command.domain.repository.OrderDetailRepository;
 import com.harusari.chainware.takeback.command.application.dto.request.TakeBackCreateRequest;
 import com.harusari.chainware.takeback.command.application.dto.request.TakeBackRejectRequest;
 import com.harusari.chainware.takeback.command.application.dto.response.TakeBackCommandResponse;
@@ -31,6 +33,7 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
     private final TakeBackRepository takeBackRepository;
     private final TakeBackDetailRepository takeBackDetailRepository;
 
+    private final OrderDetailRepository orderDetailRepository;
     private final DeliveryRepository deliveryRepository;
 
     // 반품 신청
@@ -43,17 +46,20 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
                 .takeBackCode(takeBackCode)
                 .build());
 
-        // 2. 반품 상세 저장
-        List<TakeBackDetail> details = request.getItems().stream()
-                .map(item -> TakeBackDetail.builder()
-                        .takeBackId(takeBack.getTakeBackId())
-                        .productId(item.getProductId())
-                        .quantity(item.getQuantity())
-                        .price(item.getPrice())
-                        .takeBackReason(item.getTakeBackReason())
-                        .takeBackImage(item.getTakeBackImage())
-                        .build())
-                .toList();
+        // 2. 반품 상세 저장 (OrderDetail 조회 후 정보 채움)
+        List<TakeBackDetail> details = request.getItems().stream().map(item -> {
+            OrderDetail orderDetail = orderDetailRepository.findById(item.getOrderDetailId())
+                    .orElseThrow(() -> new TakeBackException(TakeBackErrorCode.ORDER_DETAIL_NOT_FOUND));
+
+            return TakeBackDetail.builder()
+                    .takeBackId(takeBack.getTakeBackId())
+                    .productId(orderDetail.getProductId())
+                    .quantity(orderDetail.getQuantity())
+                    .price(orderDetail.getUnitPrice())
+                    .takeBackReason(item.getTakeBackReason())
+                    .takeBackImage(item.getTakeBackImage())
+                    .build();
+        }).toList();
 
         takeBackDetailRepository.saveAll(details);
 
