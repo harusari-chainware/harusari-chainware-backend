@@ -1,5 +1,6 @@
 package com.harusari.chainware.takeback.command.application.controller;
 
+import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.takeback.command.application.dto.request.TakeBackCreateRequest;
 import com.harusari.chainware.takeback.command.application.dto.request.TakeBackRejectRequest;
@@ -8,6 +9,7 @@ import com.harusari.chainware.takeback.command.application.service.TakeBackComma
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -59,9 +61,11 @@ public class TakeBackCommandController {
     @PutMapping("/{takeBackId}/reject")
     public ResponseEntity<ApiResponse<TakeBackCommandResponse>> rejectTakeBack(
             @PathVariable Long takeBackId,
-            @RequestBody TakeBackRejectRequest request
+            @RequestBody TakeBackRejectRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+
     ) {
-        TakeBackCommandResponse response = takeBackCommandService.rejectTakeBack(takeBackId, request);
+        TakeBackCommandResponse response = takeBackCommandService.rejectTakeBack(takeBackId, request, userDetails.getMemberId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

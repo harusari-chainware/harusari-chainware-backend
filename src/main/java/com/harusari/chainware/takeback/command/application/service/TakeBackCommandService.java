@@ -9,5 +9,5 @@ public interface TakeBackCommandService {
     TakeBackCommandResponse cancelTakeBack(Long takeBackId);
     TakeBackCommandResponse collectTakeBack(Long takeBackId);
     TakeBackCommandResponse approveTakeBack(Long takeBackId);
-    TakeBackCommandResponse rejectTakeBack(Long takeBackId, TakeBackRejectRequest request);
+    TakeBackCommandResponse rejectTakeBack(Long takeBackId, TakeBackRejectRequest request, Long memberId);
 }

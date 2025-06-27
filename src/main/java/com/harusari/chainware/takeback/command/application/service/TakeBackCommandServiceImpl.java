@@ -16,6 +16,8 @@ import com.harusari.chainware.takeback.command.domain.repository.TakeBackDetailR
 import com.harusari.chainware.takeback.command.domain.repository.TakeBackRepository;
 import com.harusari.chainware.takeback.exception.TakeBackErrorCode;
 import com.harusari.chainware.takeback.exception.TakeBackException;
+import com.harusari.chainware.warehouse.command.domain.aggregate.Warehouse;
+import com.harusari.chainware.warehouse.command.infrastructure.repository.JpaWarehouseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +37,7 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
 
     private final OrderDetailRepository orderDetailRepository;
     private final DeliveryRepository deliveryRepository;
+    private final JpaWarehouseRepository warehouseRepository;
 
     // 반품 신청
     @Override
@@ -134,7 +137,7 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
 
     // 반품 반려
     @Override
-    public TakeBackCommandResponse rejectTakeBack(Long takeBackId, TakeBackRejectRequest request) {
+    public TakeBackCommandResponse rejectTakeBack(Long takeBackId, TakeBackRejectRequest request, Long memberId) {
         // 1. 반품 조회
         TakeBack takeBack = takeBackRepository.findById(takeBackId)
                 .orElseThrow(() -> new TakeBackException(TakeBackErrorCode.TAKE_BACK_NOT_FOUND));
@@ -147,10 +150,15 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
         // 3. 상태 변경
         takeBack.reject(request.getRejectReason());
 
-        // 4. 재배송 생성
+        // 4. 사용자가 관리하는 창고 조회
+        Warehouse warehouse = warehouseRepository.findByMemberIdAndIsDeletedFalse(memberId)
+                .orElseThrow(() -> new TakeBackException(TakeBackErrorCode.WAREHOUSE_NOT_FOUND));
+
+        // 5. 재배송 요청
         Delivery redelivery = Delivery.builder()
                 .orderId(takeBack.getOrderId())
                 .takeBackId(takeBack.getTakeBackId())
+                .warehouseId(warehouse.getWarehouseId())
                 .deliveryMethod(DeliveryMethod.HEADQUARTERS)
                 .deliveryStatus(DeliveryStatus.REQUESTED)
                 .createdAt(LocalDateTime.now())

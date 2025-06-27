@@ -19,6 +19,7 @@ public enum TakeBackErrorCode {
     INVALID_TAKE_BACK_STATUS_FOR_APPROVE("10004", "수거 상태가 아닌 반품은 승인할 수 없습니다.", HttpStatus.BAD_REQUEST),
     INVALID_TAKE_BACK_STATUS_FOR_REJECT("10005", "수거 상태가 아닌 반품은 반려할 수 없습니다.", HttpStatus.BAD_REQUEST),
     ORDER_DETAIL_NOT_FOUND("10005", "반품할 수 있는 주문 상세 제품이 아닙니다.", HttpStatus.BAD_REQUEST),
+    WAREHOUSE_NOT_FOUND("10006", "해당 사용자가 관리하는 창고가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
 
     INVENTORY_NOT_FOUND("10003", "재고가 없는 제품입니다.", HttpStatus.BAD_REQUEST);
 
