@@ -51,102 +51,82 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     // 주문 등록
     @Override
     public OrderCommandResponse createOrder(OrderCreateRequest request, Long memberId) {
-        // 0. Redission 분산락 적용
-        RLock lock = redissonClient.getLock("inventory_lock");
-        try {
-            // 0-1. 락 획득 시도 : 최대 3초 대기, 10초 후 자동 해제
-            if (!lock.tryLock(3, 10, TimeUnit.SECONDS)) {
-                throw new OrderException(OrderErrorCode.INVENTORY_LOCK_TIMEOUT);
-            }
-            // 0-2. 주문 상세가 비어있는 경우 예외 처리
-            if (request.getOrderDetails() == null || request.getOrderDetails().isEmpty()) {
-                throw new OrderException(OrderErrorCode.EMPTY_ORDER_DETAIL);
-            }
-
-            // 1. 가격 계산
-            int productCount = request.getOrderDetails().size();
-            int totalQuantity = 0;
-            long totalPrice = 0L;
-
-            List<OrderDetail> details = new ArrayList<>();
-
-            for (OrderDetailCreateRequest d : request.getOrderDetails()) {
-                // 1-1. 비관적 락 적용 -> 재고 정보 조회
-                WarehouseInventory inventory = jpaWarehouseInventoryRepository.findByProductIdForUpdate(d.getProductId())
-                        .orElseThrow(() -> new OrderException(OrderErrorCode.PRODUCT_INVENTORY_NOT_FOUND));
-                int quantity = d.getQuantity();
-
-                // 1-2. 수량 유효성 및 주문 가능 재고량 검증
-                if (quantity <= 0) {
-                    throw new OrderException(OrderErrorCode.INVALID_ORDER_QUANTITY);
-                }
-                int availableQuantity = inventory.getQuantity() - inventory.getReservedQuantity();
-                if (availableQuantity < quantity) {
-                    throw new OrderException(OrderErrorCode.INSUFFICIENT_AVAILABLE_QUANTITY);
-                }
-
-                // 1-3. 제품 단가에 대한 가격 계산
-                Product product = ProductRepository.findById(d.getProductId())
-                        .orElseThrow(() -> new OrderException(OrderErrorCode.PRODUCT_NOT_FOUND));
-                int unitPrice = product.getBasePrice();
-                long itemTotalPrice = (long) unitPrice * quantity;
-                totalQuantity += quantity;
-                totalPrice += itemTotalPrice;
-
-                // 1-4. 주문 상세 엔티티 생성
-                details.add(OrderDetail.builder()
-                        .orderId(null) // 일단 비워두고 나중에 채움
-                        .productId(d.getProductId())
-                        .quantity(quantity)
-                        .unitPrice(unitPrice)
-                        .totalPrice(itemTotalPrice)
-                        .createdAt(LocalDateTime.now())
-                        .build());
-            }
-
-            // 2. 주문 엔티티 생성 및 저장
-            Order order = Order.builder()
-                    .franchiseId(request.getFranchiseId())
-                    .memberId(memberId)
-                    .orderCode(generateOrderCode())
-                    .deliveryDueDate(request.getDeliveryDueDate())
-                    .productCount(productCount)
-                    .totalQuantity(totalQuantity)
-                    .totalPrice(totalPrice)
-                    .orderStatus(OrderStatus.REQUESTED)
-                    .createdAt(LocalDateTime.now())
-                    .build();
-
-            Order savedOrder = orderRepository.save(order);
-
-            // 3. 주문 ID 반영해서 상세 저장
-            List<OrderDetail> finalDetails = details.stream()
-                    .map(detail -> OrderDetail.builder()
-                            .orderId(savedOrder.getOrderId())
-                            .productId(detail.getProductId())
-                            .quantity(detail.getQuantity())
-                            .unitPrice(detail.getUnitPrice())
-                            .totalPrice(detail.getTotalPrice())
-                            .createdAt(detail.getCreatedAt())
-                            .build())
-                    .toList();
-
-            orderDetailRepository.saveAll(finalDetails);
-
-            return OrderCommandResponse.builder()
-                    .orderId(savedOrder.getOrderId())
-                    .franchiseId(savedOrder.getFranchiseId())
-                    .orderStatus(savedOrder.getOrderStatus())
-                    .createdAt(savedOrder.getCreatedAt())
-                    .build();
-
-        } catch (InterruptedException e) { // 락 획득 도중 인터럽트 발생 시 예외 처리
-            throw new OrderException(OrderErrorCode.INVENTORY_LOCK_TIMEOUT);
-        } catch (DataAccessException e) { // DB 접근 중 예외 발생 시 처리
-            throw new OrderException(OrderErrorCode.ORDER_SAVE_FAILED);
-        } finally { // 락 해제
-            lock.unlock();
+        // 0-2. 주문 상세가 비어있는 경우 예외 처리
+        if (request.getOrderDetails() == null || request.getOrderDetails().isEmpty()) {
+            throw new OrderException(OrderErrorCode.EMPTY_ORDER_DETAIL);
         }
+
+        // 1. 가격 계산
+        int productCount = request.getOrderDetails().size();
+        int totalQuantity = 0;
+        long totalPrice = 0L;
+
+        List<OrderDetail> details = new ArrayList<>();
+
+        for (OrderDetailCreateRequest d : request.getOrderDetails()) {
+            // 1-1. 재고 정보 조회
+            int quantity = d.getQuantity();
+
+            // 1-2. 수량 유효성 및 주문 가능 재고량 검증
+            if (quantity <= 0) {
+                throw new OrderException(OrderErrorCode.INVALID_ORDER_QUANTITY);
+            }
+
+            // 1-3. 제품 단가에 대한 가격 계산
+            Product product = ProductRepository.findById(d.getProductId())
+                    .orElseThrow(() -> new OrderException(OrderErrorCode.PRODUCT_NOT_FOUND));
+            int unitPrice = product.getBasePrice();
+            long itemTotalPrice = (long) unitPrice * quantity;
+            totalQuantity += quantity;
+            totalPrice += itemTotalPrice;
+
+            // 1-4. 주문 상세 엔티티 생성
+            details.add(OrderDetail.builder()
+                    .orderId(null) // 일단 비워두고 나중에 채움
+                    .productId(d.getProductId())
+                    .quantity(quantity)
+                    .unitPrice(unitPrice)
+                    .totalPrice(itemTotalPrice)
+                    .createdAt(LocalDateTime.now())
+                    .build());
+        }
+
+        // 2. 주문 엔티티 생성 및 저장
+        Order order = Order.builder()
+                .franchiseId(request.getFranchiseId())
+                .memberId(memberId)
+                .orderCode(generateOrderCode())
+                .deliveryDueDate(request.getDeliveryDueDate())
+                .productCount(productCount)
+                .totalQuantity(totalQuantity)
+                .totalPrice(totalPrice)
+                .orderStatus(OrderStatus.REQUESTED)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        Order savedOrder = orderRepository.save(order);
+
+        // 3. 주문 ID 반영해서 상세 저장
+        List<OrderDetail> finalDetails = details.stream()
+                .map(detail -> OrderDetail.builder()
+                        .orderId(savedOrder.getOrderId())
+                        .productId(detail.getProductId())
+                        .quantity(detail.getQuantity())
+                        .unitPrice(detail.getUnitPrice())
+                        .totalPrice(detail.getTotalPrice())
+                        .createdAt(detail.getCreatedAt())
+                        .build())
+                .toList();
+
+        orderDetailRepository.saveAll(finalDetails);
+
+        return OrderCommandResponse.builder()
+                .orderId(savedOrder.getOrderId())
+                .franchiseId(savedOrder.getFranchiseId())
+                .orderStatus(savedOrder.getOrderStatus())
+                .createdAt(savedOrder.getCreatedAt())
+                .build();
+
     }
 
     // 주문 수정
