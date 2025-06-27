@@ -1,5 +1,6 @@
 package com.harusari.chainware.category.query.mapper;
 
+import com.harusari.chainware.category.query.dto.request.CategorySearchRequest;
 import com.harusari.chainware.category.query.dto.response.*;
 import com.harusari.chainware.product.query.dto.response.ProductDto;
 import org.apache.ibatis.annotations.Mapper;
@@ -10,9 +11,14 @@ import java.util.List;
 
 @Mapper
 public interface CategoryQueryMapper {
-    List<CategoryWithTopResponse> selectCategoriesWithTopAndProductCount(@Param("offset") int offset, @Param("limit") int limit);
 
-    long countAllCategories();
+    List<CategoryWithTopResponse> searchCategoriesWithTopAndProductCount(
+            @Param("request") CategorySearchRequest request,
+            @Param("offset") int offset,
+            @Param("limit") int limit
+    );
+
+    long countCategoriesWithCondition(@Param("request") CategorySearchRequest request);
 
     TopCategoryOnlyResponse selectTopCategoryBasic(@Param("topCategoryId") Long topCategoryId);
 
@@ -36,4 +42,5 @@ public interface CategoryQueryMapper {
 
     @Select("SELECT category_name FROM category WHERE category_id = #{categoryId}")
     String selectCategoryNameById(@Param("categoryId") Long categoryId);
+
 }

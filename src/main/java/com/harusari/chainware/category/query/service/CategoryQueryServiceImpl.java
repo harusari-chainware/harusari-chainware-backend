@@ -1,5 +1,6 @@
 package com.harusari.chainware.category.query.service;
 
+import com.harusari.chainware.category.query.dto.request.CategorySearchRequest;
 import com.harusari.chainware.category.query.dto.response.*;
 import com.harusari.chainware.category.query.mapper.CategoryQueryMapper;
 import com.harusari.chainware.common.dto.Pagination;
@@ -23,14 +24,16 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
     private final CategoryQueryMapper categoryQueryMapper;
 
     @Override
-    public TopCategoryListResponse getAllCategoriesGroupedByTopCategory(int page, int size) {
-        int offset = (page - 1) * size;
-        List<CategoryWithTopResponse> flatCategoryList = categoryQueryMapper.selectCategoriesWithTopAndProductCount(offset, size);
-        long total = categoryQueryMapper.countAllCategories();
+    public TopCategoryListResponse searchCategories(CategorySearchRequest request) {
+        int offset = request.getOffset();
+        int limit = request.getLimit();
+
+        List<CategoryWithTopResponse> flatList =
+                categoryQueryMapper.searchCategoriesWithTopAndProductCount(request, offset, limit);
+        long total = categoryQueryMapper.countCategoriesWithCondition(request);
 
         Map<Long, TopCategoryWithCategoriesResponse> grouped = new LinkedHashMap<>();
-
-        for (CategoryWithTopResponse row : flatCategoryList) {
+        for (CategoryWithTopResponse row : flatList) {
             grouped.computeIfAbsent(row.getTopCategoryId(), id ->
                     TopCategoryWithCategoriesResponse.builder()
                             .topCategoryId(row.getTopCategoryId())
@@ -46,11 +49,11 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
             );
         }
 
-        return TopCategoryListResponse.builder()
-                .topCategories(new ArrayList<>(grouped.values()))
-                .pagination(Pagination.of(page, size, total))
-                .build();
-    }
+    return TopCategoryListResponse.builder()
+            .topCategories(new ArrayList<>(grouped.values()))
+            .pagination(Pagination.of(request.getPage(), request.getSize(), total))
+            .build();
+}
 
     @Override
     public TopCategoryProductPageResponse getTopCategoryWithPagedProducts(Long topCategoryId, int page, int size) {
