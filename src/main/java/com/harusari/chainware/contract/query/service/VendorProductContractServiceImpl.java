@@ -3,7 +3,11 @@ package com.harusari.chainware.contract.query.service;
 import com.harusari.chainware.common.dto.PagedResult;
 import com.harusari.chainware.contract.query.dto.request.VendorProductContractSearchRequest;
 import com.harusari.chainware.contract.query.dto.response.VendorProductContractDto;
+import com.harusari.chainware.contract.query.dto.response.VendorProductContractListDto;
 import com.harusari.chainware.contract.query.mapper.VendorProductContractMapper;
+import com.harusari.chainware.exception.contract.ContractAccessDeniedException;
+import com.harusari.chainware.exception.contract.ContractErrorCode;
+import com.harusari.chainware.exception.contract.ContractNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,14 +22,14 @@ public class VendorProductContractServiceImpl implements VendorProductContractSe
     private final VendorProductContractMapper mapper;
 
     @Override
-    public PagedResult<VendorProductContractDto> getContracts(VendorProductContractSearchRequest request, Long memberId, boolean isManager) {
+    public PagedResult<VendorProductContractListDto> getContracts(VendorProductContractSearchRequest request, Long memberId, boolean isManager) {
         Long vendorId = isManager ? null : mapper.findVendorIdByMemberId(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원의 거래처 정보가 존재하지 않습니다."));
 
-        List<VendorProductContractDto> content = mapper.findVendorProductContracts(request, vendorId, isManager);
+        List<VendorProductContractListDto> content = mapper.findVendorProductContracts(request, vendorId, isManager);
         long total = mapper.countVendorProductContracts(request, vendorId, isManager);
 
-        return PagedResult.<VendorProductContractDto>builder()
+        return PagedResult.<VendorProductContractListDto>builder()
                 .content(content)
                 .pagination(PagedResult.PaginationMeta.builder()
                         .page(request.getPage())
@@ -34,5 +38,20 @@ public class VendorProductContractServiceImpl implements VendorProductContractSe
                         .totalPages((int) Math.ceil((double) total / request.getSize()))
                         .build())
                 .build();
+    }
+
+    @Override
+    public VendorProductContractDto getContractById(Long contractId, Long memberId, boolean isManager) {
+        Long vendorId = isManager
+                ? null
+                : mapper.findVendorIdByMemberId(memberId)
+                .orElseThrow(() -> new ContractAccessDeniedException(
+                        ContractErrorCode.CONTRACT_ACCESS_DENIED
+                ));
+
+        return mapper.findVendorProductContractById(contractId, vendorId, isManager)
+                .orElseThrow(() -> new ContractNotFoundException(
+                        ContractErrorCode.CONTRACT_NOT_FOUND
+                ));
     }
 }

@@ -17,21 +17,10 @@
         <result property="contractStatus" column="contract_status"/>
         <result property="contractStartDate" column="contract_start_date"/>
         <result property="contractEndDate" column="contract_end_date"/>
-
-<!--        <result property="productId" column="product_id"/>-->
-<!--        <result property="unitQuantity" column="unit_quantity"/>-->
-<!--        <result property="unitSpec" column="unit_spec" javaType="java.lang.String"/>-->
-<!--        <result property="storeType" column="store_type"/>-->
-
-<!--        <result property="topCategoryId" column="top_category_id"/>-->
-<!--        <result property="topCategoryName" column="top_category_name"/>-->
-
-<!--        <result property="categoryId" column="category_id"/>-->
-<!--        <result property="categoryName" column="category_name"/>-->
     </resultMap>
 
     <select id="findVendorProductContracts"
-            resultType="com.harusari.chainware.contract.query.dto.response.VendorProductContractDto">
+            resultType="com.harusari.chainware.contract.query.dto.response.VendorProductContractListDto">
         SELECT
         c.contract_id,
         v.vendor_name,
@@ -83,6 +72,73 @@
         FROM vendor
         WHERE member_id = #{memberId}
         LIMIT 1
+    </select>
+
+    <!-- 1) 단일조회 전용 resultMap -->
+    <resultMap id="VendorContractDetailResultMap"
+               type="com.harusari.chainware.contract.query.dto.response.VendorProductContractDto">
+        <!-- 공통 필드 -->
+        <result property="contractId"         column="contract_id"/>
+        <result property="vendorName"         column="vendor_name"/>
+        <result property="productName"        column="product_name"/>
+        <result property="basePrice"          column="base_price"/>
+        <result property="contractPrice"      column="contract_price"/>
+        <result property="minOrderQty"        column="min_order_qty"/>
+        <result property="leadTime"           column="lead_time"/>
+        <result property="contractStatus"     column="contract_status"/>
+        <result property="contractStartDate"  column="contract_start_date"/>
+        <result property="contractEndDate"    column="contract_end_date"/>
+
+        <!-- 단일조회 전용 추가 필드 -->
+        <result property="vendorId"           column="vendor_id"/>
+        <result property="productId"          column="product_id"/>
+        <result property="unitQuantity"       column="unit_quantity"/>
+        <result property="unitSpec"           column="unit_spec"/>
+        <result property="storeType"          column="store_type"/>
+        <result property="topCategoryId"      column="top_category_id"/>
+        <result property="topCategoryName"    column="top_category_name"/>
+        <result property="categoryId"         column="category_id"/>
+        <result property="categoryName"       column="category_name"/>
+        <result property="createdAt"          column="created_at"/>
+        <result property="modifiedAt"         column="modified_at"/>
+    </resultMap>
+
+    <!-- 2) 단일조회 쿼리 -->
+    <select id="findVendorProductContractById"
+            resultMap="VendorContractDetailResultMap"
+            parameterType="map">
+        SELECT
+        c.contract_id,
+        v.vendor_name,
+        p.product_name,
+        p.base_price,
+        c.contract_price,
+        c.min_order_qty,
+        c.lead_time,
+        c.contract_status,
+        c.contract_start_date,
+        c.contract_end_date,
+        v.vendor_id,
+        p.product_id,
+        p.unit_quantity,
+        p.unit_spec,
+        p.store_type,
+        tc.category_id   AS top_category_id,
+        tc.category_name AS top_category_name,
+        cgy.category_id  AS category_id,
+        cgy.category_name AS category_name,
+        c.created_at,
+        c.modified_at
+        FROM contract c
+        JOIN vendor v    ON c.vendor_id = v.vendor_id
+        JOIN product p   ON c.product_id = p.product_id
+        JOIN category cgy ON p.category_id = cgy.category_id
+        JOIN category tc  ON cgy.top_category_id = tc.category_id
+        WHERE c.is_deleted = 0
+        AND c.contract_id = #{contractId}
+        <if test="!isManager">
+            AND c.vendor_id = #{vendorId}
+        </if>
     </select>
 
 </mapper>
