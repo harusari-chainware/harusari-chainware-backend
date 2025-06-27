@@ -110,6 +110,15 @@ public enum SecurityPolicy {
     PURCHASE_SHIPPED_PUT("/api/v1/purchases/{purchaseOrderId}/shipped", PUT, ROLE_BASED, List.of(VENDOR_MANAGER)), // 출고 완료 처리
 
     /* Take Back */
+    TAKEBACK_REGISTER("/api/v1/takeback", POST, ROLE_BASED, List.of(FRANCHISE_MANAGER)), // 반품 신청
+    TAKEBACK_CANCEL("/api/v1/takeback/{takebackId}/cancel", PUT, ROLE_BASED, List.of(FRANCHISE_MANAGER)), // 반품 취소
+    TAKEBACK_WAREHOUSED("/api/v1/takeback/{takebackId}/collect", PUT, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 반품 수거
+    TAKEBACK_APPROVE("/api/v1/takeback/{takebackId}/approve", PUT, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 반품 승인
+    TAKEBACK_REJECT("/api/v1/takeback/{takebackId}/reject", PUT, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 반품 반려
+    TAKEBACK_DISPOSAL("/api/v1/takeback/{takebackId}/disposal", PUT, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 반품 폐기
+
+    TAKEBACK_LIST_GET("/api/v1/takeback", GET, ROLE_BASED, List.of(FRANCHISE_MANAGER, WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 반품 목록 조회
+    TAKEBACK_DETAIL_GET("/api/v1/takeback/{takebackId}", GET, ROLE_BASED, List.of(FRANCHISE_MANAGER, WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 반품 상세 조회
 
 
     /* Notification */
