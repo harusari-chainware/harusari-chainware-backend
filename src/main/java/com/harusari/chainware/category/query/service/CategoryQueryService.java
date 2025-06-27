@@ -1,15 +1,12 @@
 package com.harusari.chainware.category.query.service;
 
-import com.harusari.chainware.category.query.dto.response.CategoryDetailResponse;
-import com.harusari.chainware.category.query.dto.response.TopCategoryDetailResponse;
-import com.harusari.chainware.category.query.dto.response.TopCategoryResponse;
-
-import java.util.List;
+import com.harusari.chainware.category.query.dto.request.CategoryByTopCategoryRequest;
+import com.harusari.chainware.category.query.dto.response.*;
 
 public interface CategoryQueryService {
-    List<TopCategoryResponse> getCategoryListWithProductCount();
+    TopCategoryListResponse getTopCategoryListWithPaging(int page, int size);
 
-    TopCategoryDetailResponse getTopCategoryDetail(Long topCategoryId);
+    CategoryListResponse getCategoriesByTopCategory(CategoryByTopCategoryRequest request);
 
-    CategoryDetailResponse getCategoryDetail(Long categoryId);
+    ProductListWithPagination getCategoryProducts(Long categoryId, int page, int size);
 }

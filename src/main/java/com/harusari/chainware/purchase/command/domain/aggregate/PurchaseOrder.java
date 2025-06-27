@@ -1,5 +1,6 @@
 package com.harusari.chainware.purchase.command.domain.aggregate;
 
+import com.harusari.chainware.exception.purchase.PurchaseOrderException;
 import com.harusari.chainware.requisition.command.application.exception.InvalidStatusException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -24,6 +25,9 @@ public class PurchaseOrder {
 
     @Column(name = "vendor_id", nullable = false)
     private Long vendorId;
+
+    @Column(name = "warehouse_id", nullable = false)
+    private Long warehouseId;
 
     @Column(name = "created_member_id", nullable = false)
     private Long createdMemberId;
@@ -51,11 +55,12 @@ public class PurchaseOrder {
     private LocalDateTime modifiedAt;
 
     @Builder
-    public PurchaseOrder(Long requisitionId, Long vendorId, Long createdMemberId, Long vendorMemberId,
+    public PurchaseOrder(Long requisitionId, Long vendorId, Long warehouseId, Long createdMemberId, Long vendorMemberId,
                          String purchaseOrderCode, Long totalAmount, PurchaseOrderStatus purchaseOrderStatus,
                          String rejectReason, LocalDateTime createdAt, LocalDateTime modifiedAt) {
         this.requisitionId = requisitionId;
         this.vendorId = vendorId;
+        this.warehouseId = warehouseId;
         this.createdMemberId = createdMemberId;
         this.vendorMemberId = vendorMemberId;
         this.purchaseOrderCode = purchaseOrderCode;
@@ -92,4 +97,9 @@ public class PurchaseOrder {
         this.modifiedAt = LocalDateTime.now();
     }
 
+    // 발주 출고
+    public void shipped() {
+        this.purchaseOrderStatus = PurchaseOrderStatus.SHIPPED;
+        this.modifiedAt = LocalDateTime.now();
+    }
 }

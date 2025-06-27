@@ -12,6 +12,9 @@ public class CreateRequisitionRequest {
     @NotNull(message = "거래처 ID는 필수입니다.")
     private Long vendorId;
 
+    @NotNull(message = "창고 ID는 필수입니다.")
+    private Long warehouseId;
+
     @NotNull(message = "결재자 ID는 필수입니다.")
     private Long approvedMemberId;
 

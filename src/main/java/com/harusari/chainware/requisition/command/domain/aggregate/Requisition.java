@@ -24,6 +24,9 @@ public class Requisition {
     @Column(name = "vendor_id", nullable = false)
     private Long vendorId;
 
+    @Column(name = "warehouse_id", nullable = false)
+    private Long warehouseId;
+
     @Column(name = "requisition_code", nullable = false, length = 50)
     private String requisitionCode;
 
@@ -53,11 +56,12 @@ public class Requisition {
     private LocalDateTime modifiedAt;
 
     @Builder
-    public Requisition(Long createdMemberId, Long approvedMemberId, Long vendorId, String code,
+    public Requisition(Long createdMemberId, Long approvedMemberId, Long vendorId, Long warehouseId, String code,
                        int productCount, int totalQuantity, Long totalPrice) {
         this.createdMemberId = createdMemberId;
         this.approvedMemberId = approvedMemberId;
         this.vendorId = vendorId;
+        this.warehouseId = warehouseId;
         this.requisitionCode = code;
         this.productCount = productCount;
         this.totalQuantity = totalQuantity;
@@ -86,8 +90,9 @@ public class Requisition {
     }
 
 
-    public void update(Long approvedMemberId, int productCount, int totalQuantity, Long totalPrice) {
+    public void update(Long approvedMemberId, Long warehouseId, int productCount, int totalQuantity, Long totalPrice) {
         this.approvedMemberId = approvedMemberId;
+        this.warehouseId = warehouseId;
         this.productCount = productCount;
         this.totalQuantity = totalQuantity;
         this.totalPrice = totalPrice;

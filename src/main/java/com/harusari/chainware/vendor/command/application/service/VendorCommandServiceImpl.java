@@ -73,7 +73,7 @@ public class VendorCommandServiceImpl implements VendorCommandService {
     }
 
     @Override
-    public void createFranchiseWithAgreement(
+    public void createVendorWithAgreement(
             Long memberId, MemberWithVendorRequest memberWithVendorRequest, MultipartFile agreementFile
     ) {
         Vendor vendor = vendorMapStruct.toVendor(memberWithVendorRequest.vendorCreateRequest(), memberId);

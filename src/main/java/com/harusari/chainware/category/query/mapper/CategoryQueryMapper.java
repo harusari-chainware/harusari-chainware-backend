@@ -1,6 +1,7 @@
 package com.harusari.chainware.category.query.mapper;
 
 import com.harusari.chainware.category.query.dto.response.*;
+import com.harusari.chainware.product.query.dto.response.ProductDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -8,15 +9,23 @@ import java.util.List;
 
 @Mapper
 public interface CategoryQueryMapper {
+    List<TopCategoryOnlyResponse> selectTopCategoriesWithPaging(@Param("offset") int offset, @Param("limit") int limit);
 
-    List<TopCategoryOnlyResponse> selectTopCategories();
+    long countAllTopCategories();
 
-    List<CategoryResponse> selectCategoriesByTopCategoryId(@Param("topCategoryId") Long topCategoryId);
+    List<CategoryResponse> selectCategoriesByTopCategoryId(
+            @Param("topCategoryId") Long topCategoryId,
+            @Param("offset") int offset,
+            @Param("limit") int limit
+    );
 
-    TopCategoryOnlyResponse selectTopCategoryBasic(@Param("topCategoryId") Long topCategoryId);
+    long countCategoriesByTopCategoryId(@Param("topCategoryId") Long topCategoryId);
 
-    List<CategoryWithProductsResponse> selectCategoriesWithProductsByTopCategoryId(@Param("topCategoryId") Long topCategoryId);
+    List<ProductDto> selectProductsByCategoryId(
+            @Param("categoryId") Long categoryId,
+            @Param("offset") int offset,
+            @Param("limit") int limit
+    );
 
-    CategoryDetailResponse selectCategoryDetailWithProducts(@Param("categoryId") Long categoryId);
-
+    long countProductsByCategoryId(@Param("categoryId") Long categoryId);
 }

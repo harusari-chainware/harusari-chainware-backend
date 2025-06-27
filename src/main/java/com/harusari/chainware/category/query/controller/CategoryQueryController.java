@@ -1,18 +1,12 @@
 package com.harusari.chainware.category.query.controller;
 
-import com.harusari.chainware.category.query.dto.response.CategoryDetailResponse;
-import com.harusari.chainware.category.query.dto.response.TopCategoryDetailResponse;
-import com.harusari.chainware.category.query.dto.response.TopCategoryResponse;
+import com.harusari.chainware.category.query.dto.request.CategoryByTopCategoryRequest;
+import com.harusari.chainware.category.query.dto.response.*;
 import com.harusari.chainware.category.query.service.CategoryQueryService;
 import com.harusari.chainware.common.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/categories")
@@ -22,25 +16,40 @@ public class CategoryQueryController {
     private final CategoryQueryService categoryQueryService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<TopCategoryResponse>>> getAllCategoryList() {
+    public ResponseEntity<ApiResponse<TopCategoryListResponse>> getAllCategoryListWithPaging(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
         return ResponseEntity.ok(ApiResponse.success(
-                categoryQueryService.getCategoryListWithProductCount()
+                categoryQueryService.getTopCategoryListWithPaging(page, size)
         ));
     }
 
     @GetMapping("/top/{topCategoryId}")
-    public ResponseEntity<ApiResponse<TopCategoryDetailResponse>> getTopCategoryDetail(
-            @PathVariable Long topCategoryId) {
+    public ResponseEntity<ApiResponse<CategoryListResponse>> getCategoriesByTopCategory(
+            @PathVariable  Long topCategoryId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        CategoryByTopCategoryRequest request = CategoryByTopCategoryRequest.builder()
+                .topCategoryId(topCategoryId)
+                .page(page)
+                .size(size)
+                .build();
+
         return ResponseEntity.ok(ApiResponse.success(
-                categoryQueryService.getTopCategoryDetail(topCategoryId)
+                categoryQueryService.getCategoriesByTopCategory(request)
         ));
     }
 
     @GetMapping("/{categoryId}")
-    public ResponseEntity<ApiResponse<CategoryDetailResponse>> getCategoryDetail(
-            @PathVariable Long categoryId) {
+    public ResponseEntity<ApiResponse<ProductListWithPagination>> getCategoryProducts(
+            @PathVariable Long categoryId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
         return ResponseEntity.ok(ApiResponse.success(
-                categoryQueryService.getCategoryDetail(categoryId)
+                categoryQueryService.getCategoryProducts(categoryId, page, size)
         ));
     }
 }
