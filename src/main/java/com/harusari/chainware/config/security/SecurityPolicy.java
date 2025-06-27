@@ -63,6 +63,7 @@ public enum SecurityPolicy {
     /* Franchise */
     FRANCHISE_PUT("/api/v1/franchises/{franchiseId}", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 가맹점 정보 수정
     FRANCHISES_GET("/api/v1/franchises", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 가맹점 목록 조회
+    FRANCHISE_GET("/api/v1/franchises/{franchiseId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 가맹점 상세 조회
 
     /* Vendor */
 

@@ -2,6 +2,7 @@ package com.harusari.chainware.franchise.query.repository;
 
 import com.harusari.chainware.franchise.command.domain.aggregate.FranchiseStatus;
 import com.harusari.chainware.franchise.query.dto.request.FranchiseSearchRequest;
+import com.harusari.chainware.franchise.query.dto.resposne.FranchiseSearchDetailResponse;
 import com.harusari.chainware.franchise.query.dto.resposne.FranchiseSearchResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -68,6 +69,22 @@ public class FranchiseQueryRepositoryImpl implements FranchiseQueryRepositoryCus
         long total = Optional.ofNullable(result).orElse(TOTAL_DEFAULT_VALUE);
 
         return new PageImpl<>(contents, pageable, total);
+    }
+
+    @Override
+    public Optional<FranchiseSearchDetailResponse> findFranchiseDetailById(Long franchiseId) {
+        return Optional.ofNullable(queryFactory
+                .select(Projections.constructor(FranchiseSearchDetailResponse.class,
+                        member.memberId, member.name, member.phoneNumber, franchise.franchiseId,
+                        franchise.franchiseName, franchise.franchiseContact, franchise.franchiseTaxId,
+                        franchise.franchiseAddress, franchise.agreementFilePath, franchise.agreementOriginalFileName,
+                        franchise.agreementFileSize, franchise.contractStartDate, franchise.contractEndDate, franchise.franchiseStatus
+                ))
+                .from(franchise)
+                .leftJoin(member).on(franchise.memberId.eq(member.memberId))
+                .where(franchise.franchiseId.eq(franchiseId))
+                .fetchOne()
+        );
     }
 
     private BooleanExpression franchiseNameContains(String franchiseName) {
