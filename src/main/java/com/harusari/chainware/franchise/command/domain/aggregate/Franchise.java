@@ -64,7 +64,7 @@ public class Franchise {
 
     @Column(name = "franchise_status")
     @Enumerated(EnumType.STRING)
-    private FranchiseStatus franchiseStatus = FranchiseStatus.ACTIVE;
+    private FranchiseStatus franchiseStatus = FranchiseStatus.OPERATING;
 
     @Builder
     public Franchise(
@@ -89,11 +89,12 @@ public class Franchise {
 
     public void updateFranchise(
             String franchiseName, String franchiseContact,
-            String franchiseTaxId, Address franchiseAddress
+            String franchiseTaxId, FranchiseStatus franchiseStatus, Address franchiseAddress
     ) {
         this.franchiseName = franchiseName;
         this.franchiseContact = franchiseContact;
         this.franchiseTaxId = franchiseTaxId;
+        this.franchiseStatus = franchiseStatus;
         this.franchiseAddress = franchiseAddress;
         this.modifiedAt = LocalDateTime.now().withNano(0);
     }
