@@ -61,7 +61,8 @@ public enum SecurityPolicy {
     PRODUCT_DETAIL_GET("/api/v1/products/{productId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, FRANCHISE_MANAGER)), // 제품 상세 정보 조회
 
     /* Franchise */
-    FRANCHISE_PUT("/api/v1/franchise/{franchiseId}", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 가맹점 정보 수정
+    FRANCHISE_PUT("/api/v1/franchises/{franchiseId}", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 가맹점 정보 수정
+    FRANCHISES_GET("/api/v1/franchises", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 가맹점 목록 조회
 
     /* Vendor */
 
