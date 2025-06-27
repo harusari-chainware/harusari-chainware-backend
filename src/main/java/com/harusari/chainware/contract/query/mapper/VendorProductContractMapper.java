@@ -6,15 +6,19 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 @Mapper
 public interface VendorProductContractMapper {
-    List<VendorProductContractDto> findVendorProductContracts(@Param("request") VendorProductContractSearchRequest request,
-                                                              @Param("isManager") boolean isManager);
+    List<VendorProductContractDto> findVendorProductContracts(
+            @Param("request") VendorProductContractSearchRequest request,
+            @Param("vendorId") Long vendorId,
+            @Param("isManager") boolean isManager);
 
-    long countVendorProductContracts(@Param("request") VendorProductContractSearchRequest request,
-                                     @Param("isManager") boolean isManager);
+    long countVendorProductContracts(
+            @Param("request") VendorProductContractSearchRequest request,
+            @Param("vendorId") Long vendorId,
+            @Param("isManager") boolean isManager);
 
-    List<VendorProductContractDto> findVendorProductContractsByVendorId(@Param("vendorId") Long vendorId);
-
+    Optional<Long> findVendorIdByMemberId(@Param("memberId") Long memberId);
 }

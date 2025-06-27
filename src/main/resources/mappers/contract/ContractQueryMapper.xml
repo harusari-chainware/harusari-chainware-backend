@@ -5,142 +5,99 @@
 
 <mapper namespace="com.harusari.chainware.contract.query.mapper.VendorProductContractMapper">
 
-    <resultMap id="VendorProductContractResultMap" type="com.harusari.chainware.contract.query.dto.response.VendorProductContractDto">
-        <result property="vendorId" column="vendor_id"/>
-        <result property="vendorName" column="vendor_name"/>
-        <result property="vendorType" column="vendor_type"/>
-        <result property="vendorTaxId" column="vendor_tax_id"/>
-        <result property="vendorStatus" column="vendor_status"/>
+    <resultMap id="VendorContractResultMap" type="com.harusari.chainware.contract.query.dto.response.VendorProductContractDto">
+        <result property="contractId" column="contract_id" />
+        <result property="contractPrice" column="contract_price" />
+        <result property="minOrderQty" column="min_order_qty" />
+        <result property="leadTime" column="lead_time" />
+        <result property="contractStartDate" column="contract_start_date" />
+        <result property="contractEndDate" column="contract_end_date" />
+        <result property="contractStatus" column="contract_status" />
+        <result property="createdAt" column="created_at" />
+        <result property="modifiedAt" column="modified_at" />
 
-        <result property="productId" column="product_id"/>
-        <result property="productName" column="product_name"/>
-        <result property="topCategoryId" column="top_category_id"/>
-        <result property="topCategoryName" column="top_category_name"/>
-        <result property="categoryId" column="category_id"/>
-        <result property="categoryName" column="category_name"/>
-        <result property="storeType" column="store_type"/>
-        <result property="basePrice" column="base_price"/>
-        <result property="unitQuantity" column="unit_quantity"/>
-        <result property="unitSpec" column="unit_spec"/>
+        <result property="vendorId" column="vendor_id" />
 
-        <result property="contractId" column="contract_id"/>
-        <result property="contractPrice" column="contract_price"/>
-        <result property="minOrderQty" column="min_order_qty"/>
-        <result property="leadTime" column="lead_time"/>
-        <result property="contractStartDate" column="contract_start_date"/>
-        <result property="contractEndDate" column="contract_end_date"/>
-        <result property="contractStatus" column="contract_status"/>
-        <result property="createdAt" column="created_at"/>
-        <result property="modifiedAt" column="modified_at"/>
+        <result property="productId" column="product_id" />
+        <result property="productName" column="product_name" />
+        <result property="basePrice" column="base_price" />
+        <result property="unitQuantity" column="unit_quantity" />
+        <result property="unitSpec" column="unit_spec" javaType="java.lang.String"/>
+        <result property="storeType" column="store_type" />
+
+        <result property="topCategoryId" column="top_category_id" />
+        <result property="topCategoryName" column="top_category_name" />
+
+        <result property="categoryId" column="category_id" />
+        <result property="categoryName" column="category_name" />
     </resultMap>
 
-    <!-- 전체 거래처-제품 계약 목록 조회 (모든 거래처 대상) -->
-    <select id="findAllVendorProductContracts" resultType="com.harusari.chainware.contract.query.dto.response.VendorProductContractDto">
+    <select id="findVendorProductContracts" resultType="com.harusari.chainware.contract.query.dto.response.VendorProductContractDto">
         SELECT
+        c.contract_id,
+        c.contract_price,
+        c.min_order_qty,
+        c.lead_time,
+        c.contract_start_date,
+        c.contract_end_date,
+        c.contract_status,
+        c.created_at,
+        c.modified_at,
+
         v.vendor_id,
-        v.vendor_name,
-        v.vendor_type,
-        v.vendor_tax_id,
-        v.vendor_status,
 
         p.product_id,
         p.product_name,
-        tc.top_category_id,
-        tc.top_category_name,
-        c.category_id,
-        c.category_name,
-        p.store_type,
         p.base_price,
         p.unit_quantity,
         p.unit_spec,
+        p.store_type,
 
-        co.contract_id,
-        co.contract_price,
-        co.min_order_qty,
-        co.lead_time,
-        co.contract_start_date,
-        co.contract_end_date,
-        co.contract_status,
-        co.created_at,
-        co.modified_at
+        tc.category_id AS top_category_id,
+        tc.category_name AS top_category_name,
 
-        FROM vendor v
-        JOIN contract co ON v.vendor_id = co.vendor_id AND co.is_deleted = 0
-        JOIN product p ON co.product_id = p.product_id AND p.is_deleted = 0
-        JOIN category c ON p.category_id = c.category_id
-        JOIN top_category tc ON c.top_category_id = tc.top_category_id
-        <where>
-            co.contract_status = 'ACTIVE'
-            <if test="!isManager">
-                AND v.vendor_id = #{request.vendorId}
+        cgy.category_id,
+        cgy.category_name
+        FROM contract c
+        JOIN vendor v ON c.vendor_id = v.vendor_id
+        JOIN product p ON c.product_id = p.product_id
+        JOIN category cgy ON p.category_id = cgy.category_id
+        JOIN category tc ON cgy.top_category_id = tc.category_id
+        WHERE c.is_deleted = 0
+
+        <if test="isManager">
+            <if test="request.vendorId != null">
+                AND c.vendor_id = #{request.vendorId}
             </if>
-        </where>
-        ORDER BY co.contract_id DESC
-        LIMIT #{request.limit} OFFSET #{request.offset}
+        </if>
+        <if test="!isManager">
+            AND c.vendor_id = #{vendorId}
+        </if>
+
+        ORDER BY c.contract_id DESC
+        LIMIT #{request.size}
+        OFFSET #{request.offset}
     </select>
 
     <select id="countVendorProductContracts" resultType="long">
         SELECT COUNT(*)
-        FROM vendor v
-        JOIN contract co ON v.vendor_id = co.vendor_id AND co.is_deleted = 0
-        JOIN product p ON co.product_id = p.product_id AND p.is_deleted = 0
-        JOIN category c ON p.category_id = c.category_id
-        JOIN top_category tc ON c.top_category_id = tc.top_category_id
-        <where>
-            co.contract_status = 'ACTIVE'
-            AND v.vendor_id = #{request.vendorId}
-        </where>
-        ORDER BY co.contract_id DESC
-        LIMIT #{request.limit} OFFSET #{request.offset}
+        FROM contract c
+        WHERE c.is_deleted = 0
+        <if test="isManager">
+            <if test="request.vendorId != null">
+                AND c.vendor_id = #{request.vendorId}
+            </if>
+        </if>
+        <if test="!isManager">
+            AND c.vendor_id = #{vendorId}
+        </if>
     </select>
 
-<!--    <select id="countVendorProductContracts" resultType="long">-->
-<!--        SELECT COUNT(*)-->
-<!--        FROM vendor v-->
-<!--        JOIN contract co ON v.vendor_id = co.vendor_id AND co.is_deleted = 0-->
-<!--        JOIN product p ON co.product_id = p.product_id AND p.is_deleted = 0-->
-<!--        <where>-->
-<!--            co.contract_status = 'ACTIVE'-->
-<!--            AND v.vendor_id = #{request.vendorId}-->
-<!--        </where>-->
-<!--    </select>-->
-
-    <!-- 특정 거래처(vendor_id)에 대한 제품 목록 조회 -->
-    <select id="findVendorProductContractsByVendorId" resultType="com.harusari.chainware.contract.query.dto.response.VendorProductContractDto">
-        SELECT
-        v.vendor_id,
-        v.vendor_name,
-        v.vendor_type,
-        v.vendor_tax_id,
-        v.vendor_status,
-
-        p.product_id,
-        p.product_name,
-        tc.top_category_id,
-        tc.top_category_name,
-        c.category_id,
-        c.category_name,
-        p.store_type,
-        p.base_price,
-        p.unit_quantity,
-        p.unit_spec,
-
-        co.contract_id,
-        co.contract_price,
-        co.min_order_qty,
-        co.lead_time,
-        co.contract_start_date,
-        co.contract_end_date,
-        co.contract_status,
-        co.created_at,
-        co.modified_at
-
-        FROM vendor v
-        JOIN contract co ON v.vendor_id = co.vendor_id AND co.is_deleted = 0
-        JOIN product p ON co.product_id = p.product_id AND p.is_deleted = 0
-        JOIN category c ON p.category_id = c.category_id
-        JOIN top_category tc ON c.top_category_id = tc.top_category_id
-        WHERE v.vendor_id = #{vendorId}
+    <select id="findVendorIdByMemberId" resultType="long">
+        SELECT vendor_id
+        FROM vendor
+        WHERE member_id = #{memberId}
+        LIMIT 1
     </select>
 
 </mapper>
