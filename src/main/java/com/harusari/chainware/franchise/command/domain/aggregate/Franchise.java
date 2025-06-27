@@ -1,5 +1,6 @@
 package com.harusari.chainware.franchise.command.domain.aggregate;
 
+import com.harusari.chainware.common.domain.vo.Address;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,8 +30,13 @@ public class Franchise {
     @Column(name = "franchise_tax_id")
     private String franchiseTaxId;
 
-    @Column(name = "franchise_address")
-    private String franchiseAddress;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "zipcode", column = @Column(name = "franchise_zipcode")),
+            @AttributeOverride(name = "addressRoad", column = @Column(name = "franchise_address_road")),
+            @AttributeOverride(name = "addressDetail", column = @Column(name = "franchise_address_detail"))
+    })
+    private Address franchiseAddress;
 
     @Column(name = "agreement_file_path")
     private String agreementFilePath;
@@ -58,12 +64,12 @@ public class Franchise {
 
     @Column(name = "franchise_status")
     @Enumerated(EnumType.STRING)
-    private FranchiseStatus franchiseStatus = FranchiseStatus.ACTIVE;
+    private FranchiseStatus franchiseStatus = FranchiseStatus.OPERATING;
 
     @Builder
     public Franchise(
             Long memberId, String franchiseName, String franchiseContact, String franchiseTaxId,
-            String franchiseAddress, String agreementFilePath, String agreementOriginalFileName,
+            Address franchiseAddress, String agreementFilePath, String agreementOriginalFileName,
             long agreementFileSize, LocalDate contractStartDate, LocalDate contractEndDate, LocalDateTime modifiedAt
     ) {
         this.memberId = memberId;
@@ -79,6 +85,18 @@ public class Franchise {
         this.contractEndDate = contractEndDate;
         this.createdAt = LocalDateTime.now().withNano(0);
         this.modifiedAt = modifiedAt;
+    }
+
+    public void updateFranchise(
+            String franchiseName, String franchiseContact,
+            String franchiseTaxId, FranchiseStatus franchiseStatus, Address franchiseAddress
+    ) {
+        this.franchiseName = franchiseName;
+        this.franchiseContact = franchiseContact;
+        this.franchiseTaxId = franchiseTaxId;
+        this.franchiseStatus = franchiseStatus;
+        this.franchiseAddress = franchiseAddress;
+        this.modifiedAt = LocalDateTime.now().withNano(0);
     }
 
     public void updateAgreementInfo(

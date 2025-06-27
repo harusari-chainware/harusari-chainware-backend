@@ -1,12 +1,13 @@
-package com.harusari.chainware.member.command.infrastructure.repository;
+package com.harusari.chainware.member.command.domain.repository;
 
 import com.harusari.chainware.member.command.domain.aggregate.Member;
-import com.harusari.chainware.member.command.domain.repository.MemberCommandRepositoryCustom;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 import static com.harusari.chainware.member.command.domain.aggregate.QMember.member;
 
+@Repository
 @RequiredArgsConstructor
 public class MemberCommandRepositoryCustomImpl implements MemberCommandRepositoryCustom {
 

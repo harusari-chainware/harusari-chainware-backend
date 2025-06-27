@@ -69,6 +69,7 @@
 
     <resultMap id="VendorDetailResultMap" type="com.harusari.chainware.vendor.query.dto.VendorDetailDto">
         <id property="vendorId" column="vendor_id"/>
+        <result property="memberId" column="member_id"/>
         <result property="name" column="member_name"/>
         <result property="phoneNumber" column="member_phone"/>
         <result property="vendorName" column="vendor_name"/>
@@ -85,6 +86,7 @@
     <select id="findVendorDetailById" resultMap="VendorDetailResultMap">
         SELECT
         v.vendor_id,
+        v.member_id,
         m.name AS member_name,
         m.phone_number AS member_phone,
         v.vendor_name,

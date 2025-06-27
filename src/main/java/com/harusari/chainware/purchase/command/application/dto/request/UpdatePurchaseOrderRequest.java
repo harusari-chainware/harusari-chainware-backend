@@ -9,6 +9,8 @@ import java.util.List;
 @Getter
 public class UpdatePurchaseOrderRequest {
 
+    private Long warehouseId;
+
     @Size(min = 1, message = "최소 1개 이상의 품목이 필요합니다.")
     private List<PurchaseOrderItemRequest> items;
 }

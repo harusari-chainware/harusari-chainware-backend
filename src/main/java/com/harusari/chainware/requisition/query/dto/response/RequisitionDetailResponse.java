@@ -16,6 +16,7 @@ public class RequisitionDetailResponse {
     private Long createdMemberId;
     private Long approvedMemberId;
     private Long vendorId;
+    private Long warehouseId;
     private int productCount;
     private int totalQuantity;
     private Long totalPrice;
