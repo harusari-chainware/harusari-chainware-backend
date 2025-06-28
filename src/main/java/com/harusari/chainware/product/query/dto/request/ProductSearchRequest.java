@@ -4,6 +4,8 @@ import com.harusari.chainware.product.command.domain.aggregate.StoreType;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 public class ProductSearchRequest {
@@ -14,6 +16,11 @@ public class ProductSearchRequest {
     private String origin;
     private Integer shelfLife;
     private Boolean includeInactive;
+
+    private String topCategoryName;
+    private String categoryName;
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
 
     @Builder.Default
     private ProductStatusFilter productStatusFilter = ProductStatusFilter.ACTIVE_ONLY;
