@@ -11,12 +11,12 @@ import java.util.Optional;
 
 @Mapper
 public interface VendorProductContractMapper {
+
     List<VendorProductContractListDto> findVendorProductContracts(
             @Param("request") VendorProductContractSearchRequest request,
             @Param("vendorId") Long vendorId,
             @Param("isManager") boolean isManager
     );
-
     long countVendorProductContracts(
             @Param("request") VendorProductContractSearchRequest request,
             @Param("vendorId") Long vendorId,

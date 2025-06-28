@@ -35,32 +35,71 @@
         FROM contract c
         JOIN vendor v ON c.vendor_id = v.vendor_id
         JOIN product p ON c.product_id = p.product_id
-        JOIN category cgy ON p.category_id = cgy.category_id
-        JOIN category tc ON cgy.top_category_id = tc.category_id
+        JOIN category sc ON p.category_id = sc.category_id
+        JOIN category tc ON sc.top_category_id = tc.category_id
         WHERE c.is_deleted = 0
-
-        <if test="isManager">
-            <if test="request.vendorId != null">
-                AND c.vendor_id = #{request.vendorId}
-            </if>
+        <if test="request.productName != null">
+            AND p.product_name LIKE CONCAT('%', #{request.productName}, '%')
+        </if>
+        <if test="request.topCategoryName != null">
+            AND tc.category_name LIKE CONCAT('%', #{request.topCategoryName}, '%')
+        </if>
+        <if test="request.categoryName != null">
+            AND sc.category_name LIKE CONCAT('%', #{request.categoryName}, '%')
+        </if>
+        <if test="request.vendorName != null">
+            AND v.vendor_name LIKE CONCAT('%', #{request.vendorName}, '%')
+        </if>
+        <if test="request.vendorType != null">
+            AND v.vendor_type = #{request.vendorType}
+        </if>
+        <if test="request.contractStatus != null">
+            AND c.contract_status = #{request.contractStatus}
+        </if>
+        <if test="request.contractStartDate != null">
+            AND c.contract_start_date = #{request.contractStartDate}
+        </if>
+        <if test="request.contractEndDate != null">
+            AND c.contract_end_date = #{request.contractEndDate}
         </if>
         <if test="!isManager">
             AND c.vendor_id = #{vendorId}
         </if>
-
         ORDER BY c.contract_id DESC
-        LIMIT #{request.size}
-        OFFSET #{request.offset}
+        LIMIT #{request.size} OFFSET #{request.offset}
     </select>
 
-    <select id="countVendorProductContracts" resultType="long">
-        SELECT COUNT(*)
+    <select id="countVendorProductContracts" resultType="long" parameterType="map">
+        SELECT COUNT(1)
         FROM contract c
+        JOIN vendor v ON c.vendor_id = v.vendor_id
+        JOIN product p ON c.product_id = p.product_id
+        JOIN category sc ON p.category_id = sc.category_id
+        JOIN category tc ON sc.top_category_id = tc.category_id
         WHERE c.is_deleted = 0
-        <if test="isManager">
-            <if test="request.vendorId != null">
-                AND c.vendor_id = #{request.vendorId}
-            </if>
+        <if test="request.productName != null">
+            AND p.product_name LIKE CONCAT('%', #{request.productName}, '%')
+        </if>
+        <if test="request.topCategoryName != null">
+            AND tc.category_name LIKE CONCAT('%', #{request.topCategoryName}, '%')
+        </if>
+        <if test="request.categoryName != null">
+            AND sc.category_name LIKE CONCAT('%', #{request.categoryName}, '%')
+        </if>
+        <if test="request.vendorName != null">
+            AND v.vendor_name LIKE CONCAT('%', #{request.vendorName}, '%')
+        </if>
+        <if test="request.vendorType != null">
+            AND v.vendor_type = #{request.vendorType}
+        </if>
+        <if test="request.contractStatus != null">
+            AND c.contract_status = #{request.contractStatus}
+        </if>
+        <if test="request.contractStartDate != null">
+            AND c.contract_start_date = #{request.contractStartDate}
+        </if>
+        <if test="request.contractEndDate != null">
+            AND c.contract_end_date = #{request.contractEndDate}
         </if>
         <if test="!isManager">
             AND c.vendor_id = #{vendorId}
