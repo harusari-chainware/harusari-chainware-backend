@@ -41,4 +41,8 @@ public interface CategoryQueryMapper {
 
     long countProductsByTopCategoryId(@Param("topCategoryId") Long topCategoryId);
 
+    List<CategoryProductCountResponse> selectCategoryProductCountsByTopCategoryId(
+            @Param("topCategoryId") Long topCategoryId
+    );
+
 }

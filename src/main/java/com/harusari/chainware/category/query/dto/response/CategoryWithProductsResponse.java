@@ -14,5 +14,6 @@ public class CategoryWithProductsResponse {
     private String categoryName;
     private LocalDateTime categoryCreatedAt;
     private LocalDateTime categoryModifiedAt;
+    private long productCount;
     private List<ProductDto> products;
 }

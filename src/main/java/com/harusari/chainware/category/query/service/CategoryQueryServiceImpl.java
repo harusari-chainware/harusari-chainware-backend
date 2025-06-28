@@ -12,10 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -23,6 +21,7 @@ import java.util.Map;
 public class CategoryQueryServiceImpl implements CategoryQueryService {
 
     private final CategoryQueryMapper categoryQueryMapper;
+
 
     @Override
     public TopCategoryListResponse searchCategories(CategorySearchRequest request) {
@@ -33,29 +32,40 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
                 categoryQueryMapper.searchCategoriesWithTopAndProductCount(request, offset, limit);
         long total = categoryQueryMapper.countCategoriesWithCondition(request);
 
-        Map<Long, TopCategoryWithCategoriesResponse> grouped = new LinkedHashMap<>();
+        Map<Long, List<CategoryWithProductCountResponse>> categoryMap = new LinkedHashMap<>();
+        Map<Long, String> topCategoryNameMap = new HashMap<>();
+        Map<Long, Long> topCategoryProductCountMap = new HashMap<>();
+
         for (CategoryWithTopResponse row : flatList) {
-            grouped.computeIfAbsent(row.getTopCategoryId(), id ->
-                    TopCategoryWithCategoriesResponse.builder()
-                            .topCategoryId(row.getTopCategoryId())
-                            .topCategoryName(row.getTopCategoryName())
-                            .categories(new ArrayList<>())
-                            .build()
-            ).getCategories().add(
+            categoryMap.computeIfAbsent(row.getTopCategoryId(), k -> new ArrayList<>()).add(
                     CategoryWithProductCountResponse.builder()
                             .categoryId(row.getCategoryId())
                             .categoryName(row.getCategoryName())
                             .productCount(row.getProductCount())
                             .build()
             );
+
+            topCategoryNameMap.putIfAbsent(row.getTopCategoryId(), row.getTopCategoryName());
+            topCategoryProductCountMap.put(
+                    row.getTopCategoryId(),
+                    topCategoryProductCountMap.getOrDefault(row.getTopCategoryId(), 0L) + row.getProductCount()
+            );
         }
 
-    return TopCategoryListResponse.builder()
-            .topCategories(new ArrayList<>(grouped.values()))
-            .pagination(Pagination.of(request.getPage(), request.getSize(), total))
-            .build();
-}
+        List<TopCategoryWithCategoriesResponse> topCategories = categoryMap.entrySet().stream()
+                .map(entry -> TopCategoryWithCategoriesResponse.builder()
+                        .topCategoryId(entry.getKey())
+                        .topCategoryName(topCategoryNameMap.get(entry.getKey()))
+                        .productCount(topCategoryProductCountMap.getOrDefault(entry.getKey(), 0L))
+                        .categories(entry.getValue())
+                        .build())
+                .collect(Collectors.toList());
 
+        return TopCategoryListResponse.builder()
+                .topCategories(topCategories)
+                .pagination(Pagination.of(request.getPage(), request.getSize(), total))
+                .build();
+    }
     @Override
     public TopCategoryProductPageResponse getTopCategoryWithPagedProducts(Long topCategoryId, int page, int size) {
         TopCategoryOnlyResponse topCategory = categoryQueryMapper.selectTopCategoryBasic(topCategoryId);
@@ -68,6 +78,15 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
 
         List<ProductDto> pagedProducts = categoryQueryMapper.selectProductsByTopCategoryId(topCategoryId, offset, size);
 
+        // 하위 카테고리별 제품 수 조회
+        Map<Long, Long> categoryProductCountMap = categoryQueryMapper
+                .selectCategoryProductCountsByTopCategoryId(topCategoryId)
+                .stream()
+                .collect(Collectors.toMap(
+                        CategoryProductCountResponse::getCategoryId,
+                        CategoryProductCountResponse::getProductCount
+                ));
+
         Map<Long, CategoryWithProductsResponse> grouped = new LinkedHashMap<>();
         for (ProductDto product : pagedProducts) {
             grouped.computeIfAbsent(product.getCategoryId(), id -> {
@@ -77,6 +96,7 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
                         .categoryName(meta.getCategoryName())
                         .categoryCreatedAt(meta.getCreatedAt())
                         .categoryModifiedAt(meta.getModifiedAt())
+                        .productCount(categoryProductCountMap.getOrDefault(id, 0L))
                         .products(new ArrayList<>())
                         .build();
             }).getProducts().add(product);
@@ -87,6 +107,7 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
                 .topCategoryName(topCategory.getTopCategoryName())
                 .createdAt(topCategory.getCreatedAt())
                 .modifiedAt(topCategory.getModifiedAt())
+                .productCount(total)
                 .categories(new ArrayList<>(grouped.values()))
                 .pagination(Pagination.of(page, size, total))
                 .build();
@@ -96,31 +117,41 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
     public CategoryDetailWithProductsResponse getCategoryDetailWithProducts(
             Long categoryId, int page, int size) {
 
-        // 1) 기존 DTO로 하위 카테고리 기본 정보 가져오기
         CategoryMetaInfoResponse categoryMeta =
                 categoryQueryMapper.selectCategoryBasic(categoryId);
         if (categoryMeta == null) {
             throw new CategoryNotFoundException(CategoryErrorCode.CATEGORY_NOT_FOUND);
         }
 
-        // 2) 상위 카테고리 기본 정보 가져오기
         Long topCategoryId = categoryQueryMapper.selectTopCategoryIdByCategoryId(categoryId);
-
         TopCategoryOnlyResponse topCategory =
                 categoryQueryMapper.selectTopCategoryBasic(topCategoryId);
 
-        // 3) 상품 전체 수 + 페이징 계산
         int offset = (page - 1) * size;
         long total = categoryQueryMapper.countProductsByCategoryId(categoryId);
 
-        // 4) 페이징된 상품 리스트
         List<ProductDto> products =
                 categoryQueryMapper.selectProductsByCategoryId(categoryId, offset, size);
 
-        // 5) 응답 DTO 조립
+        CategoryMetaInfoWithCountResponse categoryMetaWithCount = CategoryMetaInfoWithCountResponse.builder()
+                .categoryId(categoryMeta.getCategoryId())
+                .categoryName(categoryMeta.getCategoryName())
+                .createdAt(categoryMeta.getCreatedAt())
+                .modifiedAt(categoryMeta.getModifiedAt())
+                .productCount(total)
+                .build();
+
+        TopCategoryOnlyWithCountResponse topCategoryWithCount = TopCategoryOnlyWithCountResponse.builder()
+                .topCategoryId(topCategory.getTopCategoryId())
+                .topCategoryName(topCategory.getTopCategoryName())
+                .createdAt(topCategory.getCreatedAt())
+                .modifiedAt(topCategory.getModifiedAt())
+                .productCount(categoryQueryMapper.countProductsByTopCategoryId(topCategoryId))
+                .build();
+
         return CategoryDetailWithProductsResponse.builder()
-                .categoryMeta(categoryMeta)
-                .topCategory(topCategory)
+                .categoryMeta(categoryMetaWithCount)
+                .topCategory(topCategoryWithCount)
                 .products(products)
                 .pagination(Pagination.of(page, size, total))
                 .build();

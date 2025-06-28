@@ -14,6 +14,7 @@ public class TopCategoryProductPageResponse {
     private String topCategoryName;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
+    private long productCount;
     private List<CategoryWithProductsResponse> categories;
     private Pagination pagination;
 }

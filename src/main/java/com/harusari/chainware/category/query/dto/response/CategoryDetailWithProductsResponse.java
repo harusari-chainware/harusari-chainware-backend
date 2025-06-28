@@ -10,9 +10,9 @@ import java.util.List;
 @Getter
 @Builder
 public class CategoryDetailWithProductsResponse {
-    private CategoryMetaInfoResponse categoryMeta;
+    private CategoryMetaInfoWithCountResponse categoryMeta;
 
-    private TopCategoryOnlyResponse topCategory;
+    private TopCategoryOnlyWithCountResponse topCategory;
 
     private List<ProductDto> products;
 

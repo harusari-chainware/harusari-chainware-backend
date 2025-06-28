@@ -167,4 +167,14 @@
         WHERE category_id = #{categoryId}
     </select>
 
+    <select id="selectCategoryProductCountsByTopCategoryId"
+            resultType="com.harusari.chainware.category.query.dto.response.CategoryProductCountResponse">
+        SELECT
+        c.category_id AS categoryId,
+        COUNT(p.product_id) AS productCount
+        FROM category c
+        LEFT JOIN product p ON p.category_id = c.category_id
+        WHERE c.top_category_id = #{topCategoryId}
+        GROUP BY c.category_id
+    </select>
 </mapper>
