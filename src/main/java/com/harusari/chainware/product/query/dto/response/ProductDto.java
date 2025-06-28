@@ -4,6 +4,8 @@ import com.harusari.chainware.product.command.domain.aggregate.StoreType;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 public class ProductDto {
@@ -19,11 +21,14 @@ public class ProductDto {
     private String origin;
     private Integer shelfLife;
     private Boolean productStatus;
+    private LocalDateTime productCreatedAt;
+    private LocalDateTime productModifiedAt;
 
     public ProductDto(
             Long productId, String productName, String productCode, Long categoryId,
             Integer basePrice, String unitQuantity, String unitSpec, StoreType storeType,
-            Integer safetyStock, String origin, Integer shelfLife, Boolean productStatus
+            Integer safetyStock, String origin, Integer shelfLife, Boolean productStatus,
+            LocalDateTime productCreatedAt, LocalDateTime productModifiedAt
     ) {
         this.productId = productId;
         this.productName = productName;
@@ -37,5 +42,7 @@ public class ProductDto {
         this.origin = origin;
         this.shelfLife = shelfLife;
         this.productStatus = productStatus != null && productStatus;
+        this.productCreatedAt = productCreatedAt;
+        this.productModifiedAt = productModifiedAt;
     }
 }

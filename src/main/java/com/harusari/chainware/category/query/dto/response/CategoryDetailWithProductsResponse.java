@@ -9,11 +9,12 @@ import java.util.List;
 
 @Getter
 @Builder
-public class CategoryDetailResponse {
-    private Long categoryId;
-    private String categoryName;
-    private Long topCategoryId;
-    private String topCategoryName;
+public class CategoryDetailWithProductsResponse {
+    private CategoryMetaInfoResponse categoryMeta;
+
+    private TopCategoryOnlyResponse topCategory;
+
     private List<ProductDto> products;
+
     private Pagination pagination;
 }

@@ -39,7 +39,6 @@ public class CategoryQueryController {
         ));
     }
 
-
     /* 2. 특정 상위 카테고리 → 제품 목록 조회 (제품 기준 페이징) */
     @GetMapping("/top/{topCategoryId}")
     public ResponseEntity<ApiResponse<TopCategoryProductPageResponse>> getTopCategoryDetailWithProducts(
@@ -54,7 +53,7 @@ public class CategoryQueryController {
 
     /* 3. 특정 카테고리 상세 조회 (상위 카테고리 + 제품 포함) */
     @GetMapping("/{categoryId}")
-    public ResponseEntity<ApiResponse<CategoryDetailResponse>> getCategoryDetail(
+    public ResponseEntity<ApiResponse<CategoryDetailWithProductsResponse>> getCategoryDetail(
             @PathVariable Long categoryId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size

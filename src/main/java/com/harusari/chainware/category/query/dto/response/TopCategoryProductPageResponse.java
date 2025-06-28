@@ -4,6 +4,7 @@ import com.harusari.chainware.common.dto.Pagination;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
@@ -11,6 +12,8 @@ import java.util.List;
 public class TopCategoryProductPageResponse {
     private Long topCategoryId;
     private String topCategoryName;
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
     private List<CategoryWithProductsResponse> categories;
     private Pagination pagination;
 }

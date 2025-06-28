@@ -5,6 +5,7 @@ import com.harusari.chainware.category.query.dto.response.*;
 import com.harusari.chainware.category.query.mapper.CategoryQueryMapper;
 import com.harusari.chainware.common.dto.Pagination;
 import com.harusari.chainware.exception.category.CategoryErrorCode;
+import com.harusari.chainware.exception.category.CategoryNotFoundException;
 import com.harusari.chainware.exception.category.TopCategoryNotFoundException;
 import com.harusari.chainware.product.query.dto.response.ProductDto;
 import lombok.RequiredArgsConstructor;
@@ -65,18 +66,17 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
         int offset = (page - 1) * size;
         long total = categoryQueryMapper.countProductsByTopCategoryId(topCategoryId);
 
-        // 페이징된 제품 리스트 (카테고리 정보 포함)
-        List<ProductDto> pagedProducts =
-                categoryQueryMapper.selectProductsByTopCategoryId(topCategoryId, offset, size);
+        List<ProductDto> pagedProducts = categoryQueryMapper.selectProductsByTopCategoryId(topCategoryId, offset, size);
 
-        // 카테고리 ID 기준으로 그룹핑
         Map<Long, CategoryWithProductsResponse> grouped = new LinkedHashMap<>();
         for (ProductDto product : pagedProducts) {
             grouped.computeIfAbsent(product.getCategoryId(), id -> {
-                String categoryName = categoryQueryMapper.selectCategoryNameById(id); // 또는 product에서 가져오되 1회만
+                CategoryMetaInfoResponse meta = categoryQueryMapper.selectCategoryBasic(id);
                 return CategoryWithProductsResponse.builder()
-                        .categoryId(id)
-                        .categoryName(categoryName) // 여기만 따로 가져옴
+                        .categoryId(meta.getCategoryId())
+                        .categoryName(meta.getCategoryName())
+                        .categoryCreatedAt(meta.getCreatedAt())
+                        .categoryModifiedAt(meta.getModifiedAt())
                         .products(new ArrayList<>())
                         .build();
             }).getProducts().add(product);
@@ -85,23 +85,42 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
         return TopCategoryProductPageResponse.builder()
                 .topCategoryId(topCategory.getTopCategoryId())
                 .topCategoryName(topCategory.getTopCategoryName())
+                .createdAt(topCategory.getCreatedAt())
+                .modifiedAt(topCategory.getModifiedAt())
                 .categories(new ArrayList<>(grouped.values()))
                 .pagination(Pagination.of(page, size, total))
                 .build();
     }
 
     @Override
-    public CategoryDetailResponse getCategoryDetailWithProducts(Long categoryId, int page, int size) {
+    public CategoryDetailWithProductsResponse getCategoryDetailWithProducts(
+            Long categoryId, int page, int size) {
+
+        // 1) 기존 DTO로 하위 카테고리 기본 정보 가져오기
+        CategoryMetaInfoResponse categoryMeta =
+                categoryQueryMapper.selectCategoryBasic(categoryId);
+        if (categoryMeta == null) {
+            throw new CategoryNotFoundException(CategoryErrorCode.CATEGORY_NOT_FOUND);
+        }
+
+        // 2) 상위 카테고리 기본 정보 가져오기
+        Long topCategoryId = categoryQueryMapper.selectTopCategoryIdByCategoryId(categoryId);
+
+        TopCategoryOnlyResponse topCategory =
+                categoryQueryMapper.selectTopCategoryBasic(topCategoryId);
+
+        // 3) 상품 전체 수 + 페이징 계산
         int offset = (page - 1) * size;
-        CategoryDetailInfoResponse categoryInfo = categoryQueryMapper.selectCategoryInfoWithTop(categoryId);
-        List<ProductDto> products = categoryQueryMapper.selectProductsByCategoryId(categoryId, offset, size);
         long total = categoryQueryMapper.countProductsByCategoryId(categoryId);
 
-        return CategoryDetailResponse.builder()
-                .categoryId(categoryInfo.getCategoryId())
-                .categoryName(categoryInfo.getCategoryName())
-                .topCategoryId(categoryInfo.getTopCategoryId())
-                .topCategoryName(categoryInfo.getTopCategoryName())
+        // 4) 페이징된 상품 리스트
+        List<ProductDto> products =
+                categoryQueryMapper.selectProductsByCategoryId(categoryId, offset, size);
+
+        // 5) 응답 DTO 조립
+        return CategoryDetailWithProductsResponse.builder()
+                .categoryMeta(categoryMeta)
+                .topCategory(topCategory)
                 .products(products)
                 .pagination(Pagination.of(page, size, total))
                 .build();

@@ -5,7 +5,6 @@ import com.harusari.chainware.category.query.dto.response.*;
 import com.harusari.chainware.product.query.dto.response.ProductDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -22,7 +21,9 @@ public interface CategoryQueryMapper {
 
     TopCategoryOnlyResponse selectTopCategoryBasic(@Param("topCategoryId") Long topCategoryId);
 
-    CategoryDetailInfoResponse selectCategoryInfoWithTop(@Param("categoryId") Long categoryId);
+    CategoryMetaInfoResponse selectCategoryBasic(@Param("categoryId") Long categoryId);
+
+    Long selectTopCategoryIdByCategoryId(@Param("categoryId") Long categoryId);
 
     List<ProductDto> selectProductsByCategoryId(
             @Param("categoryId") Long categoryId,
@@ -39,8 +40,5 @@ public interface CategoryQueryMapper {
     );
 
     long countProductsByTopCategoryId(@Param("topCategoryId") Long topCategoryId);
-
-    @Select("SELECT category_name FROM category WHERE category_id = #{categoryId}")
-    String selectCategoryNameById(@Param("categoryId") Long categoryId);
 
 }

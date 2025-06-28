@@ -12,5 +12,5 @@ public interface CategoryQueryService {
     TopCategoryProductPageResponse getTopCategoryWithPagedProducts(Long topCategoryId, int page, int size);
 
     // 3. 특정 카테고리 상세 조회 (상위 카테고리 + 제품 정보 포함)
-    CategoryDetailResponse getCategoryDetailWithProducts(Long categoryId, int page, int size);
+    CategoryDetailWithProductsResponse getCategoryDetailWithProducts(Long categoryId, int page, int size);
 }
