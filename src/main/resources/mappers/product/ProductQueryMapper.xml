@@ -18,7 +18,9 @@
         safety_stock,
         origin,
         shelf_life,
-        product_status
+        product_status,
+        created_at AS product_created_at,
+        modified_at AS product_modified_at
         FROM product
         WHERE is_deleted = false
 
@@ -58,7 +60,9 @@
         safety_stock,
         origin,
         shelf_life,
-        product_status
+        product_status,
+        created_at AS product_created_at,
+        modified_at AS product_modified_at
         FROM product
         WHERE is_deleted = false
         AND product_id = #{productId}
