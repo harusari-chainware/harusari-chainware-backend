@@ -17,4 +17,5 @@ public class VendorByProductRequest {
     public int getLimit() {
         return size;
     }
+
 }
