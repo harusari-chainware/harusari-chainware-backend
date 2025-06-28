@@ -39,6 +39,7 @@ public class PurchaseOrderQueryServiceImpl implements PurchaseOrderQueryService 
         response.setPurchaseOrderId(order.getPurchaseOrderId());
         response.setPurchaseOrderCode(order.getPurchaseOrderCode());
         response.setVendorName(order.getVendorName());
+        response.setWarehouseId(order.getWarehouseId());
         response.setStatus(order.getStatus());
         response.setTotalAmount(order.getTotalAmount());
         response.setCreatedAt(order.getCreatedAt());

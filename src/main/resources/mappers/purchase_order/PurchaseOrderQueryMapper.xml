@@ -10,6 +10,8 @@
         po.purchase_order_id,
         po.purchase_order_code,
         po.purchase_order_status AS status,
+        po.vendor_id,
+        po.warehouse_id,
         po.created_member_id AS requesterId,
         po.created_at,
         po.total_amount
@@ -37,6 +39,7 @@
         <id property="purchaseOrderId" column="purchase_order_id"/>
         <result property="purchaseOrderCode" column="purchase_order_code"/>
         <result property="vendorName" column="vendor_name"/>
+        <result property="warehouseId" column="warehouse_id"/>
         <result property="status" column="purchase_order_status"/>
         <result property="totalAmount" column="total_amount"/>
         <result property="createdAt" column="created_at"/>
@@ -47,6 +50,7 @@
             po.purchase_order_id,
             po.purchase_order_code,
             v.vendor_name,
+            po.warehouse_id,
             po.purchase_order_status,
             po.total_amount,
             po.created_at

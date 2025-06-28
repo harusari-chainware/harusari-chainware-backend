@@ -60,6 +60,7 @@ public class RequisitionCommandServiceImpl implements RequisitionCommandService 
                 .createdMemberId(memberId)
                 .approvedMemberId(request.getApprovedMemberId())
                 .vendorId(request.getVendorId())
+                .warehouseId(request.getWarehouseId())
                 .code(requisitionCode)
                 .productCount(productCount)
                 .totalQuantity(totalQuantity)
@@ -119,6 +120,7 @@ public class RequisitionCommandServiceImpl implements RequisitionCommandService 
         // 4. requisition 정보 업데이트
         requisition.update(
                 request.getApprovedMemberId(),
+                request.getWarehouseId(),
                 productCount,
                 totalQuantity,
                 totalPrice
