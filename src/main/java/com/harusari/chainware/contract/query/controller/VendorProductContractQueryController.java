@@ -53,7 +53,7 @@ public class VendorProductContractQueryController {
         Long memberId = userDetails.getMemberId();
 
         LocalDate startDate = contractStartDate != null ? LocalDate.parse(contractStartDate) : null;
-        LocalDate endDate   = contractEndDate   != null ? LocalDate.parse(contractEndDate)   : null;
+        LocalDate endDate = contractEndDate != null ? LocalDate.parse(contractEndDate) : null;
 
         VendorProductContractSearchRequest request = VendorProductContractSearchRequest.builder()
                 .productName(productName)
