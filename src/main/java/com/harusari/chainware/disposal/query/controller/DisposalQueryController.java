@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/disposal")
 @RequiredArgsConstructor
@@ -32,6 +30,6 @@ public class DisposalQueryController {
         MemberAuthorityType authorityType = userDetails.getMemberAuthorityType();
 
         DisposalListResponseDto result = disposalQueryService.getDisposals(request, memberId, authorityType);
-        return ResponseEntity.ok(ApiResponse.success(result));
+         return ResponseEntity.ok(ApiResponse.success(result));
     }
 }

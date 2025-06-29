@@ -24,7 +24,14 @@ public class InventorySnapshotSchedulerImpl implements InventorySnapshotSchedule
     private final WarehouseInventorySnapshotRepository warehouseInventorySnapshotRepository;
     private final JpaWarehouseInventorySnapshotRepository jpaRepository;
 
+
     @Scheduled(cron = "0 1 0 * * *")
+    @Override
+    @Transactional
+    public void saveDailySnapshot() {
+        saveDailySnapshot(LocalDate.now().minusDays(1));
+    }
+
     @Override
     @Transactional
     public void saveDailySnapshot(LocalDate snapshotDate) {

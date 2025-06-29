@@ -33,7 +33,7 @@ public class PurchaseOrderStatisticsQueryServiceImpl implements PurchaseOrderSta
             case "WEEKLY" -> {
                 startDate = baseDate.with(DayOfWeek.MONDAY);
                 endDate = baseDate.with(DayOfWeek.SUNDAY);
-                if (today.isBefore(endDate)) {
+                if (!today.isAfter(endDate)) {
                     throw new StatisticsException(StatisticsErrorCode.PERIOD_NOT_COMPLETED);
                 }
             }
