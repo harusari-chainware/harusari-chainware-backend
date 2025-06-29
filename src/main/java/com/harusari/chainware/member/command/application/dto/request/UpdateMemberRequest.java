@@ -6,6 +6,6 @@ import lombok.Builder;
 @Builder
 public record UpdateMemberRequest(
         String name, MemberAuthorityType authorityName,
-        String phoneNumber, String position, boolean isDeleted
+        String phoneNumber, String position
 ) {
 }

@@ -130,4 +130,20 @@ public class MemberCommandController {
                 .body(ApiResponse.success(null));
     }
 
+    @Operation(summary = "회원 탈퇴", description = "회원 탈퇴 처리합니다. (Soft Delete)")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "회원 탈퇴 성공")
+    })
+    @DeleteMapping("/members/{memberId}")
+    public ResponseEntity<ApiResponse<Void>> deleteMember(
+            @Parameter(description = "회원 ID", required = true)
+            @PathVariable Long memberId
+    ) {
+        memberCommandService.deleteMemberRequest(memberId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(null));
+    }
+
 }

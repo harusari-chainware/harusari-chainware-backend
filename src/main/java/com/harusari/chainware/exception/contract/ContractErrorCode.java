@@ -13,6 +13,7 @@ public enum ContractErrorCode {
     CONTRACT_CANNOT_DELETE("50002", "계약을 삭제할 수 없습니다.", HttpStatus.BAD_REQUEST),
     CONTRACT_PERIOD_INVALID("50003", "계약 시작일은 종료일보다 앞서야 합니다.", HttpStatus.BAD_REQUEST),
     CONTRACT_VENDOR_PRODUCT_CONFLICT("50004", "해당 제품과 거래처 간 계약이 이미 존재합니다.", HttpStatus.CONFLICT),
+    CONTRACT_ACCESS_DENIED("50005", "해당 거래처에 접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
 
     ;
 
