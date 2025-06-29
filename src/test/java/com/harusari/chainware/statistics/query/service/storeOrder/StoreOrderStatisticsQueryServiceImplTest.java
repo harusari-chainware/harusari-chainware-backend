@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -83,13 +84,16 @@ class StoreOrderStatisticsQueryServiceImplTest {
         @Test
         @DisplayName("4. WEEKLY - 기간이 아직 완료되지 않음")
         void testWeeklyPeriodNotCompleted() {
-            LocalDate futureWeek = LocalDate.now().with(java.time.DayOfWeek.TUESDAY);
+            // 다음 주 화요일을 사용해야 예외 조건이 확실히 만족됨
+            LocalDate futureWeek = LocalDate.now().plusWeeks(1).with(DayOfWeek.TUESDAY);
 
             assertThatThrownBy(() ->
                     service.getStatistics("WEEKLY", null, futureWeek, false))
                     .isInstanceOf(StatisticsException.class)
                     .hasMessageContaining(StatisticsErrorCode.PERIOD_NOT_COMPLETED.getMessage());
         }
+
+
 
         @Test
         @DisplayName("5. MONTHLY - 기간이 아직 완료되지 않음")
