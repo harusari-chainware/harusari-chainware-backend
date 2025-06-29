@@ -7,9 +7,10 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class TopCategoryOnlyResponse {
-    private Long topCategoryId;
-    private String topCategoryName;
+public class CategoryMetaInfoWithCountResponse {
+    private Long categoryId;
+    private String categoryName;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
+    private long productCount;
 }

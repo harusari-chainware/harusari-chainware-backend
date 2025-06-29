@@ -1,12 +1,12 @@
 package com.harusari.chainware.contract.query.service;
 
+import com.harusari.chainware.common.dto.PagedResult;
+import com.harusari.chainware.contract.query.dto.request.VendorProductContractSearchRequest;
 import com.harusari.chainware.contract.query.dto.response.VendorProductContractDto;
-
-import java.util.List;
+import com.harusari.chainware.contract.query.dto.response.VendorProductContractListDto;
 
 public interface VendorProductContractService {
+    PagedResult<VendorProductContractListDto> getContracts(VendorProductContractSearchRequest request, Long memberId, boolean isManager);
 
-    List<VendorProductContractDto> getAllContracts();
-
-    List<VendorProductContractDto> getContractsByVendorId(Long vendorId);
+    VendorProductContractDto getContractById(Long contractId, Long memberId, boolean isManager);
 }

@@ -43,4 +43,11 @@ public class ContractExceptionHandler {
         ApiResponse<Void> response = ApiResponse.failure(errorCode.getErrorCode(), errorCode.getErrorMessage());
         return new ResponseEntity<>(response, errorCode.getHttpStatus());
     }
+
+    @ExceptionHandler(ContractAccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleContractAccessDeniedException(ContractAccessDeniedException e) {
+        var errorCode = e.getErrorCode();
+        ApiResponse<Void> response = ApiResponse.failure(errorCode.getErrorCode(), errorCode.getErrorMessage());
+        return new ResponseEntity<>(response, errorCode.getHttpStatus());
+    }
 }
