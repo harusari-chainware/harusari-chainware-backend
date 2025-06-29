@@ -3,11 +3,13 @@ package com.harusari.chainware.contract.command.application.dto.request;
 import com.harusari.chainware.contract.command.domain.aggregate.ContractStatus;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
 
 @Getter
+@Builder
 public class ContractCreateRequest {
 
     @NotNull(message = "제품 ID는 필수입니다.")
