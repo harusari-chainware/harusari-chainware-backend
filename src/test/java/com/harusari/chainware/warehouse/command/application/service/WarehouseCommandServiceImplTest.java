@@ -7,8 +7,8 @@ import com.harusari.chainware.warehouse.command.application.dto.request.Warehous
 import com.harusari.chainware.warehouse.command.application.dto.response.WarehouseCommandResponse;
 import com.harusari.chainware.warehouse.command.domain.aggregate.Warehouse;
 import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInventory;
-import com.harusari.chainware.warehouse.command.infrastructure.repository.JpaWarehouseInventoryRepository;
-import com.harusari.chainware.warehouse.command.infrastructure.repository.JpaWarehouseRepository;
+import com.harusari.chainware.warehouse.command.domain.repository.WarehouseInventoryRepository;
+import com.harusari.chainware.warehouse.command.domain.repository.WarehouseRepository;
 import com.harusari.chainware.warehouse.exception.WarehouseErrorCode;
 import com.harusari.chainware.warehouse.exception.WarehouseException;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,10 +31,10 @@ class WarehouseCommandServiceImplTest {
     private WarehouseCommandServiceImpl warehouseCommandService;
 
     @Mock
-    private JpaWarehouseRepository jpaWarehouseRepository;
+    private WarehouseRepository warehouseRepository;
 
     @Mock
-    private JpaWarehouseInventoryRepository jpaWarehouseInventoryRepository;
+    private WarehouseInventoryRepository warehouseInventoryRepository;
 
     @BeforeEach
     void setUp() {
@@ -58,7 +58,7 @@ class WarehouseCommandServiceImplTest {
                 .warehouseStatus(false)
                 .build();
 
-        given(jpaWarehouseRepository.findById(1L)).willReturn(Optional.of(warehouse));
+        given(warehouseRepository.findById(1L)).willReturn(Optional.of(warehouse));
 
         // when
         WarehouseCommandResponse response = warehouseCommandService.updateWarehouse(1L, request);
@@ -72,7 +72,7 @@ class WarehouseCommandServiceImplTest {
     @DisplayName("[창고 수정] 창고 없음 예외 테스트")
     void testUpdateWarehouseNotFound() {
         // given
-        given(jpaWarehouseRepository.findById(1L)).willReturn(Optional.empty());
+        given(warehouseRepository.findById(1L)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> warehouseCommandService.updateWarehouse(1L,
@@ -92,7 +92,7 @@ class WarehouseCommandServiceImplTest {
                 .warehouseStatus(false)
                 .build();
         ReflectionTestUtils.setField(warehouse, "warehouseId", 1L);
-        given(jpaWarehouseRepository.findById(1L)).willReturn(Optional.of(warehouse));
+        given(warehouseRepository.findById(1L)).willReturn(Optional.of(warehouse));
 
         // when
         WarehouseCommandResponse response = warehouseCommandService.deleteWarehouse(1L);
@@ -105,7 +105,7 @@ class WarehouseCommandServiceImplTest {
     @DisplayName("[창고 삭제] 창고 없음 예외 테스트")
     void testDeleteWarehouseNotFound() {
         // given
-        given(jpaWarehouseRepository.findById(1L)).willReturn(Optional.empty());
+        given(warehouseRepository.findById(1L)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> warehouseCommandService.deleteWarehouse(1L))
@@ -120,7 +120,7 @@ class WarehouseCommandServiceImplTest {
         Warehouse warehouse = Warehouse.builder()
                 .warehouseStatus(true)
                 .build();
-        given(jpaWarehouseRepository.findById(1L)).willReturn(Optional.of(warehouse));
+        given(warehouseRepository.findById(1L)).willReturn(Optional.of(warehouse));
 
         // when & then
         assertThatThrownBy(() -> warehouseCommandService.deleteWarehouse(1L))
@@ -144,7 +144,7 @@ class WarehouseCommandServiceImplTest {
                 ))
                 .build();
 
-        given(jpaWarehouseRepository.findById(1L)).willReturn(Optional.of(warehouse));
+        given(warehouseRepository.findById(1L)).willReturn(Optional.of(warehouse));
 
         // when
         WarehouseCommandResponse response = warehouseCommandService.registerInventory(1L, request);
@@ -166,7 +166,7 @@ class WarehouseCommandServiceImplTest {
                 ))
                 .build();
 
-        given(jpaWarehouseRepository.findById(1L)).willReturn(Optional.empty());
+        given(warehouseRepository.findById(1L)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> warehouseCommandService.registerInventory(1L, request))
@@ -183,7 +183,7 @@ class WarehouseCommandServiceImplTest {
                 .build();
         ReflectionTestUtils.setField(inventory, "warehouseInventoryId", 1L);
 
-        given(jpaWarehouseInventoryRepository.findById(1L)).willReturn(Optional.of(inventory));
+        given(warehouseInventoryRepository.findById(1L)).willReturn(Optional.of(inventory));
 
         // when
         WarehouseInventoryCommandResponse response = warehouseCommandService.updateInventory(
@@ -197,7 +197,7 @@ class WarehouseCommandServiceImplTest {
     @DisplayName("[재고 수정] 재고 없음 예외 테스트")
     void testUpdateInventoryNotFound() {
         // given
-        given(jpaWarehouseInventoryRepository.findById(1L)).willReturn(Optional.empty());
+        given(warehouseInventoryRepository.findById(1L)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> warehouseCommandService.updateInventory(
@@ -215,21 +215,21 @@ class WarehouseCommandServiceImplTest {
                 .build();
         ReflectionTestUtils.setField(inventory, "warehouseInventoryId", 1L);
 
-        given(jpaWarehouseInventoryRepository.findById(1L)).willReturn(Optional.of(inventory));
+        given(warehouseInventoryRepository.findById(1L)).willReturn(Optional.of(inventory));
 
         // when
         WarehouseInventoryCommandResponse response = warehouseCommandService.deleteInventory(1L);
 
         // then
         assertThat(response.getInventoryId()).isEqualTo(1L);
-        verify(jpaWarehouseInventoryRepository).delete(inventory);
+        verify(warehouseInventoryRepository).delete(inventory);
     }
 
     @Test
     @DisplayName("[재고 삭제] 재고 없음 예외 테스트")
     void testDeleteInventoryNotFound() {
         // given
-        given(jpaWarehouseInventoryRepository.findById(1L)).willReturn(Optional.empty());
+        given(warehouseInventoryRepository.findById(1L)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> warehouseCommandService.deleteInventory(1L))
