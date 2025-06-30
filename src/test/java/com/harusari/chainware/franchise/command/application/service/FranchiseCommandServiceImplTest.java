@@ -16,7 +16,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -82,7 +85,6 @@ class FranchiseCommandServiceImplTest {
     @Test
     @DisplayName("[가맹점 등록] 가맹점 등록 시 정상 동작 테스트")
     void testCreateFranchiseWithAgreement() {
-        // given
         Long memberId = 1L;
         String expectedFilePath = "franchises/contract.pdf";
         MultipartFile mockAgreementFile = createMockAgreementFile("contract.pdf", 1024L);
@@ -107,14 +109,11 @@ class FranchiseCommandServiceImplTest {
                 .franchiseCreateRequest(franchiseCreateRequest)
                 .build();
 
-        doReturn(franchise).when(franchiseMapStruct).toFranchise(any(FranchiseCreateRequest.class), any(Long.class));
-        when(franchiseRepository.save(any(Franchise.class))).thenReturn(franchise);
         when(s3Uploader.uploadAgreement(mockAgreementFile, "franchises")).thenReturn(expectedFilePath);
+        when(franchiseRepository.save(any(Franchise.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // when
         franchiseCommandService.createFranchiseWithAgreement(memberId, memberWithFranchiseRequest, mockAgreementFile);
 
-        // then
         verify(s3Uploader).uploadAgreement(mockAgreementFile, "franchises");
         verify(franchiseRepository).save(any(Franchise.class));
 
@@ -125,6 +124,9 @@ class FranchiseCommandServiceImplTest {
         assertThat(savedFranchise.getFranchiseName()).isEqualTo("가맹점01");
         assertThat(savedFranchise.getFranchiseContact()).isEqualTo("01012345678");
         assertThat(savedFranchise.getFranchiseTaxId()).isEqualTo("0123456789");
+        assertThat(savedFranchise.getFranchiseAddress().getZipcode()).isEqualTo("12345");
+        assertThat(savedFranchise.getFranchiseAddress().getAddressRoad()).isEqualTo("서울시 OOO 123");
+        assertThat(savedFranchise.getFranchiseAddress().getAddressDetail()).isEqualTo("OOO빌딩 3층");
         assertThat(savedFranchise.getAgreementFilePath()).isEqualTo(expectedFilePath);
         assertThat(savedFranchise.getAgreementOriginalFileName()).isEqualTo("contract.pdf");
         assertThat(savedFranchise.getAgreementFileSize()).isEqualTo(1024L);
@@ -134,18 +136,11 @@ class FranchiseCommandServiceImplTest {
     @Test
     @DisplayName("[가맹점 수정] 가맹점 정보 수정 시 정상 동작 테스트")
     void testUpdateFranchise() {
-        // given
         Long franchiseId = 1L;
         String expectedFilePath = "franchises/contract-update.pdf";
         MultipartFile mockAgreementFile = createMockAgreementFile("contract-update.pdf", 2048L);
 
         AddressRequest updateAddressRequest = AddressRequest.builder()
-                .zipcode("54321")
-                .addressRoad("서울시 수정로 456")
-                .addressDetail("수정빌딩 5층")
-                .build();
-
-        Address updatedAddress = Address.builder()
                 .zipcode("54321")
                 .addressRoad("서울시 수정로 456")
                 .addressDetail("수정빌딩 5층")
@@ -160,24 +155,19 @@ class FranchiseCommandServiceImplTest {
                 .build();
 
         when(franchiseRepository.findFranchiseByFranchiseId(franchiseId)).thenReturn(Optional.of(franchise));
-        doReturn(updatedAddress).when(addressMapStruct).toAddress(any(AddressRequest.class));
         when(s3Uploader.uploadAgreement(mockAgreementFile, "franchises")).thenReturn(expectedFilePath);
 
-        // when
         franchiseCommandService.updateFranchise(franchiseId, updateRequest, mockAgreementFile);
 
-        // then
         verify(franchiseRepository).findFranchiseByFranchiseId(franchiseId);
         verify(s3Uploader).uploadAgreement(mockAgreementFile, "franchises");
 
         assertThat(franchise.getFranchiseName()).isEqualTo("가맹점01-수정");
         assertThat(franchise.getFranchiseContact()).isEqualTo("01099999999");
         assertThat(franchise.getFranchiseTaxId()).isEqualTo("9876543210");
-
         assertThat(franchise.getFranchiseAddress().getZipcode()).isEqualTo("54321");
         assertThat(franchise.getFranchiseAddress().getAddressRoad()).isEqualTo("서울시 수정로 456");
         assertThat(franchise.getFranchiseAddress().getAddressDetail()).isEqualTo("수정빌딩 5층");
-
         assertThat(franchise.getAgreementFilePath()).isEqualTo(expectedFilePath);
         assertThat(franchise.getAgreementOriginalFileName()).isEqualTo("contract-update.pdf");
         assertThat(franchise.getAgreementFileSize()).isEqualTo(2048L);
@@ -187,7 +177,6 @@ class FranchiseCommandServiceImplTest {
     @Test
     @DisplayName("[가맹점 수정] 가맹점 ID가 존재하지 않아 FranchiseNotFoundException이 발생하는 테스트")
     void testUpdateFranchise_NotFound() {
-        // given
         Long invalidFranchiseId = 999L;
 
         UpdateFranchiseRequest updateRequest = UpdateFranchiseRequest.builder()
@@ -200,13 +189,9 @@ class FranchiseCommandServiceImplTest {
 
         MultipartFile mockAgreementFile = mock(MultipartFile.class);
 
-        when(franchiseRepository.findFranchiseByFranchiseId(invalidFranchiseId))
-                .thenReturn(Optional.empty());
+        when(franchiseRepository.findFranchiseByFranchiseId(invalidFranchiseId)).thenReturn(Optional.empty());
 
-        // when & then
-        assertThatThrownBy(() ->
-                franchiseCommandService.updateFranchise(invalidFranchiseId, updateRequest, mockAgreementFile)
-        )
+        assertThatThrownBy(() -> franchiseCommandService.updateFranchise(invalidFranchiseId, updateRequest, mockAgreementFile))
                 .isInstanceOf(FranchiseNotFoundException.class)
                 .hasMessage(FRANCHISE_NOT_FOUND_EXCEPTION.getErrorMessage());
 
