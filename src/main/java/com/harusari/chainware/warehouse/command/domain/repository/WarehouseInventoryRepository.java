@@ -17,4 +17,11 @@ public interface WarehouseInventoryRepository extends JpaRepository<WarehouseInv
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT w FROM WarehouseInventory w WHERE w.productId = :productId")
     Optional<WarehouseInventory> findByProductIdForUpdate(@Param("productId") Long productId);
+
+    // 비관적 락을 이용해 특정 창고 + 제품에 대해 비관적 락으로 재고 조회
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT w FROM WarehouseInventory w WHERE w.warehouseId = :warehouseId AND w.productId = :productId")
+    Optional<WarehouseInventory> findByWarehouseIdAndProductIdForUpdate(@Param("warehouseId") Long warehouseId,
+                                                                        @Param("productId") Long productId);
+
 }

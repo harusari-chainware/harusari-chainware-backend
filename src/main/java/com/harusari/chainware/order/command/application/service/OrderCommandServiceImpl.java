@@ -17,11 +17,10 @@ import com.harusari.chainware.product.command.domain.aggregate.Product;
 import com.harusari.chainware.product.command.domain.repository.ProductRepository;
 import com.harusari.chainware.product.command.infrastructure.JpaProductRepository;
 import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInventory;
-import com.harusari.chainware.warehouse.command.infrastructure.repository.JpaWarehouseInventoryRepository;
+import com.harusari.chainware.warehouse.command.domain.repository.WarehouseInventoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +41,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     private final OrderDetailRepository orderDetailRepository;
 
     private final DeliveryRepository deliveryRepository;
-    private final JpaWarehouseInventoryRepository jpaWarehouseInventoryRepository;
+    private final WarehouseInventoryRepository warehouseInventoryRepository;
     private final JpaProductRepository jpaProductRepository;
     private final ProductRepository ProductRepository;
 
@@ -223,43 +222,57 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
     // 주문 승인
     @Override
-    public OrderCommandResponse approveOrder(Long orderId, Long memberId) {
-        // 1. 주문 조회
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND));
+    public OrderCommandResponse approveOrder(Long orderId, OrderApproveRequest request, Long memberId) {
+        // 0. 분산락 적용
+        RLock lock = redissonClient.getLock("inventory_lock:order:" + orderId);
+        try {
+            if (!lock.tryLock(3, 10, TimeUnit.SECONDS)) {
+                throw new OrderException(OrderErrorCode.INVENTORY_LOCK_TIMEOUT);
+            }
 
-        // 2. 권한 및 상태 검증
-        if (!OrderStatus.REQUESTED.equals(order.getOrderStatus())) {
-            throw new OrderException(OrderErrorCode.CANNOT_APPROVE_ORDER);
+            // 1. 주문 조회
+            Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND));
+
+            // 2. 권한 및 상태 검증
+            if (!OrderStatus.REQUESTED.equals(order.getOrderStatus())) {
+                throw new OrderException(OrderErrorCode.CANNOT_APPROVE_ORDER);
+            }
+
+            // 3. 주문 상세 조회
+            List<OrderDetail> details = orderDetailRepository.findByOrderId(orderId);
+            for (OrderDetail detail : details) {
+                WarehouseInventory inventory = warehouseInventoryRepository.findByWarehouseIdAndProductIdForUpdate(request.getWarehouseId(), detail.getProductId())
+                        .orElseThrow(() -> new OrderException(OrderErrorCode.PRODUCT_INVENTORY_NOT_FOUND));
+                inventory.increaseReservedQuantity(detail.getQuantity(), LocalDateTime.now());
+            }
+
+            // 4. 주문 승인으로 상태 변경
+            order.changeStatus(OrderStatus.APPROVED, null, LocalDateTime.now());
+
+            // 5. 배송 등록
+            Delivery delivery = Delivery.builder()
+                    .orderId(order.getOrderId())
+                    .warehouseId(request.getWarehouseId())
+                    .deliveryMethod(DeliveryMethod.HEADQUARTERS)
+                    .deliveryStatus(DeliveryStatus.REQUESTED)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+
+            deliveryRepository.save(delivery);
+
+            return OrderCommandResponse.builder()
+                    .orderId(order.getOrderId())
+                    .franchiseId(order.getFranchiseId())
+                    .orderStatus(order.getOrderStatus())
+                    .createdAt(order.getCreatedAt())
+                    .build();
+
+        } catch (InterruptedException e){
+            throw new OrderException(OrderErrorCode.INVENTORY_LOCK_TIMEOUT);
+        } finally {
+            lock.unlock();
         }
-
-        // 3. 상태 변경
-        order.changeStatus(OrderStatus.APPROVED, null, LocalDateTime.now());
-
-        // 4. 예약 재고 변경
-        List<OrderDetail> details = orderDetailRepository.findByOrderId(orderId);
-        for (OrderDetail detail : details) {
-            WarehouseInventory inventory = jpaWarehouseInventoryRepository.findByProductIdForUpdate(detail.getProductId())
-                    .orElseThrow(() -> new OrderException(OrderErrorCode.PRODUCT_INVENTORY_NOT_FOUND));
-            inventory.increaseReservedQuantity(detail.getQuantity(), LocalDateTime.now());
-        }
-
-        // 4. 배송 등록
-        Delivery delivery = Delivery.builder()
-                .orderId(order.getOrderId())
-                .deliveryMethod(DeliveryMethod.HEADQUARTERS)
-                .deliveryStatus(DeliveryStatus.REQUESTED)
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        deliveryRepository.save(delivery);
-
-        return OrderCommandResponse.builder()
-                .orderId(order.getOrderId())
-                .franchiseId(order.getFranchiseId())
-                .orderStatus(order.getOrderStatus())
-                .createdAt(order.getCreatedAt())
-                .build();
     }
 
     // 주문 반려
