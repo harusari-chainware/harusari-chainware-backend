@@ -20,7 +20,8 @@ public enum DeliveryErrorCode {
     INSUFFICIENT_INVENTORY_FOR_DELIVERY("10005", "배송할 제품의 수량이 충분하지 않습니다.", HttpStatus.BAD_REQUEST),
     DELIVERY_STATUS_NOT_IN_TRANSIT("10006", "배송 완료 처리는 'IN_TRANSIT' 상태에서만 가능합니다.", HttpStatus.BAD_REQUEST),
     PRODUCT_NOT_FOUND_IN_ORDER("10006", "주문에 포함되지 않은 제품입니다.", HttpStatus.BAD_REQUEST),
-    INVALID_DELIVERY_QUANTITY("10006", "배송 불가능한 수량입니다.", HttpStatus.BAD_REQUEST);
+    INVALID_DELIVERY_QUANTITY("10006", "배송 불가능한 수량입니다.", HttpStatus.BAD_REQUEST),
+    TAKE_BACK_DETAIL_NOT_FOUND("10006", "존재하는 반품이 아닙니다.", HttpStatus.BAD_REQUEST);
 
     private final String errorCode;
     private final String errorMessage;
