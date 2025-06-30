@@ -19,6 +19,10 @@ import com.harusari.chainware.requisition.query.dto.response.RequisitionItemResp
 import com.harusari.chainware.requisition.query.mapper.RequisitionQueryMapper;
 import com.harusari.chainware.vendor.query.dto.VendorDetailDto;
 import com.harusari.chainware.vendor.query.service.VendorQueryService;
+import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInbound;
+import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInventory;
+import com.harusari.chainware.warehouse.command.domain.repository.WarehouseInboundRepository;
+import com.harusari.chainware.warehouse.command.domain.repository.WarehouseInventoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +39,8 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
     private final PurchaseOrderCodeGenerator codeGenerator;
     private final RequisitionQueryMapper requisitionQueryMapper;
     private final VendorQueryService vendorQueryService;
+    private final WarehouseInboundRepository warehouseInboundRepository;
+    private final WarehouseInventoryRepository warehouseInventoryRepository;
 
     @Override
     @Transactional
@@ -200,5 +206,56 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
         order.shipped();
     }
 
+    @Override
+    @Transactional
+    public void inboundPurchaseOrder(Long purchaseOrderId, Long memberId) {
+        // 1. 발주서 조회 및 상태 검증
+        PurchaseOrder order = purchaseOrderRepository.findById(purchaseOrderId)
+                .orElseThrow(() -> new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_NOT_FOUND));
+
+        if (!order.getPurchaseOrderStatus().equals(PurchaseOrderStatus.SHIPPED)) {
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_SHIP_INVALID_STATUS);
+        }
+
+        Long warehouseId = order.getWarehouseId();
+
+        // 2. 발주 상세 품목 조회
+        List<PurchaseOrderDetail> details = purchaseOrderDetailRepository.findByPurchaseOrderId(purchaseOrderId);
+        if (details.isEmpty()) {
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.NO_PURCHASE_ORDER_DETAILS);
+        }
+
+        // 3. 입고 기록 저장 (warehouse_inbound)
+        List<WarehouseInbound> inboundList = details.stream().map(detail ->
+                WarehouseInbound.builder()
+                        .purchaseOrderId(order.getPurchaseOrderId())
+                        .warehouseId(warehouseId)
+                        .productId(detail.getProductId())
+                        .unitQuantity(detail.getQuantity())
+                        .inboundedAt(LocalDateTime.now())
+                        .build()
+        ).toList();
+        warehouseInboundRepository.saveAll(inboundList);
+
+        // 4. 재고 반영 (warehouse_inventory)
+        for (PurchaseOrderDetail detail : details) {
+            warehouseInventoryRepository.findByWarehouseIdAndProductId(warehouseId, detail.getProductId())
+                    .ifPresentOrElse(
+                            inventory -> inventory.updateQuantity(inventory.getQuantity() + detail.getQuantity(), LocalDateTime.now()),
+                            () -> {
+                                WarehouseInventory newInventory = WarehouseInventory.builder()
+                                        .warehouseId(warehouseId)
+                                        .productId(detail.getProductId())
+                                        .quantity(detail.getQuantity())
+                                        .reservedQuantity(0)
+                                        .build();
+                                warehouseInventoryRepository.save(newInventory);
+                            }
+                    );
+        }
+
+        // 5. 상태 전이 → WAREHOUSED
+        order.warehoused(PurchaseOrderStatus.WAREHOUSED);
+    }
 
 }

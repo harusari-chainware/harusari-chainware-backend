@@ -7,4 +7,6 @@ import java.util.Optional;
 public interface WarehouseInventoryRepository {
     WarehouseInventory save(WarehouseInventory inventory);
     Optional<WarehouseInventory> findByProductId(Long productId);
+    Optional<WarehouseInventory> findByWarehouseIdAndProductId(Long warehouseId, Long productId);
+
 }
