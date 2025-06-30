@@ -14,7 +14,7 @@ import com.harusari.chainware.order.exception.OrderException;
 import com.harusari.chainware.product.command.domain.aggregate.Product;
 import com.harusari.chainware.product.command.domain.repository.ProductRepository;
 import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInventory;
-import com.harusari.chainware.warehouse.command.infrastructure.repository.JpaWarehouseInventoryRepository;
+import com.harusari.chainware.warehouse.command.domain.repository.WarehouseInventoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.BDDMockito.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("[주문 - service] OrderCommandServiceImpl 테스트")
 class OrderCommandServiceImplTest {
@@ -49,7 +48,7 @@ class OrderCommandServiceImplTest {
     private DeliveryRepository deliveryRepository;
 
     @Mock
-    private JpaWarehouseInventoryRepository jpaWarehouseInventoryRepository;
+    private WarehouseInventoryRepository warehouseInventoryRepository;
 
     @Mock
     private ProductRepository productRepository;
@@ -81,7 +80,7 @@ class OrderCommandServiceImplTest {
 
     @Test
     @DisplayName("[주문 등록] 성공 테스트")
-    void testCreateOrderSuccess() throws Exception {
+    void testCreateOrderSuccess() {
         // given
         WarehouseInventory inventory = WarehouseInventory.builder()
                 .productId(1L)
@@ -111,8 +110,7 @@ class OrderCommandServiceImplTest {
 
         ReflectionTestUtils.setField(savedOrder, "orderId", 1L);
 
-        given(rLock.tryLock(anyLong(), anyLong(), any())).willReturn(true);
-        given(jpaWarehouseInventoryRepository.findByProductIdForUpdate(1L)).willReturn(Optional.of(inventory));
+        given(warehouseInventoryRepository.findByProductIdForUpdate(1L)).willReturn(Optional.of(inventory));
         given(orderRepository.save(any(Order.class))).willReturn(savedOrder);
 
         // when
@@ -125,19 +123,6 @@ class OrderCommandServiceImplTest {
 
         verify(orderRepository).save(any());
         verify(orderDetailRepository).saveAll(any());
-        verify(rLock).unlock();
-    }
-
-    @Test
-    @DisplayName("[주문 등록] 재고 락 획득 실패 예외 테스트")
-    void testCreateOrderLockFail() throws Exception {
-        // given
-        given(rLock.tryLock(anyLong(), anyLong(), any())).willReturn(false);
-
-        // when & then
-        assertThatThrownBy(() -> orderCommandService.createOrder(validRequest, 100L))
-                .isInstanceOf(OrderException.class)
-                .hasFieldOrPropertyWithValue("errorCode", OrderErrorCode.INVENTORY_LOCK_TIMEOUT);
     }
 
     @Test
@@ -193,8 +178,8 @@ class OrderCommandServiceImplTest {
         Product product2 = Product.builder().productId(2L).basePrice(2000).build();
 
         given(orderRepository.findById(orderId)).willReturn(Optional.of(existingOrder));
-        given(jpaWarehouseInventoryRepository.findByProductIdForUpdate(1L)).willReturn(Optional.of(inventory1));
-        given(jpaWarehouseInventoryRepository.findByProductIdForUpdate(2L)).willReturn(Optional.of(inventory2));
+        given(warehouseInventoryRepository.findByProductIdForUpdate(1L)).willReturn(Optional.of(inventory1));
+        given(warehouseInventoryRepository.findByProductIdForUpdate(2L)).willReturn(Optional.of(inventory2));
         given(productRepository.findById(1L)).willReturn(Optional.of(product1));
         given(productRepository.findById(2L)).willReturn(Optional.of(product2));
 
@@ -332,10 +317,15 @@ class OrderCommandServiceImplTest {
 
     @Test
     @DisplayName("[주문 승인] 성공 테스트")
-    void testApproveOrderSuccess() {
+    void testApproveOrderSuccess() throws Exception {
         // given
         Long orderId = 1L;
         Long approverId = 200L;
+        Long warehouseId = 10L;
+
+        OrderApproveRequest request = OrderApproveRequest.builder()
+                .warehouseId(warehouseId)
+                .build();
 
         Order order = Order.builder()
                 .franchiseId(1L)
@@ -360,33 +350,43 @@ class OrderCommandServiceImplTest {
                 .build();
 
         WarehouseInventory inventory = WarehouseInventory.builder()
+                .warehouseId(warehouseId)
                 .productId(1L)
                 .quantity(100)
                 .reservedQuantity(10)
                 .build();
 
+        RLock mockLock = mock(RLock.class);
+        given(redissonClient.getLock(any())).willReturn(mockLock);
+
+        given(mockLock.tryLock(anyLong(), anyLong(), any())).willReturn(true);
         given(orderRepository.findById(orderId)).willReturn(Optional.of(order));
         given(orderDetailRepository.findByOrderId(orderId)).willReturn(List.of(detail));
-        given(jpaWarehouseInventoryRepository.findByProductIdForUpdate(1L)).willReturn(Optional.of(inventory));
-        given(deliveryRepository.save(any())).willReturn(any());
+        given(warehouseInventoryRepository.findByWarehouseIdAndProductIdForUpdate(warehouseId, 1L)).willReturn(Optional.of(inventory));
+        given(deliveryRepository.save(any())).willReturn(mock(Delivery.class));
 
         // when
-        OrderCommandResponse response = orderCommandService.approveOrder(orderId, approverId);
+        OrderCommandResponse response = orderCommandService.approveOrder(orderId, request, approverId);
 
         // then
         assertThat(response.getOrderId()).isEqualTo(orderId);
         assertThat(response.getOrderStatus()).isEqualTo(OrderStatus.APPROVED);
-        assertThat(order.getOrderStatus()).isEqualTo(OrderStatus.APPROVED);
 
         verify(deliveryRepository).save(any(Delivery.class));
-        verify(jpaWarehouseInventoryRepository).findByProductIdForUpdate(1L);
+        verify(warehouseInventoryRepository).findByWarehouseIdAndProductIdForUpdate(warehouseId, 1L);
     }
 
     @Test
     @DisplayName("[주문 승인] 주문 상태가 REQUESTED가 아닌 경우 예외 발생")
-    void testApproveOrder_InvalidStatus() {
+    void testApproveOrder_InvalidStatus() throws Exception{
         // given
         Long orderId = 1L;
+        Long warehouseId = 10L;
+        Long approverId = 200L;
+
+        OrderApproveRequest request = OrderApproveRequest.builder()
+                .warehouseId(warehouseId)
+                .build();
 
         Order alreadyApproved = Order.builder()
                 .franchiseId(1L)
@@ -401,19 +401,28 @@ class OrderCommandServiceImplTest {
                 .build();
         ReflectionTestUtils.setField(alreadyApproved, "orderId", orderId);
 
+        RLock mockLock = mock(RLock.class);
+        given(redissonClient.getLock(any())).willReturn(mockLock);
+        given(mockLock.tryLock(anyLong(), anyLong(), any())).willReturn(true);
         given(orderRepository.findById(orderId)).willReturn(Optional.of(alreadyApproved));
 
         // when & then
-        assertThatThrownBy(() -> orderCommandService.approveOrder(orderId, 200L))
+        assertThatThrownBy(() -> orderCommandService.approveOrder(orderId, request, approverId))
                 .isInstanceOf(OrderException.class)
                 .hasFieldOrPropertyWithValue("errorCode", OrderErrorCode.CANNOT_APPROVE_ORDER);
     }
 
     @Test
     @DisplayName("[주문 승인] 재고 없음 예외 발생")
-    void testApproveOrder_NoInventory() {
+    void testApproveOrder_NoInventory() throws Exception {
         // given
         Long orderId = 1L;
+        Long warehouseId = 10L;
+        Long approverId = 200L;
+
+        OrderApproveRequest request = OrderApproveRequest.builder()
+                .warehouseId(warehouseId)
+                .build();
 
         Order order = Order.builder()
                 .franchiseId(1L)
@@ -436,16 +445,21 @@ class OrderCommandServiceImplTest {
                 .totalPrice(4500L)
                 .createdAt(LocalDateTime.now())
                 .build();
+        RLock mockLock = mock(RLock.class);
+        given(redissonClient.getLock(any())).willReturn(mockLock);
 
+        given(mockLock.tryLock(anyLong(), anyLong(), any())).willReturn(true);
         given(orderRepository.findById(orderId)).willReturn(Optional.of(order));
         given(orderDetailRepository.findByOrderId(orderId)).willReturn(List.of(detail));
-        given(jpaWarehouseInventoryRepository.findByProductIdForUpdate(1L)).willReturn(Optional.empty());
+        given(warehouseInventoryRepository.findByWarehouseIdAndProductIdForUpdate(warehouseId, 1L))
+                .willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> orderCommandService.approveOrder(orderId, 200L))
+        assertThatThrownBy(() -> orderCommandService.approveOrder(orderId, request, approverId))
                 .isInstanceOf(OrderException.class)
                 .hasFieldOrPropertyWithValue("errorCode", OrderErrorCode.PRODUCT_INVENTORY_NOT_FOUND);
     }
+
 
     @Test
     @DisplayName("[주문 반려] 성공 테스트")

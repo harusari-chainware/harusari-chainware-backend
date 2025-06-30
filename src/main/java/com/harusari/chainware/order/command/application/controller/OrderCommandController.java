@@ -2,6 +2,7 @@ package com.harusari.chainware.order.command.application.controller;
 
 import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.common.dto.ApiResponse;
+import com.harusari.chainware.order.command.application.dto.request.OrderApproveRequest;
 import com.harusari.chainware.order.command.application.dto.request.OrderCreateRequest;
 import com.harusari.chainware.order.command.application.dto.request.OrderRejectRequest;
 import com.harusari.chainware.order.command.application.dto.request.OrderUpdateRequest;
@@ -54,9 +55,10 @@ public class OrderCommandController {
     @PutMapping("/{orderId}/approve")
     public ResponseEntity<ApiResponse<OrderCommandResponse>> approveOrder(
             @PathVariable Long orderId,
+            @RequestBody OrderApproveRequest request,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        OrderCommandResponse response = orderCommandService.approveOrder(orderId, customUserDetails.getMemberId());
+        OrderCommandResponse response = orderCommandService.approveOrder(orderId, request, customUserDetails.getMemberId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
