@@ -51,7 +51,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     // 주문 등록
     @Override
     public OrderCommandResponse createOrder(OrderCreateRequest request, Long memberId) {
-        // 0-2. 주문 상세가 비어있는 경우 예외 처리
+        // 0. 주문 상세가 비어있는 경우 예외 처리
         if (request.getOrderDetails() == null || request.getOrderDetails().isEmpty()) {
             throw new OrderException(OrderErrorCode.EMPTY_ORDER_DETAIL);
         }
@@ -153,21 +153,13 @@ public class OrderCommandServiceImpl implements OrderCommandService {
         List<OrderDetail> details = new ArrayList<>();
 
         for (OrderDetailUpdateRequest d : request.getOrderDetails()) {
-            // 4-1. 비관적 락을 통한 재고 확인
-            WarehouseInventory inventory = jpaWarehouseInventoryRepository.findByProductIdForUpdate(d.getProductId())
-                    .orElseThrow(() -> new OrderException(OrderErrorCode.PRODUCT_INVENTORY_NOT_FOUND));
+            // 4-1. 재고 확인
             int quantity = d.getQuantity();
-
-            // 4-2. 수량 유효성 및 주문 가능 재고량 검증
             if (quantity <= 0) {
                 throw new OrderException(OrderErrorCode.INVALID_ORDER_QUANTITY);
             }
-            int availableQuantity = inventory.getQuantity() - inventory.getReservedQuantity();
-            if (availableQuantity < quantity) {
-                throw new OrderException(OrderErrorCode.INSUFFICIENT_AVAILABLE_QUANTITY);
-            }
 
-            // 4-3. 제품 단가에 대한 가격 계산
+            // 4-2. 제품 단가에 대한 가격 계산
             Product product = ProductRepository.findById(d.getProductId())
                     .orElseThrow(() -> new OrderException(OrderErrorCode.PRODUCT_NOT_FOUND));
             int unitPrice = product.getBasePrice();
@@ -175,7 +167,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
             totalQuantity += quantity;
             totalPrice += itemTotalPrice;
 
-            // 4-4. 주문 상세 엔티티 생성
+            // 4-3. 주문 상세 엔티티 생성
             details.add(OrderDetail.builder()
                     .orderId(orderId)
                     .productId(d.getProductId())
