@@ -147,7 +147,7 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
     @Transactional
     public void approvePurchaseOrder(Long purchaseOrderId, Long memberId) {
         PurchaseOrder order = purchaseOrderRepository.findById(purchaseOrderId)
-                .orElseThrow(() -> new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_UNAUTHORIZED_VENDOR));
+                .orElseThrow(() -> new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_NOT_FOUND));
 
         if (!order.getPurchaseOrderStatus().equals(PurchaseOrderStatus.REQUESTED)) {
             throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_APPROVE_INVALID_STATUS);
