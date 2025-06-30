@@ -5,18 +5,20 @@ import com.harusari.chainware.franchise.command.domain.aggregate.FranchiseStatus
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class DeliverySearchRequest {
-    private String franchiseName;                 // 가맹점명 검색
-    private LocalDate startDate;                  // 배송 시작일 필터 (시작)
-    private LocalDate endDate;                    // 배송 시작일 필터 (끝)
-    private DeliveryStatus deliveryStatus;        // 배송 상태 필터
-//    private String warehouseName;                 // 창고명 검색
-//    private String warehouseAddress;              // 창고주소 검색
-//    private WarehouseStatus warehouseStatus;      // 창고 상태 필터 (예: ACTIVE)
+    private String franchiseName;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private DeliveryStatus deliveryStatus;
+    private String warehouseName;
+    private String warehouseAddress;
+    private Boolean warehouseStatus;
 }
