@@ -82,7 +82,7 @@ public enum SecurityPolicy {
     ORDER_CANCEL("/api/v1/orders/{orderId}/cancel", PUT, ROLE_BASED, List.of(FRANCHISE_MANAGER)), // 주문 수정
     ORDER_APPROVE("/api/v1/orders/{orderId}/approve", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 주문 승인
     ORDER_REJECT("/api/v1/orders/{orderId}/reject", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 주문 반려
-    ORDER_AVAILABLE_WAREHOUSE("/api/v1/orders/{orderId}/warehouses", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 주문 가능 창고 조회
+    ORDER_AVAILABLE_WAREHOUSE("/api/v1/orders/{orderId}/available-warehouses", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 주문 가능 창고 조회
     ORDER_LIST_GET("/api/v1/orders", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, FRANCHISE_MANAGER)), // 주문 목록 조회
     ORDER_DETAIL_GET("/api/v1/orders/{orderId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, FRANCHISE_MANAGER)), // 주문 상세 조회
 
