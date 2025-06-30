@@ -268,7 +268,7 @@ class OrderCommandControllerTest {
                 .build();
 
         // when
-        when(orderCommandService.approveOrder(eq(orderId), any(OrderApproveRequest.class), eq(300L)))
+        when(orderCommandService.approveOrder(eq(orderId), any(OrderApproveRequest.class), eq(200L)))
                 .thenReturn(approveResponse);
 
         // then
