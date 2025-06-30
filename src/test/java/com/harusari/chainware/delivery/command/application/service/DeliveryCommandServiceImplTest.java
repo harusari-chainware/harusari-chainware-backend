@@ -10,7 +10,7 @@ import com.harusari.chainware.delivery.exception.DeliveryException;
 import com.harusari.chainware.order.command.domain.aggregate.OrderDetail;
 import com.harusari.chainware.order.command.domain.repository.OrderDetailRepository;
 import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInventory;
-import com.harusari.chainware.warehouse.command.infrastructure.repository.JpaWarehouseInventoryRepository;
+import com.harusari.chainware.warehouse.command.domain.repository.WarehouseInventoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ class DeliveryCommandServiceImplTest {
     private OrderDetailRepository orderDetailRepository;
 
     @Mock
-    private JpaWarehouseInventoryRepository jpaWarehouseInventoryRepository;
+    private WarehouseInventoryRepository warehouseInventoryRepository;
 
     @BeforeEach
     void setUp() {
@@ -74,7 +74,7 @@ class DeliveryCommandServiceImplTest {
 
         given(deliveryRepository.findById(deliveryId)).willReturn(Optional.of(delivery));
         given(orderDetailRepository.findByOrderId(orderId)).willReturn(details);
-        given(jpaWarehouseInventoryRepository.findByProductId(1L)).willReturn(Optional.of(inventory));
+        given(warehouseInventoryRepository.findByProductId(1L)).willReturn(Optional.of(inventory));
 
         // when
         DeliveryCommandResponse response = deliveryCommandService.startDelivery(deliveryId, request);
@@ -140,7 +140,7 @@ class DeliveryCommandServiceImplTest {
 
         given(deliveryRepository.findById(anyLong())).willReturn(Optional.of(delivery));
         given(orderDetailRepository.findByOrderId(anyLong())).willReturn(details);
-        given(jpaWarehouseInventoryRepository.findByProductId(1L)).willReturn(Optional.of(inventory));
+        given(warehouseInventoryRepository.findByProductId(1L)).willReturn(Optional.of(inventory));
 
         assertThatThrownBy(() -> deliveryCommandService.startDelivery(1L, mock(DeliveryStartRequest.class)))
                 .isInstanceOf(DeliveryException.class)

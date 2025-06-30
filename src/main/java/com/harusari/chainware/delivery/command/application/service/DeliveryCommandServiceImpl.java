@@ -10,7 +10,7 @@ import com.harusari.chainware.delivery.exception.DeliveryException;
 import com.harusari.chainware.order.command.domain.aggregate.OrderDetail;
 import com.harusari.chainware.order.command.domain.repository.OrderDetailRepository;
 import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInventory;
-import com.harusari.chainware.warehouse.command.infrastructure.repository.JpaWarehouseInventoryRepository;
+import com.harusari.chainware.warehouse.command.domain.repository.WarehouseInventoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +28,7 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
     private final DeliveryRepository deliveryRepository;
 
     private final OrderDetailRepository orderDetailRepository;
-    private final JpaWarehouseInventoryRepository jpaWarehouseInventoryRepository;
+    private final WarehouseInventoryRepository warehouseInventoryRepository;
 
     @Override
     public DeliveryCommandResponse startDelivery(Long deliveryId, DeliveryStartRequest request) {
@@ -50,7 +50,7 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
 
         // 4. 재고 차감 로직 실행
         for (OrderDetail detail : details) {
-            WarehouseInventory inventory = jpaWarehouseInventoryRepository.findByProductId(detail.getProductId())
+            WarehouseInventory inventory = warehouseInventoryRepository.findByProductId(detail.getProductId())
                     .orElseThrow(() -> new DeliveryException(DeliveryErrorCode.PRODUCT_INVENTORY_NOT_FOUND_FOR_DELIVERY));
 
             // 수량 차감 처리

@@ -5,7 +5,7 @@ import com.harusari.chainware.disposal.command.domain.aggregate.Disposal;
 import com.harusari.chainware.disposal.command.infrastructure.repository.JpaDisposalRepository;
 import com.harusari.chainware.franchise.command.domain.repository.FranchiseRepository;
 import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
-import com.harusari.chainware.warehouse.command.infrastructure.repository.JpaWarehouseRepository;
+import com.harusari.chainware.warehouse.command.domain.repository.WarehouseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +16,7 @@ public class DisposalCommandServiceImpl implements DisposalCommandService {
 
     private final JpaDisposalRepository disposalRepository;
     private final FranchiseRepository franchiseRepository;
-    private final JpaWarehouseRepository warehouseRepository;
+    private final WarehouseRepository warehouseRepository;
 
     @Transactional
     @Override

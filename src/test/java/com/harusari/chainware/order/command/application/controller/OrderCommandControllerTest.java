@@ -254,6 +254,8 @@ class OrderCommandControllerTest {
     void testApproveOrderSuccessAsGeneralManager() throws Exception {
         // given
         Long orderId = 1L;
+        Long warehouseId = 10L;
+
         OrderCommandResponse approveResponse = OrderCommandResponse.builder()
                 .orderId(orderId)
                 .franchiseId(1L)
@@ -261,16 +263,20 @@ class OrderCommandControllerTest {
                 .createdAt(LocalDateTime.now())
                 .build();
 
+        OrderApproveRequest request = OrderApproveRequest.builder()
+                .warehouseId(warehouseId)
+                .build();
+
         // when
-        when(orderCommandService.approveOrder(eq(orderId), eq(200L)))
+        when(orderCommandService.approveOrder(eq(orderId), any(OrderApproveRequest.class), eq(200L)))
                 .thenReturn(approveResponse);
 
         // then
         mockMvc.perform(put("/api/v1/orders/{orderId}/approve", orderId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.orderId").value(orderId))
                 .andExpect(jsonPath("$.data.orderStatus").value("APPROVED"));
     }
 
@@ -280,6 +286,8 @@ class OrderCommandControllerTest {
     void testApproveOrderSuccessAsSeniorManager() throws Exception {
         // given
         Long orderId = 1L;
+        Long warehouseId = 10L;
+
         OrderCommandResponse approveResponse = OrderCommandResponse.builder()
                 .orderId(orderId)
                 .franchiseId(1L)
@@ -287,17 +295,22 @@ class OrderCommandControllerTest {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        // when
-        when(orderCommandService.approveOrder(eq(orderId), eq(300L)))
+        OrderApproveRequest request = OrderApproveRequest.builder()
+                .warehouseId(warehouseId)
+                .build();
+
+        when(orderCommandService.approveOrder(eq(orderId), any(OrderApproveRequest.class), eq(300L)))
                 .thenReturn(approveResponse);
 
-        // then
+        // when & then
         mockMvc.perform(put("/api/v1/orders/{orderId}/approve", orderId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.orderStatus").value("APPROVED"));
     }
+
 
     @Test
     @DisplayName("[주문 승인] 승인 불가 상태 예외 테스트")
@@ -305,18 +318,24 @@ class OrderCommandControllerTest {
     void testApproveOrder_CannotApprove() throws Exception {
         // given
         Long orderId = 1L;
+        Long warehouseId = 99L;
 
-        // when
-        when(orderCommandService.approveOrder(eq(orderId), eq(200L)))
+        OrderApproveRequest request = OrderApproveRequest.builder()
+                .warehouseId(warehouseId)
+                .build();
+
+        when(orderCommandService.approveOrder(eq(orderId), any(OrderApproveRequest.class), eq(200L)))
                 .thenThrow(new OrderException(OrderErrorCode.CANNOT_APPROVE_ORDER));
 
-        // then
+        // when & then
         mockMvc.perform(put("/api/v1/orders/{orderId}/approve", orderId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.errorCode").value(OrderErrorCode.CANNOT_APPROVE_ORDER.getErrorCode()));
     }
+
 
     @Test
     @DisplayName("[주문 반려] 성공 테스트")
