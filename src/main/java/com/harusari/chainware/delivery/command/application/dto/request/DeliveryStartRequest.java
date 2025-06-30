@@ -10,7 +10,6 @@ import java.util.List;
 @Builder
 public class DeliveryStartRequest {
 
-    private String trackingNumber;
     private String carrier;
     private List<DeliveryStartItem> products;
 

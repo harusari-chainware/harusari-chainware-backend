@@ -55,6 +55,7 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
         Long warehouseId = delivery.getWarehouseId();
         Long orderId = delivery.getOrderId();
         Long takeBackId = delivery.getTakeBackId();
+        String trackingNumber = generateTrackingNumber();
 
         // 4. 배송 대상 제품 및 수량 정보를 저장할 맵 선언
         Map<Long, Integer> productQuantityMap = null;
@@ -122,7 +123,7 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
         }
 
         // 6. 상태 변경
-        delivery.startDelivery(request.getTrackingNumber(), request.getCarrier(), LocalDateTime.now());
+        delivery.startDelivery(trackingNumber, request.getCarrier(), LocalDateTime.now());
 
         return DeliveryCommandResponse.builder()
                 .deliveryId(delivery.getDeliveryId())
