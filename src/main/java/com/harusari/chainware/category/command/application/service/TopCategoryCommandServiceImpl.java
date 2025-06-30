@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class TopCategoryCommandServiceImpl implements TopCategoryCommandService {
 
     private final TopCategoryRepository topCategoryRepository;
-    private final JpaTopCategoryRepository jpaTopCategoryRepository;
     private final JpaCategoryRepository jpaCategoryRepository;
 
     /** 상위 카테고리 생성 */
@@ -28,12 +27,12 @@ public class TopCategoryCommandServiceImpl implements TopCategoryCommandService 
     @Override
     public TopCategoryCommandResponse createTopCategory(TopCategoryCreateRequest request) {
         // 중복 이름 체크
-        if (jpaTopCategoryRepository.existsByTopCategoryName(request.topCategoryName())) {
+        if (((JpaTopCategoryRepository) topCategoryRepository).existsByTopCategoryName(request.topCategoryName())) {
             throw new TopCategoryNameAlreadyExistsException(CategoryErrorCode.TOP_CATEGORY_NAME_ALREADY_EXISTS);
         }
 
         TopCategory topCategory = new TopCategory(request.topCategoryName());
-        TopCategory saved = topCategoryRepository.save(topCategory);
+        TopCategory saved = ((JpaTopCategoryRepository) topCategoryRepository).save(topCategory);
 
         return TopCategoryCommandResponse.builder()
                 .topCategoryId(saved.getTopCategoryId())
@@ -49,7 +48,7 @@ public class TopCategoryCommandServiceImpl implements TopCategoryCommandService 
                 .orElseThrow(() -> new TopCategoryNotFoundException(CategoryErrorCode.TOP_CATEGORY_NOT_FOUND));
 
         // 수정하려는 이름이 이미 다른 카테고리에서 사용 중인지 확인 (자기 자신 제외)
-        if (jpaTopCategoryRepository.existsByTopCategoryNameAndTopCategoryIdNot(request.topCategoryName(), topCategoryId)) {
+        if (((JpaTopCategoryRepository) topCategoryRepository).existsByTopCategoryNameAndTopCategoryIdNot(request.topCategoryName(), topCategoryId)) {
             throw new TopCategoryNameAlreadyExistsException(CategoryErrorCode.TOP_CATEGORY_NAME_ALREADY_EXISTS);
         }
 
@@ -72,6 +71,6 @@ public class TopCategoryCommandServiceImpl implements TopCategoryCommandService 
             throw new TopCategoryCannotDeleteHasProductsException(CategoryErrorCode.TOP_CATEGORY_CANNOT_DELETE_HAS_PRODUCTS);
         }
 
-        topCategoryRepository.delete(topCategory);
+        ((JpaTopCategoryRepository) topCategoryRepository).delete(topCategory);
     }
 }

@@ -33,7 +33,7 @@ public class CategoryCommandController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @Operation(summary = "카테고리 수정", description = "기존 카테고리의 이름과 상위 카테고리를 수정합니다.")
+    @Operation(summary = "카테고리 수정", description = "지정한 ID의 카테고리를 수정합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "카테고리 수정 성공")
     })
@@ -47,7 +47,7 @@ public class CategoryCommandController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @Operation(summary = "카테고리 삭제", description = "지정한 ID의 카테고리를 논리 삭제 처리합니다.")
+    @Operation(summary = "카테고리 삭제", description = "지정한 ID의 카테고리를 삭제합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "카테고리 삭제 성공")
     })

@@ -22,7 +22,7 @@ public class CategoryQueryController {
 
     private final CategoryQueryService categoryQueryService;
 
-    @Operation(summary = "전체 카테고리 목록 조회", description = "카테고리 기준 페이징으로 전체 카테고리 목록을 조회합니다.")
+    @Operation(summary = "전체 카테고리 목록 조회", description = "상위 카테고리 기준으로 전체 카테고리 목록을 조회합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "전체 카테고리 목록 조회 성공")
     })
@@ -49,7 +49,7 @@ public class CategoryQueryController {
         ));
     }
 
-    @Operation(summary = "특정 상위 카테고리 제품 목록 조회", description = "특정 상위 카테고리에 속한 제품들을 제품 기준 페이징으로 조회합니다.")
+    @Operation(summary = "특정 상위 카테고리 제품 목록 조회", description = "특정 상위 카테고리에 속한 카테고리와 제품들을 제품 기준 페이징으로 조회합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "특정 상위 카테고리 제품 목록 조회 성공")
     })

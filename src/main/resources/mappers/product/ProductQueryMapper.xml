@@ -194,7 +194,7 @@
         v.vendor_id,
         v.vendor_name,
         v.vendor_type,
-        v.vendor_address,
+        v.vendor_address_road,
         v.vendor_tax_id,
         v.vendor_memo,
         v.vendor_status,

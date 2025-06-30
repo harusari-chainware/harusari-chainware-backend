@@ -23,9 +23,20 @@ public class VendorProductContractServiceImpl implements VendorProductContractSe
 
     @Override
     public PagedResult<VendorProductContractListDto> getContracts(VendorProductContractSearchRequest request, Long memberId, boolean isManager) {
-        Long vendorId = isManager ? null : request.getVendorId();
-        if (!isManager && vendorId == null) {
-            throw new ContractAccessDeniedException(ContractErrorCode.CONTRACT_ACCESS_DENIED);
+
+        Long vendorId = null;
+
+        if (isManager) {
+            vendorId = null;
+        } else {
+            // 거래처 담당자: vendorId를 직접 조회 (파라미터에 없으면)
+            if (request.getVendorId() != null) {
+                vendorId = request.getVendorId();
+            } else {
+                // DB에서 본인의 vendorId를 찾기 (필요한 경우)
+                vendorId = mapper.findVendorIdByMemberId(memberId)
+                        .orElseThrow(() -> new ContractAccessDeniedException(ContractErrorCode.CONTRACT_ACCESS_DENIED));
+            }
         }
 
         List<VendorProductContractListDto> content = mapper.findVendorProductContracts
