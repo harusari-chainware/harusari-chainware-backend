@@ -9,7 +9,12 @@ import java.util.List;
 
 @Getter
 @Builder
-public class ProductListWithPagination {
+public class CategoryDetailWithProductsResponse {
+    private CategoryMetaInfoWithCountResponse categoryMeta;
+
+    private TopCategoryOnlyWithCountResponse topCategory;
+
     private List<ProductDto> products;
+
     private Pagination pagination;
 }

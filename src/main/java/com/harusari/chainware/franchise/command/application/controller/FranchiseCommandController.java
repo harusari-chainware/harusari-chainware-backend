@@ -16,7 +16,7 @@ public class FranchiseCommandController {
 
     private final FranchiseCommandService franchiseCommandService;
 
-    @PutMapping("franchise/{franchiseId}")
+    @PutMapping("franchises/{franchiseId}")
     public ResponseEntity<ApiResponse<Void>> updateFranchise(
             @PathVariable(name = "franchiseId") Long franchiseId,
             @RequestPart UpdateFranchiseRequest updateFranchiseRequest,
