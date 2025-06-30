@@ -80,7 +80,7 @@ class OrderCommandServiceImplTest {
 
     @Test
     @DisplayName("[주문 등록] 성공 테스트")
-    void testCreateOrderSuccess() throws Exception {
+    void testCreateOrderSuccess() {
         // given
         WarehouseInventory inventory = WarehouseInventory.builder()
                 .productId(1L)
@@ -110,7 +110,6 @@ class OrderCommandServiceImplTest {
 
         ReflectionTestUtils.setField(savedOrder, "orderId", 1L);
 
-        given(rLock.tryLock(anyLong(), anyLong(), any())).willReturn(true);
         given(warehouseInventoryRepository.findByProductIdForUpdate(1L)).willReturn(Optional.of(inventory));
         given(orderRepository.save(any(Order.class))).willReturn(savedOrder);
 
@@ -124,19 +123,6 @@ class OrderCommandServiceImplTest {
 
         verify(orderRepository).save(any());
         verify(orderDetailRepository).saveAll(any());
-        verify(rLock).unlock();
-    }
-
-    @Test
-    @DisplayName("[주문 등록] 재고 락 획득 실패 예외 테스트")
-    void testCreateOrderLockFail() throws Exception {
-        // given
-        given(rLock.tryLock(anyLong(), anyLong(), any())).willReturn(false);
-
-        // when & then
-        assertThatThrownBy(() -> orderCommandService.createOrder(validRequest, 100L))
-                .isInstanceOf(OrderException.class)
-                .hasFieldOrPropertyWithValue("errorCode", OrderErrorCode.INVENTORY_LOCK_TIMEOUT);
     }
 
     @Test
@@ -331,7 +317,7 @@ class OrderCommandServiceImplTest {
 
     @Test
     @DisplayName("[주문 승인] 성공 테스트")
-    void testApproveOrderSuccess() {
+    void testApproveOrderSuccess() throws Exception {
         // given
         Long orderId = 1L;
         Long approverId = 200L;
@@ -370,6 +356,10 @@ class OrderCommandServiceImplTest {
                 .reservedQuantity(10)
                 .build();
 
+        RLock mockLock = mock(RLock.class);
+        given(redissonClient.getLock(any())).willReturn(mockLock);
+
+        given(mockLock.tryLock(anyLong(), anyLong(), any())).willReturn(true);
         given(orderRepository.findById(orderId)).willReturn(Optional.of(order));
         given(orderDetailRepository.findByOrderId(orderId)).willReturn(List.of(detail));
         given(warehouseInventoryRepository.findByWarehouseIdAndProductIdForUpdate(warehouseId, 1L)).willReturn(Optional.of(inventory));
@@ -388,7 +378,7 @@ class OrderCommandServiceImplTest {
 
     @Test
     @DisplayName("[주문 승인] 주문 상태가 REQUESTED가 아닌 경우 예외 발생")
-    void testApproveOrder_InvalidStatus() {
+    void testApproveOrder_InvalidStatus() throws Exception{
         // given
         Long orderId = 1L;
         Long warehouseId = 10L;
@@ -411,6 +401,9 @@ class OrderCommandServiceImplTest {
                 .build();
         ReflectionTestUtils.setField(alreadyApproved, "orderId", orderId);
 
+        RLock mockLock = mock(RLock.class);
+        given(redissonClient.getLock(any())).willReturn(mockLock);
+        given(mockLock.tryLock(anyLong(), anyLong(), any())).willReturn(true);
         given(orderRepository.findById(orderId)).willReturn(Optional.of(alreadyApproved));
 
         // when & then
@@ -419,10 +412,9 @@ class OrderCommandServiceImplTest {
                 .hasFieldOrPropertyWithValue("errorCode", OrderErrorCode.CANNOT_APPROVE_ORDER);
     }
 
-
     @Test
     @DisplayName("[주문 승인] 재고 없음 예외 발생")
-    void testApproveOrder_NoInventory() {
+    void testApproveOrder_NoInventory() throws Exception {
         // given
         Long orderId = 1L;
         Long warehouseId = 10L;
@@ -453,7 +445,10 @@ class OrderCommandServiceImplTest {
                 .totalPrice(4500L)
                 .createdAt(LocalDateTime.now())
                 .build();
+        RLock mockLock = mock(RLock.class);
+        given(redissonClient.getLock(any())).willReturn(mockLock);
 
+        given(mockLock.tryLock(anyLong(), anyLong(), any())).willReturn(true);
         given(orderRepository.findById(orderId)).willReturn(Optional.of(order));
         given(orderDetailRepository.findByOrderId(orderId)).willReturn(List.of(detail));
         given(warehouseInventoryRepository.findByWarehouseIdAndProductIdForUpdate(warehouseId, 1L))
