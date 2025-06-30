@@ -1,5 +1,6 @@
 package com.harusari.chainware.delivery.command.application.service;
 
+import com.harusari.chainware.delivery.command.application.dto.request.DeliveryStartItem;
 import com.harusari.chainware.delivery.command.application.dto.request.DeliveryStartRequest;
 import com.harusari.chainware.delivery.command.application.dto.response.DeliveryCommandResponse;
 import com.harusari.chainware.delivery.command.domain.aggregate.Delivery;
@@ -11,12 +12,14 @@ import com.harusari.chainware.order.command.domain.aggregate.OrderDetail;
 import com.harusari.chainware.order.command.domain.repository.OrderDetailRepository;
 import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInventory;
 import com.harusari.chainware.warehouse.command.domain.repository.WarehouseInventoryRepository;
+import com.harusari.chainware.warehouse.command.domain.repository.WarehouseOutboundRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +42,9 @@ class DeliveryCommandServiceImplTest {
     @Mock
     private WarehouseInventoryRepository warehouseInventoryRepository;
 
+    @Mock
+    private WarehouseOutboundRepository warehouseOutboundRepository;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -54,6 +60,7 @@ class DeliveryCommandServiceImplTest {
         Delivery delivery = Delivery.builder()
                 .orderId(orderId)
                 .deliveryStatus(DeliveryStatus.REQUESTED)
+                .warehouseId(10L)
                 .build();
         ReflectionTestUtils.setField(delivery, "deliveryId", deliveryId);
 
@@ -63,18 +70,25 @@ class DeliveryCommandServiceImplTest {
 
         WarehouseInventory inventory = WarehouseInventory.builder()
                 .productId(1L)
+                .warehouseId(10L)
                 .quantity(10)
                 .reservedQuantity(10)
                 .build();
 
+        DeliveryStartItem item = DeliveryStartItem.builder()
+                .productId(1L)
+                .quantity(3)
+                .expirationDate(LocalDate.of(2025, 12, 31))
+                .build();
+
         DeliveryStartRequest request = DeliveryStartRequest.builder()
-                .trackingNumber("TN-123")
                 .carrier("CJ대한통운")
+                .products(List.of(item))
                 .build();
 
         given(deliveryRepository.findById(deliveryId)).willReturn(Optional.of(delivery));
         given(orderDetailRepository.findByOrderId(orderId)).willReturn(details);
-        given(warehouseInventoryRepository.findByProductId(1L)).willReturn(Optional.of(inventory));
+        given(warehouseInventoryRepository.findByWarehouseIdAndProductIdForUpdate(10L, 1L)).willReturn(Optional.of(inventory));
 
         // when
         DeliveryCommandResponse response = deliveryCommandService.startDelivery(deliveryId, request);
@@ -126,23 +140,39 @@ class DeliveryCommandServiceImplTest {
     @Test
     @DisplayName("[배송 시작] 재고 부족 예외 테스트")
     void testStartDelivery_InsufficientInventory() {
+        //given
+        Long deliveryId = 1L;
+
         Delivery delivery = Delivery.builder()
                 .orderId(1L)
+                .warehouseId(10L)
                 .deliveryStatus(DeliveryStatus.REQUESTED)
                 .build();
         List<OrderDetail> details = List.of(OrderDetail.builder().productId(1L).quantity(5).build());
 
         WarehouseInventory inventory = WarehouseInventory.builder()
                 .productId(1L)
+                .warehouseId(10L)
                 .quantity(3)  // 부족한 재고
                 .reservedQuantity(3)
                 .build();
 
-        given(deliveryRepository.findById(anyLong())).willReturn(Optional.of(delivery));
-        given(orderDetailRepository.findByOrderId(anyLong())).willReturn(details);
-        given(warehouseInventoryRepository.findByProductId(1L)).willReturn(Optional.of(inventory));
+        DeliveryStartItem item = DeliveryStartItem.builder()
+                .productId(1L)
+                .quantity(5)
+                .expirationDate(LocalDate.now())
+                .build();
 
-        assertThatThrownBy(() -> deliveryCommandService.startDelivery(1L, mock(DeliveryStartRequest.class)))
+        DeliveryStartRequest request = DeliveryStartRequest.builder()
+                .carrier("CJ대한통운")
+                .products(List.of(item))
+                .build();
+
+        given(deliveryRepository.findById(deliveryId)).willReturn(Optional.of(delivery));
+        given(orderDetailRepository.findByOrderId(1L)).willReturn(details);
+        given(warehouseInventoryRepository.findByWarehouseIdAndProductIdForUpdate(10L, 1L)).willReturn(Optional.of(inventory));
+
+        assertThatThrownBy(() -> deliveryCommandService.startDelivery(deliveryId, request))
                 .isInstanceOf(DeliveryException.class)
                 .hasFieldOrPropertyWithValue("errorCode", DeliveryErrorCode.INSUFFICIENT_INVENTORY_FOR_DELIVERY);
     }
