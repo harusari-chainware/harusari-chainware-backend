@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 
 import java.time.DayOfWeek;
@@ -91,12 +92,19 @@ class DisposalRateStatisticsQueryServiceImplTest {
         @Test
         @DisplayName("5. MONTHLY 기간이 아직 완료되지 않았을 때 예외")
         void testMonthlyPeriodNotCompleted() {
-            LocalDate thisMonth = LocalDate.now().withDayOfMonth(15);
+            // given
+            LocalDate thisMonth = LocalDate.of(2025, 6, 15);
+            LocalDate fakeToday = LocalDate.of(2025, 6, 20);
 
-            assertThatThrownBy(() ->
-                    service.getDisposalStatistics("MONTHLY", null, null, thisMonth, false))
-                    .isInstanceOf(StatisticsException.class)
-                    .hasMessageContaining(StatisticsErrorCode.PERIOD_NOT_COMPLETED.getMessage());
+            try (MockedStatic<LocalDate> mocked = mockStatic(LocalDate.class, CALLS_REAL_METHODS)) {
+                mocked.when(LocalDate::now).thenReturn(fakeToday);
+
+                // when & then
+                assertThatThrownBy(() ->
+                        service.getDisposalStatistics("MONTHLY", null, null, thisMonth, false))
+                        .isInstanceOf(StatisticsException.class)
+                        .hasMessageContaining(StatisticsErrorCode.PERIOD_NOT_COMPLETED.getMessage());
+            }
         }
 
         @Test
