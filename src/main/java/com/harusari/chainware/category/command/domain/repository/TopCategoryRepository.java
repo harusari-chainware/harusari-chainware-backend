@@ -5,11 +5,15 @@ import com.harusari.chainware.category.command.domain.aggregate.TopCategory;
 import java.util.Optional;
 
 public interface TopCategoryRepository {
+    Optional<TopCategory> findByTopCategoryId(Long topCategoryId);
+
+    boolean existsByTopCategoryName(String topCategoryName);
+
+    boolean existsByTopCategoryNameAndTopCategoryIdNot(String topCategoryName, Long topCategoryId);
 
     TopCategory save(TopCategory topCategory);
 
     void delete(TopCategory topCategory);
 
-    Optional<TopCategory> findByTopCategoryId(Long topCategoryId);
-
+    boolean existsById(Long topCategoryId);
 }

@@ -5,9 +5,4 @@ import com.harusari.chainware.category.command.domain.repository.CategoryReposit
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface JpaCategoryRepository extends CategoryRepository, JpaRepository<Category, Long> {
-
-    boolean existsByTopCategoryId(Long topCategoryId);
-
-    boolean existsByTopCategoryIdAndCategoryName(Long topCategoryId, String categoryName);
-
 }
