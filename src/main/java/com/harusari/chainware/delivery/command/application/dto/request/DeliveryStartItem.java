@@ -8,7 +8,7 @@ import java.time.LocalDate;
 @Getter
 @Builder
 public class DeliveryStartItem {
-    private Long productId;
-    private Integer quantity;
+    private Long orderDetailId;
+    private Long takeBackDetailId;
     private LocalDate expirationDate;
 }

@@ -56,28 +56,31 @@ class DeliveryCommandServiceImplTest {
         // given
         Long deliveryId = 1L;
         Long orderId = 100L;
+        Long orderDetailId = 10L;
+        Long warehouseId = 10L;
 
         Delivery delivery = Delivery.builder()
                 .orderId(orderId)
                 .deliveryStatus(DeliveryStatus.REQUESTED)
-                .warehouseId(10L)
+                .warehouseId(warehouseId)
                 .build();
         ReflectionTestUtils.setField(delivery, "deliveryId", deliveryId);
 
-        List<OrderDetail> details = List.of(
-                OrderDetail.builder().productId(1L).quantity(3).build()
-        );
+        OrderDetail orderDetail = OrderDetail.builder()
+                .productId(1L)
+                .quantity(3)
+                .build();
+        ReflectionTestUtils.setField(orderDetail, "orderDetailId", orderDetailId);
 
         WarehouseInventory inventory = WarehouseInventory.builder()
                 .productId(1L)
-                .warehouseId(10L)
+                .warehouseId(warehouseId)
                 .quantity(10)
                 .reservedQuantity(10)
                 .build();
 
         DeliveryStartItem item = DeliveryStartItem.builder()
-                .productId(1L)
-                .quantity(3)
+                .orderDetailId(orderDetailId)
                 .expirationDate(LocalDate.of(2025, 12, 31))
                 .build();
 
@@ -87,8 +90,8 @@ class DeliveryCommandServiceImplTest {
                 .build();
 
         given(deliveryRepository.findById(deliveryId)).willReturn(Optional.of(delivery));
-        given(orderDetailRepository.findByOrderId(orderId)).willReturn(details);
-        given(warehouseInventoryRepository.findByWarehouseIdAndProductIdForUpdate(10L, 1L)).willReturn(Optional.of(inventory));
+        given(orderDetailRepository.findById(orderDetailId)).willReturn(Optional.of(orderDetail));
+        given(warehouseInventoryRepository.findByWarehouseIdAndProductIdForUpdate(warehouseId, 1L)).willReturn(Optional.of(inventory));
 
         // when
         DeliveryCommandResponse response = deliveryCommandService.startDelivery(deliveryId, request);
@@ -97,6 +100,7 @@ class DeliveryCommandServiceImplTest {
         assertThat(response.getDeliveryId()).isEqualTo(deliveryId);
         assertThat(response.getDeliveryStatus()).isEqualTo(DeliveryStatus.IN_TRANSIT);
     }
+
 
     @Test
     @DisplayName("[배송 시작] 존재하지 않는 배송 ID 예외 테스트")
@@ -125,41 +129,64 @@ class DeliveryCommandServiceImplTest {
     @Test
     @DisplayName("[배송 시작] 주문 상세 없음 예외 테스트")
     void testStartDelivery_NoOrderDetails() {
+        // given
+        Long deliveryId = 1L;
+        Long orderDetailId = 999L;
+
         Delivery delivery = Delivery.builder()
                 .orderId(1L)
+                .warehouseId(10L)
                 .deliveryStatus(DeliveryStatus.REQUESTED)
                 .build();
-        given(deliveryRepository.findById(anyLong())).willReturn(Optional.of(delivery));
-        given(orderDetailRepository.findByOrderId(anyLong())).willReturn(List.of());
 
-        assertThatThrownBy(() -> deliveryCommandService.startDelivery(1L, mock(DeliveryStartRequest.class)))
+        DeliveryStartItem item = DeliveryStartItem.builder()
+                .orderDetailId(orderDetailId)
+                .expirationDate(LocalDate.of(2025, 12, 31))
+                .build();
+
+        DeliveryStartRequest request = DeliveryStartRequest.builder()
+                .carrier("CJ대한통운")
+                .products(List.of(item))
+                .build();
+
+        given(deliveryRepository.findById(deliveryId)).willReturn(Optional.of(delivery));
+        given(orderDetailRepository.findById(orderDetailId)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> deliveryCommandService.startDelivery(deliveryId, request))
                 .isInstanceOf(DeliveryException.class)
                 .hasFieldOrPropertyWithValue("errorCode", DeliveryErrorCode.ORDER_DETAIL_NOT_FOUND_FOR_DELIVERY);
     }
 
+
     @Test
     @DisplayName("[배송 시작] 재고 부족 예외 테스트")
     void testStartDelivery_InsufficientInventory() {
-        //given
+        // given
         Long deliveryId = 1L;
+        Long orderDetailId = 10L;
 
         Delivery delivery = Delivery.builder()
                 .orderId(1L)
                 .warehouseId(10L)
                 .deliveryStatus(DeliveryStatus.REQUESTED)
                 .build();
-        List<OrderDetail> details = List.of(OrderDetail.builder().productId(1L).quantity(5).build());
+
+        OrderDetail detail = OrderDetail.builder()
+                .productId(1L)
+                .quantity(5)
+                .build();
+        ReflectionTestUtils.setField(detail, "orderDetailId", orderDetailId);
 
         WarehouseInventory inventory = WarehouseInventory.builder()
                 .productId(1L)
                 .warehouseId(10L)
-                .quantity(3)  // 부족한 재고
+                .quantity(3)  // 부족
                 .reservedQuantity(3)
                 .build();
 
         DeliveryStartItem item = DeliveryStartItem.builder()
-                .productId(1L)
-                .quantity(5)
+                .orderDetailId(orderDetailId)
                 .expirationDate(LocalDate.now())
                 .build();
 
@@ -169,13 +196,15 @@ class DeliveryCommandServiceImplTest {
                 .build();
 
         given(deliveryRepository.findById(deliveryId)).willReturn(Optional.of(delivery));
-        given(orderDetailRepository.findByOrderId(1L)).willReturn(details);
+        given(orderDetailRepository.findById(orderDetailId)).willReturn(Optional.of(detail));
         given(warehouseInventoryRepository.findByWarehouseIdAndProductIdForUpdate(10L, 1L)).willReturn(Optional.of(inventory));
 
+        // when & then
         assertThatThrownBy(() -> deliveryCommandService.startDelivery(deliveryId, request))
                 .isInstanceOf(DeliveryException.class)
                 .hasFieldOrPropertyWithValue("errorCode", DeliveryErrorCode.INSUFFICIENT_INVENTORY_FOR_DELIVERY);
     }
+
 
     @Test
     @DisplayName("[배송 완료] 성공 테스트")

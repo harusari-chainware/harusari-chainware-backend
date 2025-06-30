@@ -22,10 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -57,46 +54,33 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
         Long takeBackId = delivery.getTakeBackId();
         String trackingNumber = generateTrackingNumber();
 
-        // 4. 배송 대상 제품 및 수량 정보를 저장할 맵 선언
-        Map<Long, Integer> productQuantityMap = null;
-
-        if(takeBackId != null){
-            // 4-1. 재배송 (반품 기반 배송)
-            List<TakeBackDetail> details = takeBackDetailRepository.findByTakeBackId(takeBackId);
-            if (details.isEmpty()) {
-                throw new DeliveryException(DeliveryErrorCode.TAKE_BACK_DETAIL_NOT_FOUND);
-            }
-
-            productQuantityMap = details.stream()
-                    .collect(Collectors.toMap(TakeBackDetail::getProductId, TakeBackDetail::getQuantity));
-
-        } else if (orderId != null){
-            // 4-2. 주문 기반 배송
-            List<OrderDetail> details = orderDetailRepository.findByOrderId(orderId);
-            if (details.isEmpty()) {
-                throw new DeliveryException(DeliveryErrorCode.ORDER_DETAIL_NOT_FOUND_FOR_DELIVERY);
-            }
-
-            productQuantityMap = details.stream()
-                    .collect(Collectors.toMap(OrderDetail::getProductId, OrderDetail::getQuantity));
-        }
-
-        // 5. 재고 차감 로직 실행
+        // 4. 재고 차감 로직 실행
         for (DeliveryStartItem item : request.getProducts()) {
-            // 5-1. 요청 항목에서 제품 정보 추출
-            Long productId = item.getProductId();
-            Integer quantity = item.getQuantity();
+            // 4-1. 요청 항목에서 제품 정보 추출
+            Long productId;
+            Integer quantity;
             LocalDate expirationDate = item.getExpirationDate();
 
-            // 5-2. 주문 상세 관련 검증
-            if (!productQuantityMap.containsKey(productId)) {
-                throw new DeliveryException(DeliveryErrorCode.PRODUCT_NOT_FOUND_IN_ORDER);
-            }
-            if (productQuantityMap.get(productId) < quantity) {
-                throw new DeliveryException(DeliveryErrorCode.INVALID_DELIVERY_QUANTITY);
+            // 4-2. 배송 상세 관련 검증
+            if (takeBackId != null && item.getTakeBackDetailId() != null) {
+                // 반품 기반 배송
+                TakeBackDetail detail = takeBackDetailRepository.findById(item.getTakeBackDetailId())
+                        .orElseThrow(() -> new DeliveryException(DeliveryErrorCode.TAKE_BACK_DETAIL_NOT_FOUND));
+
+                productId = detail.getProductId();
+                quantity = detail.getQuantity();
+            } else if (orderId != null && item.getOrderDetailId() != null) {
+                // 주문 기반 배송
+                OrderDetail detail = orderDetailRepository.findById(item.getOrderDetailId())
+                        .orElseThrow(() -> new DeliveryException(DeliveryErrorCode.ORDER_DETAIL_NOT_FOUND_FOR_DELIVERY));
+
+                productId = detail.getProductId();
+                quantity = detail.getQuantity();
+            } else {
+                throw new DeliveryException(DeliveryErrorCode.INVALID_DELIVERY_DETAIL_ID);
             }
 
-            // 5-3. 창고 재고 조회 및 검증
+            // 4-3. 창고 재고 조회 및 검증
             WarehouseInventory inventory = warehouseInventoryRepository
                     .findByWarehouseIdAndProductIdForUpdate(warehouseId, productId)
                     .orElseThrow(() -> new DeliveryException(DeliveryErrorCode.PRODUCT_INVENTORY_NOT_FOUND_FOR_DELIVERY));
@@ -105,11 +89,11 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
                 throw new DeliveryException(DeliveryErrorCode.INSUFFICIENT_INVENTORY_FOR_DELIVERY);
             }
 
-            // 5-4. 재고 차감
+            // 4-4. 재고 차감
             inventory.decreaseQuantity(quantity, LocalDateTime.now());
             inventory.decreaseReservedQuantity(quantity, LocalDateTime.now());
 
-            // 5-5. 창고 출고 등록
+            // 4-5. 창고 출고 등록
             WarehouseOutbound outbound = WarehouseOutbound.builder()
                     .orderId(orderId)
                     .warehouseId(warehouseId)
@@ -122,7 +106,7 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
             warehouseOutboundRepository.save(outbound);
         }
 
-        // 6. 상태 변경
+        // 5. 상태 변경
         delivery.startDelivery(trackingNumber, request.getCarrier(), LocalDateTime.now());
 
         return DeliveryCommandResponse.builder()
