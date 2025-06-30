@@ -4,6 +4,8 @@ import com.harusari.chainware.category.command.application.dto.request.TopCatego
 import com.harusari.chainware.category.command.application.dto.request.TopCategoryUpdateRequest;
 import com.harusari.chainware.category.command.application.dto.response.TopCategoryCommandResponse;
 import com.harusari.chainware.category.command.domain.aggregate.TopCategory;
+import com.harusari.chainware.category.command.domain.repository.CategoryRepository;
+import com.harusari.chainware.category.command.domain.repository.TopCategoryRepository;
 import com.harusari.chainware.category.command.infrastructure.JpaCategoryRepository;
 import com.harusari.chainware.category.command.infrastructure.JpaTopCategoryRepository;
 import com.harusari.chainware.exception.category.CategoryErrorCode;
@@ -33,10 +35,10 @@ class TopCategoryCommandServiceImplTest {
     private TopCategoryCommandServiceImpl service;
 
     @Mock
-    private JpaTopCategoryRepository jpaTopCategoryRepository;
+    private TopCategoryRepository topCategoryRepository;
 
     @Mock
-    private JpaCategoryRepository jpaCategoryRepository;
+    private CategoryRepository categoryRepository;
 
     @BeforeEach
     void setUp() {
@@ -55,8 +57,8 @@ class TopCategoryCommandServiceImplTest {
         TopCategory saved = TopCategory.builder().topCategoryName(name).build();
         ReflectionTestUtils.setField(saved, "topCategoryId", 42L);
 
-        given(jpaTopCategoryRepository.existsByTopCategoryName(name)).willReturn(false);
-        given(jpaTopCategoryRepository.save(any(TopCategory.class))).willReturn(saved);
+        given(topCategoryRepository.existsByTopCategoryName(name)).willReturn(false);
+        given(topCategoryRepository.save(any(TopCategory.class))).willReturn(saved);
 
         // when
         TopCategoryCommandResponse response = service.createTopCategory(request);
@@ -75,7 +77,7 @@ class TopCategoryCommandServiceImplTest {
                 .topCategoryName(name)
                 .build();
 
-        given(jpaTopCategoryRepository.existsByTopCategoryName(name)).willReturn(true);
+        given(topCategoryRepository.existsByTopCategoryName(name)).willReturn(true);
 
         // when / then
         assertThatThrownBy(() -> service.createTopCategory(request))
@@ -96,8 +98,8 @@ class TopCategoryCommandServiceImplTest {
         String newName = "가전제품";
         TopCategoryUpdateRequest request = new TopCategoryUpdateRequest(newName);
 
-        given(jpaTopCategoryRepository.findByTopCategoryId(id)).willReturn(Optional.of(existing));
-        given(jpaTopCategoryRepository.existsByTopCategoryNameAndTopCategoryIdNot(newName, id)).willReturn(false);
+        given(topCategoryRepository.findByTopCategoryId(id)).willReturn(Optional.of(existing));
+        given(topCategoryRepository.existsByTopCategoryNameAndTopCategoryIdNot(newName, id)).willReturn(false);
 
         // when
         TopCategoryCommandResponse response = service.updateTopCategory(id, request);
@@ -114,7 +116,7 @@ class TopCategoryCommandServiceImplTest {
         Long id = 99L;
         TopCategoryUpdateRequest request = new TopCategoryUpdateRequest("아무개");
 
-        given(jpaTopCategoryRepository.findByTopCategoryId(id)).willReturn(Optional.empty());
+        given(topCategoryRepository.findByTopCategoryId(id)).willReturn(Optional.empty());
 
         // when / then
         assertThatThrownBy(() -> service.updateTopCategory(id, request))
@@ -135,8 +137,8 @@ class TopCategoryCommandServiceImplTest {
         String newName = "가전제품";
         TopCategoryUpdateRequest request = new TopCategoryUpdateRequest(newName);
 
-        given(jpaTopCategoryRepository.findByTopCategoryId(id)).willReturn(Optional.of(existing));
-        given(jpaTopCategoryRepository.existsByTopCategoryNameAndTopCategoryIdNot(newName, id)).willReturn(true);
+        given(topCategoryRepository.findByTopCategoryId(id)).willReturn(Optional.of(existing));
+        given(topCategoryRepository.existsByTopCategoryNameAndTopCategoryIdNot(newName, id)).willReturn(true);
 
         // when / then
         assertThatThrownBy(() -> service.updateTopCategory(id, request))
@@ -154,14 +156,14 @@ class TopCategoryCommandServiceImplTest {
                 .build();
         ReflectionTestUtils.setField(existing, "topCategoryId", id);
 
-        given(jpaTopCategoryRepository.findByTopCategoryId(id)).willReturn(Optional.of(existing));
-        given(jpaCategoryRepository.existsByTopCategoryId(id)).willReturn(false);
+        given(topCategoryRepository.findByTopCategoryId(id)).willReturn(Optional.of(existing));
+        given(categoryRepository.existsByTopCategoryId(id)).willReturn(false);
 
         // when
         service.deleteTopCategory(id);
 
         // then
-        then(jpaTopCategoryRepository).should().delete(existing);
+        then(topCategoryRepository).should().delete(existing);
     }
 
     @Test
@@ -169,7 +171,7 @@ class TopCategoryCommandServiceImplTest {
     void deleteTopCategoryNotFound() {
         // given
         Long id = 123L;
-        given(jpaTopCategoryRepository.findByTopCategoryId(id)).willReturn(Optional.empty());
+        given(topCategoryRepository.findByTopCategoryId(id)).willReturn(Optional.empty());
 
         // when / then
         assertThatThrownBy(() -> service.deleteTopCategory(id))
@@ -187,8 +189,8 @@ class TopCategoryCommandServiceImplTest {
                 .build();
         ReflectionTestUtils.setField(existing, "topCategoryId", id);
 
-        given(jpaTopCategoryRepository.findByTopCategoryId(id)).willReturn(Optional.of(existing));
-        given(jpaCategoryRepository.existsByTopCategoryId(id)).willReturn(true);
+        given(topCategoryRepository.findByTopCategoryId(id)).willReturn(Optional.of(existing));
+        given(categoryRepository.existsByTopCategoryId(id)).willReturn(true);
 
         // when / then
         assertThatThrownBy(() -> service.deleteTopCategory(id))

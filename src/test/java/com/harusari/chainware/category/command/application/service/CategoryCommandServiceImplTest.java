@@ -3,6 +3,8 @@ package com.harusari.chainware.category.command.application.service;
 import com.harusari.chainware.category.command.application.dto.request.CategoryCreateRequest;
 import com.harusari.chainware.category.command.application.dto.response.CategoryCommandResponse;
 import com.harusari.chainware.category.command.domain.aggregate.Category;
+import com.harusari.chainware.category.command.domain.repository.CategoryRepository;
+import com.harusari.chainware.category.command.domain.repository.TopCategoryRepository;
 import com.harusari.chainware.category.command.infrastructure.JpaCategoryRepository;
 import com.harusari.chainware.category.command.infrastructure.JpaTopCategoryRepository;
 import com.harusari.chainware.exception.category.*;
@@ -25,10 +27,10 @@ class CategoryCommandServiceImplTest {
     private CategoryCommandServiceImpl categoryService;
 
     @Mock
-    private JpaCategoryRepository jpaCategoryRepository;
+    private CategoryRepository categoryRepository;
 
     @Mock
-    private JpaTopCategoryRepository jpaTopCategoryRepository;
+    private TopCategoryRepository topCategoryRepository;
 
     @Mock
     private ProductRepository productRepository;
@@ -50,8 +52,8 @@ class CategoryCommandServiceImplTest {
                 .categoryCode("NC01")
                 .build();
 
-        given(jpaTopCategoryRepository.existsById(1L)).willReturn(true);
-        given(jpaCategoryRepository.existsByTopCategoryIdAndCategoryName(1L, "NewCat"))
+        given(topCategoryRepository.existsById(1L)).willReturn(true);
+        given(categoryRepository.existsByTopCategoryIdAndCategoryName(1L, "NewCat"))
                 .willReturn(false);
 
         Category saved = Category.builder()
@@ -60,7 +62,7 @@ class CategoryCommandServiceImplTest {
                 .categoryCode("NC01")
                 .build();
         ReflectionTestUtils.setField(saved, "categoryId", 100L);
-        given(jpaCategoryRepository.save(any(Category.class))).willReturn(saved);
+        given(categoryRepository.save(any(Category.class))).willReturn(saved);
 
         // when
         CategoryCommandResponse response = categoryService.createCategory(request);
@@ -80,7 +82,7 @@ class CategoryCommandServiceImplTest {
                 .topCategoryId(9L)
                 .categoryName("X")
                 .build();
-        given(jpaTopCategoryRepository.existsById(9L)).willReturn(false);
+        given(topCategoryRepository.existsById(9L)).willReturn(false);
 
         // when / then
         assertThatThrownBy(() -> categoryService.createCategory(request))
@@ -97,8 +99,8 @@ class CategoryCommandServiceImplTest {
                 .categoryName("DupCat")
                 .build();
 
-        given(jpaTopCategoryRepository.existsById(1L)).willReturn(true);
-        given(jpaCategoryRepository.existsByTopCategoryIdAndCategoryName(1L, "DupCat"))
+        given(topCategoryRepository.existsById(1L)).willReturn(true);
+        given(categoryRepository.existsByTopCategoryIdAndCategoryName(1L, "DupCat"))
                 .willReturn(true);
 
         // when / then
@@ -127,10 +129,10 @@ class CategoryCommandServiceImplTest {
                 .categoryCode("NC02")
                 .build();
 
-        given(jpaCategoryRepository.findById(categoryId)).willReturn(Optional.of(existing));
-        given(jpaTopCategoryRepository.existsById(2L)).willReturn(true);
+        given(categoryRepository.findById(categoryId)).willReturn(Optional.of(existing));
+        given(topCategoryRepository.existsById(2L)).willReturn(true);
         // name or topCategory changed, so check duplicate
-        given(jpaCategoryRepository.existsByTopCategoryIdAndCategoryName(2L, "NewName"))
+        given(categoryRepository.existsByTopCategoryIdAndCategoryName(2L, "NewName"))
                 .willReturn(false);
 
         Category updated = Category.builder()
@@ -139,7 +141,7 @@ class CategoryCommandServiceImplTest {
                 .categoryCode("NC02")
                 .build();
         ReflectionTestUtils.setField(updated, "categoryId", categoryId);
-        given(jpaCategoryRepository.save(existing)).willReturn(updated);
+        given(categoryRepository.save(existing)).willReturn(updated);
 
         // when
         CategoryCommandResponse response = categoryService.updateCategory(categoryId, request);
@@ -155,7 +157,7 @@ class CategoryCommandServiceImplTest {
     @DisplayName("[카테고리 수정] 카테고리 없음 예외 테스트")
     void updateCategoryNotFound() {
         // given
-        given(jpaCategoryRepository.findById(anyLong())).willReturn(Optional.empty());
+        given(categoryRepository.findById(anyLong())).willReturn(Optional.empty());
 
         // when / then
         assertThatThrownBy(() ->
@@ -174,13 +176,13 @@ class CategoryCommandServiceImplTest {
                 .categoryName("A")
                 .build();
         ReflectionTestUtils.setField(existing, "categoryId", categoryId);
-        given(jpaCategoryRepository.findById(categoryId)).willReturn(Optional.of(existing));
+        given(categoryRepository.findById(categoryId)).willReturn(Optional.of(existing));
 
         CategoryCreateRequest request = CategoryCreateRequest.builder()
                 .topCategoryId(9L)
                 .categoryName("B")
                 .build();
-        given(jpaTopCategoryRepository.existsById(9L)).willReturn(false);
+        given(topCategoryRepository.existsById(9L)).willReturn(false);
 
         // when / then
         assertThatThrownBy(() ->
@@ -199,15 +201,15 @@ class CategoryCommandServiceImplTest {
                 .categoryName("Orig")
                 .build();
         ReflectionTestUtils.setField(existing, "categoryId", categoryId);
-        given(jpaCategoryRepository.findById(categoryId)).willReturn(Optional.of(existing));
-        given(jpaTopCategoryRepository.existsById(2L)).willReturn(true);
+        given(categoryRepository.findById(categoryId)).willReturn(Optional.of(existing));
+        given(topCategoryRepository.existsById(2L)).willReturn(true);
 
         CategoryCreateRequest request = CategoryCreateRequest.builder()
                 .topCategoryId(2L)
                 .categoryName("DupName")
                 .build();
         // name/topCategory changed -> duplicate exists
-        given(jpaCategoryRepository.existsByTopCategoryIdAndCategoryName(2L, "DupName"))
+        given(categoryRepository.existsByTopCategoryIdAndCategoryName(2L, "DupName"))
                 .willReturn(true);
 
         // when / then
@@ -228,12 +230,12 @@ class CategoryCommandServiceImplTest {
         given(productRepository.existsByCategoryId(categoryId)).willReturn(false);
         Category existing = Category.builder().build();
         ReflectionTestUtils.setField(existing, "categoryId", categoryId);
-        given(jpaCategoryRepository.findById(categoryId)).willReturn(Optional.of(existing));
+        given(categoryRepository.findById(categoryId)).willReturn(Optional.of(existing));
 
         // when / then
         // no exception thrown
         categoryService.deleteCategory(categoryId);
-        then(jpaCategoryRepository).should().delete(existing);
+        then(categoryRepository).should().delete(existing);
     }
 
     @Test
@@ -255,7 +257,7 @@ class CategoryCommandServiceImplTest {
         // given
         Long categoryId = 700L;
         given(productRepository.existsByCategoryId(categoryId)).willReturn(false);
-        given(jpaCategoryRepository.findById(categoryId)).willReturn(Optional.empty());
+        given(categoryRepository.findById(categoryId)).willReturn(Optional.empty());
 
         // when / then
         assertThatThrownBy(() -> categoryService.deleteCategory(categoryId))

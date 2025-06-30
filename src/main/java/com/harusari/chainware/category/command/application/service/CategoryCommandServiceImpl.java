@@ -3,8 +3,8 @@ package com.harusari.chainware.category.command.application.service;
 import com.harusari.chainware.category.command.application.dto.request.CategoryCreateRequest;
 import com.harusari.chainware.category.command.application.dto.response.CategoryCommandResponse;
 import com.harusari.chainware.category.command.domain.aggregate.Category;
-import com.harusari.chainware.category.command.infrastructure.JpaCategoryRepository;
-import com.harusari.chainware.category.command.infrastructure.JpaTopCategoryRepository;
+import com.harusari.chainware.category.command.domain.repository.CategoryRepository;
+import com.harusari.chainware.category.command.domain.repository.TopCategoryRepository;
 import com.harusari.chainware.exception.category.*;
 import com.harusari.chainware.product.command.domain.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,20 +15,20 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CategoryCommandServiceImpl implements CategoryCommandService {
 
-    private final JpaCategoryRepository jpaCategoryRepository;
-    private final JpaTopCategoryRepository jpaTopCategoryRepository;
+    private final CategoryRepository categoryRepository;
+    private final TopCategoryRepository topCategoryRepository;
     private final ProductRepository productRepository;
 
     /** 상위 카테고리 존재 여부 검증 */
     private void validateTopCategoryExists(Long topCategoryId) {
-        if (!jpaTopCategoryRepository.existsById(topCategoryId)) {
+        if (!topCategoryRepository.existsById(topCategoryId)) {
             throw new TopCategoryNotFoundException(CategoryErrorCode.TOP_CATEGORY_NOT_FOUND);
         }
     }
 
     /** 중복 카테고리명 확인 (같은 상위 카테고리 내) */
     private void validateDuplicateCategoryName(Long topCategoryId, String categoryName) {
-        if (jpaCategoryRepository.existsByTopCategoryIdAndCategoryName(topCategoryId, categoryName)) {
+        if (categoryRepository.existsByTopCategoryIdAndCategoryName(topCategoryId, categoryName)) {
             throw new CategoryNameAlreadyExistsException(CategoryErrorCode.CATEGORY_NAME_ALREADY_EXISTS);
         }
     }
@@ -46,7 +46,7 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
                 .categoryCode(request.getCategoryCode())
                 .build();
 
-        Category saved = jpaCategoryRepository.save(category);
+        Category saved = categoryRepository.save(category);
 
         return CategoryCommandResponse.builder()
                 .categoryId(saved.getCategoryId())
@@ -60,7 +60,7 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
     @Transactional
     @Override
     public CategoryCommandResponse updateCategory(Long categoryId, CategoryCreateRequest request) {
-        Category category = jpaCategoryRepository.findById(categoryId)
+        Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CategoryNotFoundException(CategoryErrorCode.CATEGORY_NOT_FOUND));
 
         validateTopCategoryExists(request.getTopCategoryId());
@@ -75,7 +75,7 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
         category.updateTopCategoryId(request.getTopCategoryId());
         category.updateCategoryCode(request.getCategoryCode());
 
-        Category updated = jpaCategoryRepository.save(category);
+        Category updated = categoryRepository.save(category);
 
         return CategoryCommandResponse.builder()
                 .categoryId(updated.getCategoryId())
@@ -93,9 +93,9 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
             throw new CategoryCannotDeleteHasProductsException(CategoryErrorCode.CATEGORY_CANNOT_DELETE_HAS_PRODUCTS);
         }
 
-        Category category = jpaCategoryRepository.findById(categoryId)
+        Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CategoryNotFoundException(CategoryErrorCode.CATEGORY_NOT_FOUND));
 
-        jpaCategoryRepository.delete(category);
+        categoryRepository.delete(category);
     }
 }

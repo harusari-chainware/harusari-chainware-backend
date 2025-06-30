@@ -5,5 +5,4 @@ import com.harusari.chainware.contract.command.domain.repository.ContractReposit
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface JpaContractRepository extends ContractRepository, JpaRepository<Contract, Long> {
-
 }
