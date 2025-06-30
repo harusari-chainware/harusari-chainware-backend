@@ -23,14 +23,14 @@ import java.time.LocalDate;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/contracts")
-@Tag(name = "거래처 계약 조회 API", description = "거래처별 계약 목록 조회 및 단일 계약 조회 기능")
+@Tag(name = "거래처별 계약 제품 조회 API", description = "거래처별 계약 제품 목록 조회 및 단일 계약 제품 조회 기능")
 public class VendorProductContractQueryController {
 
     private final VendorProductContractService contractService;
 
-    @Operation(summary = "계약 목록 조회", description = "사용자 권한에 따라 거래처별 계약 목록을 조회하고, 옵션별 필터 및 페이징을 적용합니다.")
+    @Operation(summary = "거래처별 계약 제품 목록 조회", description = "사용자 권한에 따라 거래처별 계약 제품 목록을 조회하고, 옵션별 필터 및 페이징을 적용합니다.")
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "계약 목록 조회 성공")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "계약 제품 목록 조회 성공")
     })
     @GetMapping
     public ResponseEntity<ApiResponse<PagedResult<VendorProductContractListDto>>> getContracts(
@@ -64,7 +64,6 @@ public class VendorProductContractQueryController {
                 .contractStatus(contractStatus)
                 .contractStartDate(startDate)
                 .contractEndDate(endDate)
-                .vendorId(isManager ? null : memberId)
                 .page(page)
                 .size(size)
                 .build();
@@ -75,9 +74,9 @@ public class VendorProductContractQueryController {
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 
-    @Operation(summary = "단일 계약 조회", description = "계약 ID를 통해 단일 계약 정보를 조회하며, 사용자 권한에 따라 접근을 제어합니다.")
+    @Operation(summary = "단일 계약 제품 조회", description = "계약 ID를 통해 단일 계약 제품 정보를 조회하며, 사용자 권한에 따라 접근을 제어합니다.")
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "단일 계약 조회 성공")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "단일 계약 제품 조회 성공")
     })
     @GetMapping("/{contractId}")
     public ResponseEntity<ApiResponse<VendorProductContractDto>> getContract(
