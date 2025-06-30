@@ -1,11 +1,13 @@
 package com.harusari.chainware.product.query.service;
 
+import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
 import com.harusari.chainware.product.query.dto.request.ProductSearchRequest;
-import com.harusari.chainware.product.query.dto.response.ProductDto;
-
-import java.util.List;
+import com.harusari.chainware.product.query.dto.response.ProductDetailResponse;
+import com.harusari.chainware.product.query.dto.response.ProductListResponse;
 
 public interface ProductQueryService {
-    List<ProductDto> getProducts(ProductSearchRequest request);
-    ProductDto getProductById(Long productId);
+
+    ProductListResponse getProducts(ProductSearchRequest request);
+
+    ProductDetailResponse getProductDetailByAuthority(Long productId, MemberAuthorityType authorityType, int page, int size);
 }

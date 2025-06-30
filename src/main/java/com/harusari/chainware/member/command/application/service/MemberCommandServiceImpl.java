@@ -123,6 +123,14 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         member.updateMember(authority.getAuthorityId(), updateMemberRequest);
     }
 
+    @Override
+    public void deleteMemberRequest(Long memberId) {
+        Member member = memberCommandRepository.findMemberByMemberId(memberId)
+                .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND_EXCEPTION));
+
+        member.softDelete();
+    }
+
     private Member registerMember(MemberCreateRequest memberCreateRequest) {
         validateEmailVerification(memberCreateRequest.email(), memberCreateRequest.validationToken());
 

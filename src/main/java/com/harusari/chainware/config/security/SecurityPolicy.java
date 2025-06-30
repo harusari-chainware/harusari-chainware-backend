@@ -25,6 +25,7 @@ public enum SecurityPolicy {
     MEMBERS_GET("/api/v1/members", GET, ROLE_BASED, List.of(MASTER)), // 회원 정보 조회
     MEMBERS_DETAIL_GET("/api/v1/members/{memberId}", GET, ROLE_BASED, List.of(MASTER)), // 회원 정보 상세 조회
     MEMBERS_PUT("/api/v1/members/{memberId}", PUT, ROLE_BASED, List.of(MASTER)), // 회원 정보 수정
+    MEMBERS_DELETE("/api/v1/members/{memberId}", DELETE, ROLE_BASED, List.of(MASTER)), // 회원 탈퇴
     LOGIN_HISTORY_GET("/api/v1/members/{memberId}/login-history", GET, ROLE_BASED, List.of(MASTER)), // 로그인 내역 조회
 
     // Permit All
@@ -128,7 +129,7 @@ public enum SecurityPolicy {
 
 
     /* Statistics */
-
+    STATISTICS_PREDICTION_COMPARISON("/api/v1/statistics/prediction-comparison", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
 
     /* Swagger */
     SWAGGER_UI("/swagger-ui/**", GET, PERMIT_ALL, List.of()),

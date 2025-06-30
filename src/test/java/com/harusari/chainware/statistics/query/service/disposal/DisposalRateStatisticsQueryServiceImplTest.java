@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -79,11 +80,10 @@ class DisposalRateStatisticsQueryServiceImplTest {
         @Test
         @DisplayName("4. WEEKLY 기간이 아직 완료되지 않았을 때 예외")
         void testWeeklyPeriodNotCompleted() {
-            LocalDate now = LocalDate.now();
-            LocalDate thisWeek = now.with(java.time.DayOfWeek.TUESDAY);
+            LocalDate futureWeek = LocalDate.now().plusWeeks(1).with(DayOfWeek.TUESDAY);
 
             assertThatThrownBy(() ->
-                    service.getDisposalStatistics("WEEKLY", null, null, thisWeek, false))
+                    service.getDisposalStatistics("WEEKLY", null, null, futureWeek, false))
                     .isInstanceOf(StatisticsException.class)
                     .hasMessageContaining(StatisticsErrorCode.PERIOD_NOT_COMPLETED.getMessage());
         }

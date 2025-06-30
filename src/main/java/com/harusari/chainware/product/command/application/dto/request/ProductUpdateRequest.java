@@ -1,11 +1,12 @@
 package com.harusari.chainware.product.command.application.dto.request;
 
 import com.harusari.chainware.product.command.domain.aggregate.StoreType;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
-@NoArgsConstructor
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class ProductUpdateRequest {
 
     private String productName;

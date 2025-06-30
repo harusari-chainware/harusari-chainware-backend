@@ -22,4 +22,6 @@ public interface MemberCommandService {
 
     void updateMemberRequest(Long memberId, UpdateMemberRequest updateMemberRequest);
 
+    void deleteMemberRequest(Long memberId);
+
 }

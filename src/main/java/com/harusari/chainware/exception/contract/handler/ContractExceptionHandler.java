@@ -11,35 +11,42 @@ public class ContractExceptionHandler {
 
     @ExceptionHandler(ContractNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleContractNotFoundException(ContractNotFoundException e) {
-        var errorCode = e.getErrorCode();
+        ContractErrorCode errorCode = e.getErrorCode();
         ApiResponse<Void> response = ApiResponse.failure(errorCode.getErrorCode(), errorCode.getErrorMessage());
         return new ResponseEntity<>(response, errorCode.getHttpStatus());
     }
 
     @ExceptionHandler(ContractAlreadyExistsException.class)
     public ResponseEntity<ApiResponse<Void>> handleContractAlreadyExistsException(ContractAlreadyExistsException e) {
-        var errorCode = e.getErrorCode();
+        ContractErrorCode errorCode = e.getErrorCode();
         ApiResponse<Void> response = ApiResponse.failure(errorCode.getErrorCode(), errorCode.getErrorMessage());
         return new ResponseEntity<>(response, errorCode.getHttpStatus());
     }
 
     @ExceptionHandler(ContractCannotDeleteException.class)
     public ResponseEntity<ApiResponse<Void>> handleContractCannotDeleteException(ContractCannotDeleteException e) {
-        var errorCode = e.getErrorCode();
+        ContractErrorCode errorCode = e.getErrorCode();
         ApiResponse<Void> response = ApiResponse.failure(errorCode.getErrorCode(), errorCode.getErrorMessage());
         return new ResponseEntity<>(response, errorCode.getHttpStatus());
     }
 
     @ExceptionHandler(ContractPeriodInvalidException.class)
     public ResponseEntity<ApiResponse<Void>> handleContractPeriodInvalidException(ContractPeriodInvalidException e) {
-        var errorCode = e.getErrorCode();
+        ContractErrorCode errorCode = e.getErrorCode();
         ApiResponse<Void> response = ApiResponse.failure(errorCode.getErrorCode(), errorCode.getErrorMessage());
         return new ResponseEntity<>(response, errorCode.getHttpStatus());
     }
 
     @ExceptionHandler(ContractVendorProductConflictException.class)
     public ResponseEntity<ApiResponse<Void>> handleContractVendorProductConflictException(ContractVendorProductConflictException e) {
-        var errorCode = e.getErrorCode();
+        ContractErrorCode errorCode = e.getErrorCode();
+        ApiResponse<Void> response = ApiResponse.failure(errorCode.getErrorCode(), errorCode.getErrorMessage());
+        return new ResponseEntity<>(response, errorCode.getHttpStatus());
+    }
+
+    @ExceptionHandler(ContractAccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleContractAccessDeniedException(ContractAccessDeniedException e) {
+        ContractErrorCode errorCode = e.getErrorCode();
         ApiResponse<Void> response = ApiResponse.failure(errorCode.getErrorCode(), errorCode.getErrorMessage());
         return new ResponseEntity<>(response, errorCode.getHttpStatus());
     }
