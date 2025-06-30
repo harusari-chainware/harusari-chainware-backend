@@ -7,7 +7,7 @@ import com.harusari.chainware.disposal.query.dto.DisposalSearchRequestDto;
 import com.harusari.chainware.disposal.query.mapper.DisposalQueryMapper;
 import com.harusari.chainware.franchise.command.domain.repository.FranchiseRepository;
 import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
-import com.harusari.chainware.warehouse.command.infrastructure.repository.JpaWarehouseRepository;
+import com.harusari.chainware.warehouse.command.domain.repository.WarehouseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +20,7 @@ public class DisposalQueryServiceImpl implements DisposalQueryService {
 
     private final DisposalQueryMapper mapper;
     private final FranchiseRepository franchiseRepository;
-    private final JpaWarehouseRepository warehouseRepository;
+    private final WarehouseRepository warehouseRepository;
 
     @Override
     @Transactional

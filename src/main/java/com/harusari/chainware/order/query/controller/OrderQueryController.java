@@ -23,6 +23,19 @@ public class OrderQueryController {
 
     private final OrderQueryService orderQueryService;
 
+    // 해당 주문에 대해 가능한 창고 목록 조회
+    @GetMapping("/{orderId}/available-warehouses")
+    public ResponseEntity<ApiResponse<PageResponse<OrderSearchResponse>>> availableWarehouse(
+            @PathVariable Long orderId,
+            @ModelAttribute OrderSearchRequest request,
+            @PageableDefault(size = 10) Pageable pageable
+    ) {
+        PageResponse<OrderSearchResponse> response = orderQueryService.searchOrders(request, pageable);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(response));
+    }
+
     // 주문 목록 조회
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<OrderSearchResponse>>> searchOrders(
