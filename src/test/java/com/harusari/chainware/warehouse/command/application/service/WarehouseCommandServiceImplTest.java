@@ -1,5 +1,8 @@
 package com.harusari.chainware.warehouse.command.application.service;
 
+import com.harusari.chainware.common.domain.vo.Address;
+import com.harusari.chainware.common.dto.AddressRequest;
+import com.harusari.chainware.common.mapstruct.AddressMapStruct;
 import com.harusari.chainware.warehouse.command.application.dto.WarehouseInventoryCommandResponse;
 import com.harusari.chainware.warehouse.command.application.dto.request.WarehouseInventoryCreateRequest;
 import com.harusari.chainware.warehouse.command.application.dto.request.WarehouseInventoryUpdateRequest;
@@ -14,6 +17,7 @@ import com.harusari.chainware.warehouse.exception.WarehouseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 import org.mockito.*;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -36,9 +40,27 @@ class WarehouseCommandServiceImplTest {
     @Mock
     private WarehouseInventoryRepository warehouseInventoryRepository;
 
+    @Spy
+    private AddressMapStruct addressMapStruct = Mappers.getMapper(AddressMapStruct.class);;
+
+    private Address address;
+    private AddressRequest addressRequest;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        address = Address.builder()
+                .zipcode("12345")
+                .addressRoad("Old Address")
+                .addressDetail("Old Address Detail")
+                .build();
+
+        addressRequest = AddressRequest.builder()
+                .zipcode("67890")
+                .addressRoad("New Address")
+                .addressDetail("New Address Detail")
+                .build();
     }
 
     @Test
@@ -47,14 +69,14 @@ class WarehouseCommandServiceImplTest {
         // given
         Warehouse warehouse = Warehouse.builder()
                 .warehouseName("Old")
-                .warehouseAddress("Old Address")
+                .warehouseAddress(address)
                 .warehouseStatus(true)
                 .build();
         ReflectionTestUtils.setField(warehouse, "warehouseId", 1L);
 
         WarehouseUpdateRequest request = WarehouseUpdateRequest.builder()
                 .warehouseName("New")
-                .warehouseAddress("New Address")
+                .warehouseAddress(addressRequest)
                 .warehouseStatus(false)
                 .build();
 
@@ -78,7 +100,7 @@ class WarehouseCommandServiceImplTest {
         assertThatThrownBy(() -> warehouseCommandService.updateWarehouse(1L,
                 WarehouseUpdateRequest.builder()
                         .warehouseName("창고 이름")
-                        .warehouseAddress("창고 주소")
+                        .warehouseAddress(addressRequest)
                         .warehouseStatus(true).build()))
                 .isInstanceOf(WarehouseException.class)
                 .hasFieldOrPropertyWithValue("errorCode", WarehouseErrorCode.WAREHOUSE_NOT_FOUND);
@@ -236,6 +258,5 @@ class WarehouseCommandServiceImplTest {
                 .isInstanceOf(WarehouseException.class)
                 .hasFieldOrPropertyWithValue("errorCode", WarehouseErrorCode.INVENTORY_NOT_FOUND);
     }
-
 
 }

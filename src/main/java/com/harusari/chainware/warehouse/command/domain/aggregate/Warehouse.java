@@ -1,5 +1,6 @@
 package com.harusari.chainware.warehouse.command.domain.aggregate;
 
+import com.harusari.chainware.common.domain.vo.Address;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -24,8 +25,13 @@ public class Warehouse {
     @Column(name = "warehouse_name")
     private String warehouseName;
 
-    @Column(name = "warehouse_address")
-    private String warehouseAddress;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "zipcode", column = @Column(name = "warehouse_zipcode")),
+            @AttributeOverride(name = "addressRoad", column = @Column(name = "warehouse_address_road")),
+            @AttributeOverride(name = "addressDetail", column = @Column(name = "warehouse_address_detail"))
+    })
+    private Address warehouseAddress;
 
     @Column(name = "warehouse_status")
     private boolean warehouseStatus = true;
@@ -41,7 +47,7 @@ public class Warehouse {
 
     @Builder
     public Warehouse(
-            Long memberId, String warehouseName, String warehouseAddress,
+            Long memberId, String warehouseName, Address warehouseAddress,
             boolean warehouseStatus, LocalDateTime modifiedAt, boolean isDeleted
     ) {
         this.memberId = memberId;
@@ -53,9 +59,9 @@ public class Warehouse {
         this.isDeleted = isDeleted;
     }
 
-    public void updateInfo(String name, String address, boolean status, LocalDateTime modifiedAt) {
+    public void updateInfo(String name, Address warehouseAddress, boolean status, LocalDateTime modifiedAt) {
         this.warehouseName = name;
-        this.warehouseAddress = address;
+        this.warehouseAddress = warehouseAddress;
         this.warehouseStatus = status;
         this.modifiedAt = modifiedAt;
     }
@@ -64,6 +70,5 @@ public class Warehouse {
         this.isDeleted = true;
         this.modifiedAt = LocalDateTime.now();
     }
-
 
 }

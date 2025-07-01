@@ -1,5 +1,6 @@
 package com.harusari.chainware.warehouse.command.application.dto.response;
 
+import com.harusari.chainware.common.domain.vo.Address;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -8,6 +9,6 @@ import lombok.Getter;
 public class WarehouseCommandResponse {
     private Long warehouseId;
     private String warehouseName;
-    private String warehouseAddress;
+    private Address warehouseAddress;
     private boolean warehouseStatus;
 }
