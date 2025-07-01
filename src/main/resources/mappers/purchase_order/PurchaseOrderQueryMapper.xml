@@ -29,6 +29,9 @@
         <if test="condition.endDate != null">
             AND po.created_at &lt;= #{condition.endDate}
         </if>
+        <if test="condition.vendorMemberId != null">
+            AND po.vendor_member_id = #{condition.vendorMemberId}
+        </if>
         ORDER BY po.created_at DESC
         LIMIT #{condition.size}
         OFFSET #{condition.offset}

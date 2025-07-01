@@ -3,6 +3,7 @@ package com.harusari.chainware.purchase.query.controller;
 
 
 import com.harusari.chainware.auth.model.CustomUserDetails;
+import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
 import com.harusari.chainware.purchase.query.dto.PurchaseOrderSearchCondition;
 import com.harusari.chainware.purchase.query.dto.PurchaseOrderDetailResponse;
 import com.harusari.chainware.purchase.query.dto.PurchaseOrderSummaryResponse;
@@ -37,6 +38,12 @@ public class PurchaseOrderQueryController {
             @ModelAttribute PurchaseOrderSearchCondition condition
     ) {
         Long memberId = userDetails.getMemberId();
+        MemberAuthorityType role = userDetails.getMemberAuthorityType();
+
+        if (role == MemberAuthorityType.VENDOR_MANAGER) {
+            condition.setVendorMemberId(memberId);
+        }
+
         List<PurchaseOrderSummaryResponse> result = purchaseOrderQueryService.getPurchaseOrders(memberId, condition);
         return ResponseEntity
                 .status(HttpStatus.OK)
