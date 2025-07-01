@@ -1,9 +1,7 @@
 package com.harusari.chainware.vendor.command.application.service;
 
 import com.harusari.chainware.common.infrastructure.storage.StorageUploader;
-import com.harusari.chainware.franchise.command.domain.aggregate.Franchise;
 import com.harusari.chainware.member.command.application.dto.request.vendor.MemberWithVendorRequest;
-import com.harusari.chainware.vendor.command.application.dto.VendorCreateRequestDto;
 import com.harusari.chainware.vendor.command.application.dto.VendorStatusChangeRequestDto;
 import com.harusari.chainware.vendor.command.application.dto.VendorUpdateRequestDto;
 import com.harusari.chainware.vendor.command.domain.aggregate.Vendor;
@@ -69,6 +67,7 @@ public class VendorCommandServiceImpl implements VendorCommandService {
                 filePath, agreementFile.getOriginalFilename(),
                 agreementFile.getSize(), LocalDateTime.now().withNano(0)
         );
+        vendorRepository.save(vendor);
     }
 
 }

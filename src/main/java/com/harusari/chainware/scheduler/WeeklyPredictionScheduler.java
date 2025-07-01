@@ -11,8 +11,8 @@ public class WeeklyPredictionScheduler {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    // 매주 토요일 오전 7시에 실행
-    @Scheduled(cron = "0 0 7 ? * SAT", zone = "Asia/Seoul")
+    // 매주 금요일 오전 7시에 실행
+    @Scheduled(cron = "0 0 7 ? * FRI", zone = "Asia/Seoul")
     public void requestNextWeekPrediction() {
         try {
             log.info("다음 주 매출 예측 자동 요청 시작");
