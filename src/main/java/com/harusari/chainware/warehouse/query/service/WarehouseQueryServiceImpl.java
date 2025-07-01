@@ -2,6 +2,7 @@ package com.harusari.chainware.warehouse.query.service;
 
 import com.harusari.chainware.common.dto.PageResponse;
 import com.harusari.chainware.warehouse.query.dto.request.WarehouseSearchRequest;
+import com.harusari.chainware.warehouse.query.dto.response.WarehouseDetailResponse;
 import com.harusari.chainware.warehouse.query.dto.response.WarehouseSearchResponse;
 import com.harusari.chainware.warehouse.query.repository.WarehouseQueryRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,12 @@ public class WarehouseQueryServiceImpl implements WarehouseQueryService{
     @Override
     public PageResponse<WarehouseSearchResponse> searchWarehouses(WarehouseSearchRequest request, Pageable pageable) {
         return PageResponse.from(warehouseQueryRepository.searchWarehouses(request, pageable));
+    }
+
+    // 창고 마스터 상세 조회
+    @Override
+    public WarehouseDetailResponse findWarehouseDetailById(Long warehouseId) {
+        return warehouseQueryRepository.findWarehouseDetailById(warehouseId);
     }
 
 }

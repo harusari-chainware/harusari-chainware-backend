@@ -2,9 +2,11 @@ package com.harusari.chainware.warehouse.query.service;
 
 import com.harusari.chainware.common.dto.PageResponse;
 import com.harusari.chainware.warehouse.query.dto.request.WarehouseSearchRequest;
+import com.harusari.chainware.warehouse.query.dto.response.WarehouseDetailResponse;
 import com.harusari.chainware.warehouse.query.dto.response.WarehouseSearchResponse;
 import org.springframework.data.domain.Pageable;
 
 public interface WarehouseQueryService {
     PageResponse<WarehouseSearchResponse> searchWarehouses(WarehouseSearchRequest request, Pageable pageable);
+    WarehouseDetailResponse findWarehouseDetailById(Long warehouseId);
 }

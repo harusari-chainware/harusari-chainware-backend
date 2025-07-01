@@ -1,8 +1,9 @@
 package com.harusari.chainware.warehouse.query.repository;
 
-import com.harusari.chainware.order.command.domain.aggregate.Order;
+import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryMethod;
+import com.harusari.chainware.member.command.domain.aggregate.QMember;
 import com.harusari.chainware.warehouse.query.dto.request.WarehouseSearchRequest;
-import com.harusari.chainware.warehouse.query.dto.response.WarehouseSearchResponse;
+import com.harusari.chainware.warehouse.query.dto.response.*;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -19,8 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouse.warehouse;
+import static com.harusari.chainware.delivery.command.domain.aggregate.QDelivery.delivery;
+import static com.harusari.chainware.franchise.command.domain.aggregate.QFranchise.franchise;
 import static com.harusari.chainware.member.command.domain.aggregate.QMember.member;
+import static com.harusari.chainware.purchase.command.domain.aggregate.QPurchaseOrder.purchaseOrder;
+import static com.harusari.chainware.requisition.command.domain.aggregate.QRequisition.requisition;
+import static com.harusari.chainware.vendor.command.domain.aggregate.QVendor.vendor;
+import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouse.warehouse;
 
 @Repository
 @RequiredArgsConstructor
@@ -66,6 +72,77 @@ public class WarehouseQueryRepositoryImpl implements WarehouseQueryRepositoryCus
                 .fetchOne();
 
         return new PageImpl<>(contents, pageable, Optional.ofNullable(count).orElse(0L));
+    }
+
+    @Override
+    public WarehouseDetailResponse findWarehouseDetailById(Long warehouseId) {
+        // 1. 창고 기본 정보
+        WarehouseBasicInfo warehouseInfo = queryFactory
+                .select(Projections.constructor(WarehouseBasicInfo.class,
+                        warehouse.warehouseName,
+                        warehouse.warehouseAddress,
+                        warehouse.warehouseStatus,
+                        member.name,
+                        member.phoneNumber,
+                        warehouse.createdAt,
+                        warehouse.modifiedAt
+                ))
+                .from(warehouse)
+                .join(member).on(warehouse.memberId.eq(member.memberId))
+                .where(warehouse.warehouseId.eq(warehouseId))
+                .fetchOne();
+
+        // 2. 입고 이력 (최신 10건)
+        QMember creator = new QMember("creator");
+        QMember vendorContact = new QMember("vendorContact");
+
+        List<InboundHistoryInfo> inboundHistory = queryFactory
+                .select(Projections.constructor(InboundHistoryInfo.class,
+                        vendor.vendorName,
+                        creator.name,
+                        vendorContact.phoneNumber,
+                        purchaseOrder.createdAt,
+                        purchaseOrder.purchaseOrderStatus,
+                        requisition.requisitionId,
+                        requisition.requisitionCode,
+                        requisition.productCount,
+                        requisition.totalQuantity,
+                        requisition.totalPrice
+                ))
+                .from(purchaseOrder)
+                .join(vendor).on(purchaseOrder.vendorId.eq(vendor.vendorId))
+                .join(creator).on(purchaseOrder.createdMemberId.eq(creator.memberId))
+                .join(vendorContact).on(purchaseOrder.vendorMemberId.eq(vendorContact.memberId))
+                .join(requisition).on(purchaseOrder.requisitionId.eq(requisition.requisitionId))
+                .where(purchaseOrder.warehouseId.eq(warehouseId))
+                .orderBy(purchaseOrder.createdAt.desc())
+                .limit(10)
+                .fetch();
+
+        // 3. 배송 이력 (주문에 대한 배송만, 최신 10건)
+        List<OutboundHistoryInfo> outboundHistory = queryFactory
+                .select(Projections.constructor(OutboundHistoryInfo.class,
+                        delivery.trackingNumber,
+                        delivery.carrier,
+                        delivery.createdAt,
+                        delivery.startedAt,
+                        delivery.deliveredAt,
+                        delivery.deliveryStatus,
+                        franchise.franchiseName
+                ))
+                .from(delivery)
+                .join(franchise).on(delivery.orderId.eq(franchise.franchiseId))
+                .where(delivery.warehouseId.eq(warehouseId),
+                        delivery.deliveryMethod.eq(DeliveryMethod.HEADQUARTERS))
+                .orderBy(delivery.startedAt.desc())
+                .limit(10)
+                .fetch();
+
+        return WarehouseDetailResponse.builder()
+                .warehouseInfo(warehouseInfo)
+                .inboundHistory(inboundHistory)
+                .outboundHistory(outboundHistory)
+                .build();
     }
 
     private BooleanExpression nameContains(String name) {
