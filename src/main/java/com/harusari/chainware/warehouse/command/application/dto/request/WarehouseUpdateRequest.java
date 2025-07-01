@@ -1,5 +1,6 @@
 package com.harusari.chainware.warehouse.command.application.dto.request;
 
+import com.harusari.chainware.common.dto.AddressRequest;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -7,6 +8,6 @@ import lombok.Getter;
 @Builder
 public class WarehouseUpdateRequest {
     private String warehouseName;
-    private String warehouseAddress;
+    private AddressRequest warehouseAddress;
     private boolean warehouseStatus;
 }
