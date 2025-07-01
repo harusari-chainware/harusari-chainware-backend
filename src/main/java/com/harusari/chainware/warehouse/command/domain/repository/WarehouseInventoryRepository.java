@@ -13,6 +13,7 @@ public interface WarehouseInventoryRepository extends JpaRepository<WarehouseInv
 
     Optional<WarehouseInventory> findByProductId(Long productId);
 
+
     // 비관적 락을 이용한 창고 재고 수량 검증
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT w FROM WarehouseInventory w WHERE w.productId = :productId")
