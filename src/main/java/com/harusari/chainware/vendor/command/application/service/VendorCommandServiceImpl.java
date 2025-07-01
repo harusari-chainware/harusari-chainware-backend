@@ -27,25 +27,6 @@ public class VendorCommandServiceImpl implements VendorCommandService {
     private final VendorRepository vendorRepository;
 
     @Override
-    public Long createVendor(VendorCreateRequestDto dto) {
-//        Vendor vendor = Vendor.builder()
-//                .memberId(dto.memberId())
-//                .vendorName(dto.vendorName())
-//                .vendorType(dto.vendorType())
-//                .vendorAddress(dto.vendorAddress())
-//                .vendorTaxId(dto.vendorTaxId())
-//                .vendorMemo(dto.vendorMemo())
-//                .vendorStatus(dto.vendorStatus())
-//                .agreement(dto.agreement())
-//                .vendorStartDate(dto.vendorStartDate())
-//                .vendorEndDate(dto.vendorEndDate())
-//                .build();
-
-//        return vendorRepository.save(vendor).getVendorId();
-        return null;
-    }
-
-    @Override
     public void updateVendor(Long vendorId, VendorUpdateRequestDto dto) {
         Vendor vendor = vendorRepository.findById(vendorId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 거래처입니다. ID: " + vendorId));

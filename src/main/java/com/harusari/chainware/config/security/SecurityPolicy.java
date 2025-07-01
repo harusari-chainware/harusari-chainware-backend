@@ -130,6 +130,7 @@ public enum SecurityPolicy {
 
     /* Statistics */
     STATISTICS_PREDICTION_COMPARISON("/api/v1/statistics/prediction-comparison", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
+    PREDICTION_ACCURACY("/api/v1/accuracy/summary", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
 
     /* Swagger */
     SWAGGER_UI("/swagger-ui/**", GET, PERMIT_ALL, List.of()),
