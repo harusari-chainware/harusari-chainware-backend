@@ -3,6 +3,7 @@ package com.harusari.chainware.purchase.command.application.service;
 
 import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
 import com.harusari.chainware.purchase.command.application.dto.request.CancelPurchaseOrderRequest;
+import com.harusari.chainware.purchase.command.application.dto.request.PurchaseInboundRequest;
 import com.harusari.chainware.purchase.command.application.dto.request.RejectPurchaseOrderRequest;
 import com.harusari.chainware.purchase.command.application.dto.request.UpdatePurchaseOrderRequest;
 
@@ -20,5 +21,5 @@ public interface PurchaseOrderCommandService {
 
     void shippedPurchaseOrder(Long purchaseOrderId, Long memberId);
 
-    void inboundPurchaseOrder(Long purchaseOrderId, Long memberId);
+    void inboundPurchaseOrder(Long purchaseOrderId, Long memberId, PurchaseInboundRequest request);
 }

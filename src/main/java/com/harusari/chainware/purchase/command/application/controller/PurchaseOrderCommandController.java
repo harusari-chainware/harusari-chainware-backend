@@ -4,6 +4,7 @@ package com.harusari.chainware.purchase.command.application.controller;
 import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.purchase.command.application.dto.request.CancelPurchaseOrderRequest;
+import com.harusari.chainware.purchase.command.application.dto.request.PurchaseInboundRequest;
 import com.harusari.chainware.purchase.command.application.dto.request.RejectPurchaseOrderRequest;
 import com.harusari.chainware.purchase.command.application.dto.request.UpdatePurchaseOrderRequest;
 import com.harusari.chainware.purchase.command.application.service.PurchaseOrderCommandService;
@@ -106,10 +107,10 @@ public class PurchaseOrderCommandController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "발주 입고 완료")    })
     public ResponseEntity<ApiResponse<Void>> inboundPurchaseOrder(
             @PathVariable Long purchaseOrderId,
-            @AuthenticationPrincipal CustomUserDetails userDetails
-
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @ModelAttribute PurchaseInboundRequest request
     ) {
-        purchaseOrderCommandService.inboundPurchaseOrder(purchaseOrderId, userDetails.getMemberId());
+        purchaseOrderCommandService.inboundPurchaseOrder(purchaseOrderId, userDetails.getMemberId(), request);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
