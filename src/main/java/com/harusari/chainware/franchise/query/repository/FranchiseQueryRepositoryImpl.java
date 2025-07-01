@@ -77,8 +77,8 @@ public class FranchiseQueryRepositoryImpl implements FranchiseQueryRepositoryCus
                 .select(Projections.constructor(FranchiseSearchDetailResponse.class,
                         member.memberId, member.name, member.phoneNumber, franchise.franchiseId,
                         franchise.franchiseName, franchise.franchiseContact, franchise.franchiseTaxId,
-                        franchise.franchiseAddress, franchise.agreementFilePath, franchise.agreementOriginalFileName,
-                        franchise.agreementFileSize, franchise.contractStartDate, franchise.contractEndDate, franchise.franchiseStatus
+                        franchise.franchiseAddress, franchise.agreementOriginalFileName, franchise.agreementFileSize,
+                        franchise.contractStartDate, franchise.contractEndDate, franchise.franchiseStatus
                 ))
                 .from(franchise)
                 .leftJoin(member).on(franchise.memberId.eq(member.memberId))
