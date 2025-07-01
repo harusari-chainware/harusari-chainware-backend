@@ -16,14 +16,6 @@ public class VendorCommandController {
 
     private final VendorCommandService vendorCommandService;
 
-    /*
-    @PostMapping
-    public ResponseEntity<ApiResponse<Long>> createVendor(@RequestBody @Valid VendorCreateRequestDto requestDto) {
-        Long vendorId = vendorCommandService.createVendor(requestDto);
-        return ResponseEntity.ok(ApiResponse.success(vendorId));
-    }
-    */
-
     // 거래처 기본 정보 수정
     @PutMapping("/{vendorId}")
     public ResponseEntity<ApiResponse<Void>> modifyVendor(

@@ -11,8 +11,8 @@ public class ExternalFactorsScheduler {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    // 매주 토요일 오전 6시에 실행
-    @Scheduled(cron = "0 0 6 ? * SAT", zone = "Asia/Seoul")
+    // 매주 금요일 오전 6시에 실행
+    @Scheduled(cron = "0 0 6 ? * FRI", zone = "Asia/Seoul")
     public void callUpdateExternalFactors() {
         String url = "http://localhost:8000/admin/update-external-factors"; // FastAPI 서버 주소
         try {
