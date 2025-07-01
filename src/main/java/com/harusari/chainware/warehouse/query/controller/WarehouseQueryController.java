@@ -5,6 +5,7 @@ import com.harusari.chainware.common.dto.PageResponse;
 import com.harusari.chainware.warehouse.query.dto.request.WarehouseInventorySearchRequest;
 import com.harusari.chainware.warehouse.query.dto.request.WarehouseSearchRequest;
 import com.harusari.chainware.warehouse.query.dto.response.WarehouseDetailResponse;
+import com.harusari.chainware.warehouse.query.dto.response.WarehouseInventoryDetailResponse;
 import com.harusari.chainware.warehouse.query.dto.response.WarehouseInventoryInfo;
 import com.harusari.chainware.warehouse.query.dto.response.WarehouseSearchResponse;
 import com.harusari.chainware.warehouse.query.service.WarehouseQueryService;
@@ -50,6 +51,15 @@ public class WarehouseQueryController {
             @PageableDefault(size=10) Pageable pageable
     ) {
         PageResponse<WarehouseInventoryInfo> response = warehouseQueryService.getWarehouseInventories(request, pageable);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    // 보유 재고 상세 조회
+    @GetMapping("/inventory/{inventoryId}")
+    public ResponseEntity<ApiResponse<WarehouseInventoryDetailResponse>> getWarehouseInventoryDetail(
+            @PathVariable Long inventoryId
+    ) {
+        WarehouseInventoryDetailResponse response = warehouseQueryService.getWarehouseInventoryDetail(inventoryId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

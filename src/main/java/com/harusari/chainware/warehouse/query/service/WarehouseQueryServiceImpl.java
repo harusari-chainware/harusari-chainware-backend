@@ -4,6 +4,7 @@ import com.harusari.chainware.common.dto.PageResponse;
 import com.harusari.chainware.warehouse.query.dto.request.WarehouseInventorySearchRequest;
 import com.harusari.chainware.warehouse.query.dto.request.WarehouseSearchRequest;
 import com.harusari.chainware.warehouse.query.dto.response.WarehouseDetailResponse;
+import com.harusari.chainware.warehouse.query.dto.response.WarehouseInventoryDetailResponse;
 import com.harusari.chainware.warehouse.query.dto.response.WarehouseInventoryInfo;
 import com.harusari.chainware.warehouse.query.dto.response.WarehouseSearchResponse;
 import com.harusari.chainware.warehouse.query.repository.WarehouseInventoryQueryRepository;
@@ -37,6 +38,11 @@ public class WarehouseQueryServiceImpl implements WarehouseQueryService{
     @Override
     public PageResponse<WarehouseInventoryInfo> getWarehouseInventories(WarehouseInventorySearchRequest request, Pageable pageable) {
         return PageResponse.from(warehouseInventoryQueryRepository.getWarehouseInventories(request, pageable));
+    }
+
+    @Override
+    public WarehouseInventoryDetailResponse getWarehouseInventoryDetail(Long warehouseInventoryId) {
+        return warehouseInventoryQueryRepository.findWarehouseInventoryDetail(warehouseInventoryId);
     }
 
 }

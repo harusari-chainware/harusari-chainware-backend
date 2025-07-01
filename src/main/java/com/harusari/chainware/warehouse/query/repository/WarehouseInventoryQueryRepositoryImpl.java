@@ -2,9 +2,12 @@ package com.harusari.chainware.warehouse.query.repository;
 
 import com.harusari.chainware.common.dto.PageResponse;
 import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInventory;
+import com.harusari.chainware.warehouse.exception.WarehouseException;
+import com.harusari.chainware.warehouse.exception.WarehouseErrorCode;
 import com.harusari.chainware.warehouse.query.dto.request.WarehouseInventorySearchRequest;
-import com.harusari.chainware.warehouse.query.dto.response.WarehouseInventoryInfo;
+import com.harusari.chainware.warehouse.query.dto.response.*;
 import com.querydsl.core.QueryResults;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -21,11 +24,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.harusari.chainware.delivery.command.domain.aggregate.QDelivery.delivery;
+import static com.harusari.chainware.franchise.command.domain.aggregate.QFranchise.franchise;
+import static com.harusari.chainware.purchase.command.domain.aggregate.QPurchaseOrder.purchaseOrder;
+import static com.harusari.chainware.vendor.command.domain.aggregate.QVendor.vendor;
 import static com.harusari.chainware.category.command.domain.aggregate.QTopCategory.topCategory;
 import static com.harusari.chainware.category.command.domain.aggregate.QCategory.category;
 import static com.harusari.chainware.product.command.domain.aggregate.QProduct.product;
 import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouse.warehouse;
 import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouseInventory.warehouseInventory;
+import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouseInbound.warehouseInbound;
+import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouseOutbound.warehouseOutbound;
+import static com.harusari.chainware.order.command.domain.aggregate.QOrder.order;
+import static com.harusari.chainware.order.command.domain.aggregate.QOrderDetail.orderDetail;
 
 @Repository
 @RequiredArgsConstructor
@@ -91,6 +102,119 @@ public class WarehouseInventoryQueryRepositoryImpl implements WarehouseInventory
                 .fetchOne();
 
         return new PageImpl<>(contents, pageable, Optional.ofNullable(total).orElse(0L));
+    }
+
+
+    @Override
+    public WarehouseInventoryDetailResponse findWarehouseInventoryDetail(Long warehouseInventoryId) {
+
+        // 1. 창고 보유 재고 기본 정보 (창고, 상품, 재고)
+        Tuple inventoryTuple = queryFactory
+                .select(
+                        warehouse.warehouseId,
+                        warehouse.warehouseName,
+                        warehouse.warehouseAddress,
+                        warehouse.warehouseStatus,
+                        product.productId,
+                        product.productCode,
+                        product.productName,
+                        product.basePrice,
+                        product.storeType,
+                        category.categoryId,
+                        category.categoryName,
+                        topCategory.topCategoryId,
+                        topCategory.topCategoryName,
+                        warehouseInventory.quantity,
+                        warehouseInventory.reservedQuantity
+                )
+                .from(warehouseInventory)
+                .join(product).on(warehouseInventory.productId.eq(product.productId))
+                .join(category).on(product.categoryId.eq(category.categoryId))
+                .join(topCategory).on(topCategory.topCategoryId.eq(category.topCategoryId))
+                .join(warehouse).on(warehouseInventory.warehouseId.eq(warehouse.warehouseId))
+                .where(warehouseInventory.warehouseInventoryId.eq(warehouseInventoryId))
+                .fetchOne();
+
+        if (inventoryTuple == null) {
+            throw new WarehouseException(WarehouseErrorCode.INVENTORY_NOT_FOUND);
+        }
+
+        WarehouseSimpleInfo warehouseInfo = new WarehouseSimpleInfo(
+                inventoryTuple.get(warehouse.warehouseId),
+                inventoryTuple.get(warehouse.warehouseName),
+                inventoryTuple.get(warehouse.warehouseAddress),
+                inventoryTuple.get(warehouse.warehouseStatus)
+        );
+
+        ProductSimpleInfo productInfo = new ProductSimpleInfo(
+                inventoryTuple.get(product.productId),
+                inventoryTuple.get(product.productCode),
+                inventoryTuple.get(product.productName),
+                inventoryTuple.get(topCategory.topCategoryName),
+                inventoryTuple.get(category.categoryName),
+                inventoryTuple.get(product.basePrice),
+                inventoryTuple.get(product.storeType)
+        );
+
+        InventorySimpleInfo inventoryInfo = new InventorySimpleInfo(
+                inventoryTuple.get(warehouseInventory.quantity),
+                inventoryTuple.get(warehouseInventory.reservedQuantity)
+        );
+
+        Long productId = inventoryTuple.get(product.productId);
+        Long warehouseId = inventoryTuple.get(warehouse.warehouseId);
+
+        // 2. 입고 이력 (최근 10건)
+        List<InboundHistory> inboundHistories = queryFactory
+                .select(Projections.constructor(InboundHistory.class,
+                        vendor.vendorName,
+                        purchaseOrder.purchaseOrderCode,
+                        purchaseOrder.purchaseOrderId,
+                        warehouseInbound.unitQuantity,
+//                        warehouseInbound.expiraionDate,
+                        warehouseInbound.inboundedAt
+                ))
+                .from(warehouseInbound)
+                .join(purchaseOrder).on(warehouseInbound.purchaseOrderId.eq(purchaseOrder.purchaseOrderId))
+                .join(vendor).on(purchaseOrder.vendorId.eq(vendor.vendorId))
+                .where(
+                        warehouseInbound.warehouseId.eq(warehouseId),
+                        warehouseInbound.productId.eq(productId)
+                )
+                .orderBy(warehouseInbound.inboundedAt.desc())
+                .limit(10)
+                .fetch();
+
+        // 3. 배송 이력 (최근 10건)
+        List<OutboundHistory> outboundHistories = queryFactory
+                .select(Projections.constructor(OutboundHistory.class,
+                        delivery.trackingNumber,
+                        delivery.carrier,
+                        delivery.createdAt,
+                        delivery.startedAt,
+                        delivery.deliveredAt,
+                        delivery.deliveryStatus,
+                        franchise.franchiseName
+                ))
+                .from(delivery)
+                .join(order).on(delivery.orderId.eq(order.orderId))
+                .join(orderDetail).on(order.orderId.eq(orderDetail.orderId))
+                .join(franchise).on(order.franchiseId.eq(franchise.franchiseId))
+                .where(
+                        delivery.warehouseId.eq(warehouseId),
+                        orderDetail.productId.eq(productId)
+                )
+                .orderBy(delivery.createdAt.desc())
+                .limit(10)
+                .fetch();
+
+        return new WarehouseInventoryDetailResponse(
+                warehouseInfo,
+                productInfo,
+                inventoryInfo,
+                inboundHistories,
+                outboundHistories
+        );
     }
 
     private BooleanExpression nameContains(String name) {
