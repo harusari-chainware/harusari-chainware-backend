@@ -3,6 +3,7 @@ package com.harusari.chainware.takeback.query.controller;
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.common.dto.PageResponse;
 import com.harusari.chainware.takeback.query.dto.request.TakeBackSearchRequest;
+import com.harusari.chainware.takeback.query.dto.response.TakeBackDetailResponse;
 import com.harusari.chainware.takeback.query.dto.response.TakeBackSearchResponse;
 import com.harusari.chainware.takeback.query.service.TakeBackQueryService;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,14 @@ public class TakeBackQueryController {
             @PageableDefault(size = 10, sort = "createdAt") Pageable pageable
     ) {
         PageResponse<TakeBackSearchResponse> response = takeBackQueryService.getTakeBackList(request, pageable);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/{takeBackId}")
+    public ResponseEntity<ApiResponse<TakeBackDetailResponse>> getTakeBackDetail(
+            @PathVariable Long takeBackId
+    ) {
+        TakeBackDetailResponse response = takeBackQueryService.getTakeBackDetail(takeBackId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

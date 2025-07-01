@@ -1,11 +1,13 @@
 package com.harusari.chainware.takeback.query.repository;
 
 import com.harusari.chainware.delivery.command.domain.aggregate.QDelivery;
+import com.harusari.chainware.delivery.query.dto.response.FranchiseInfo;
+import com.harusari.chainware.delivery.query.dto.response.WarehouseInfo;
 import com.harusari.chainware.takeback.command.domain.aggregate.TakeBackStatus;
 import com.harusari.chainware.takeback.query.dto.request.TakeBackSearchRequest;
-import com.harusari.chainware.takeback.query.dto.response.QTakeBackSearchResponse;
-import com.harusari.chainware.takeback.query.dto.response.TakeBackSearchResponse;
+import com.harusari.chainware.takeback.query.dto.response.*;
 import com.querydsl.core.QueryResults;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -26,7 +28,7 @@ import static com.harusari.chainware.member.command.domain.aggregate.QMember.mem
 import static com.harusari.chainware.order.command.domain.aggregate.QOrder.order;
 import static com.harusari.chainware.takeback.command.domain.aggregate.QTakeBack.takeBack;
 import static com.harusari.chainware.takeback.command.domain.aggregate.QTakeBackDetail.takeBackDetail;
-import static com.harusari.chainware.vendor.command.domain.aggregate.QVendor.vendor;
+import static com.harusari.chainware.product.command.domain.aggregate.QProduct.product;
 import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouse.warehouse;
 
 @Repository
@@ -88,6 +90,103 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
                 .fetchOne();
 
         return new PageImpl<>(contents, pageable, Optional.ofNullable(total).orElse(0L));
+    }
+
+    @Override
+    public TakeBackDetailResponse findTakeBackDetailById(Long takeBackId) {
+
+        // 1. 기본 정보 + 조인 정보 조회
+        Tuple basic = queryFactory
+                .select(
+                        takeBack.takeBackCode,
+                        takeBack.takeBackStatus,
+                        takeBack.createdAt,
+                        takeBack.modifiedAt,
+                        takeBack.rejectReason,
+
+                        franchise.franchiseName,
+                        franchise.franchiseAddress,
+                        franchise.franchiseContact,
+                        franchise.franchiseStatus,
+                        franchise.franchiseTaxId,
+                        member.name,
+                        member.phoneNumber,
+
+                        warehouse.warehouseName,
+                        warehouse.warehouseAddress,
+                        member.name,
+
+                        order.orderCode,
+                        order.productCount,
+                        order.totalQuantity,
+                        order.totalPrice
+                )
+                .from(takeBack)
+                .join(order).on(order.orderId.eq(takeBack.orderId))
+                .join(franchise).on(franchise.franchiseId.eq(order.franchiseId))
+                .join(member).on(franchise.memberId.eq(member.memberId))
+                .leftJoin(delivery).on(delivery.takeBackId.eq(takeBack.takeBackId))
+                .leftJoin(warehouse).on(warehouse.warehouseId.eq(delivery.warehouseId))
+                .where(takeBack.takeBackId.eq(takeBackId))
+                .fetchOne();
+
+        // 2. 반품 상세 목록 조회
+        List<TakeBackProductInfo> productInfos = queryFactory
+                .select(new QTakeBackProductInfo(
+                        product.productId,
+                        product.productCode,
+                        product.productName,
+                        product.unitQuantity,
+                        product.unitSpec,
+                        takeBackDetail.quantity,
+                        takeBackDetail.price,
+                        takeBackDetail.takeBackReason,
+                        takeBackDetail.takeBackImage
+                ))
+                .from(takeBackDetail)
+                .join(product).on(takeBackDetail.productId.eq(product.productId))
+                .where(takeBackDetail.takeBackId.eq(takeBackId))
+                .fetch();
+
+        // 3. 응답 조립
+        TakeBackBasicInfo takeBackInfo = new TakeBackBasicInfo(
+                basic.get(takeBack.takeBackCode),
+                basic.get(takeBack.takeBackStatus),
+                basic.get(takeBack.createdAt),
+                basic.get(takeBack.modifiedAt),
+                basic.get(takeBack.rejectReason)
+        );
+
+        FranchiseInfo franchiseInfo = new FranchiseInfo(
+                basic.get(franchise.franchiseName),
+                basic.get(franchise.franchiseAddress),
+                basic.get(franchise.franchiseContact),
+                basic.get(franchise.franchiseStatus),
+                basic.get(franchise.franchiseTaxId),
+                basic.get(member.name),
+                basic.get(member.phoneNumber)
+        );
+
+        WarehouseInfo warehouseInfo = new WarehouseInfo(
+                basic.get(warehouse.warehouseName),
+                basic.get(warehouse.warehouseAddress),
+                basic.get(member.name)
+        );
+
+        OrderInfo orderInfo = new OrderInfo(
+                basic.get(order.orderCode),
+                basic.get(order.productCount),
+                basic.get(order.totalQuantity),
+                basic.get(order.totalPrice)
+        );
+
+        return TakeBackDetailResponse.builder()
+                .takeBackInfo(takeBackInfo)
+                .franchiseInfo(franchiseInfo)
+                .warehouseInfo(warehouseInfo)
+                .orderInfo(orderInfo)
+                .productInfos(productInfos)
+                .build();
     }
 
     private BooleanExpression warehouseNameContains(String name) {
