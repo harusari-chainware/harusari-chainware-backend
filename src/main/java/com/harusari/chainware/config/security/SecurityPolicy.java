@@ -79,6 +79,8 @@ public enum SecurityPolicy {
 
     WAREHOUSE_LIST_GET("/api/v1/warehouse", GET, ROLE_BASED, List.of(WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 창고 마스터 목록 조회
     WAREHOUSE_DETAIL_GET("/api/v1/warehouse/{warehouseId}", GET, ROLE_BASED, List.of(WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 창고 마스터 상세 조회
+    WAREHOUSE_INVENTORY_LIST_GET("/api/v1/warehouse/inventory", GET, ROLE_BASED, List.of(WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 보유 재고 목록 조회
+    WAREHOUSE_INVENTORY_DETAIL_GET("/api/v1/warehouse/inventory/{inventoryId}", GET, ROLE_BASED, List.of(WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 보유 재고 상세 조회
 
     /* Order */
     ORDER_CREATE("/api/v1/orders", POST, ROLE_BASED, List.of(FRANCHISE_MANAGER)), // 주문 등록

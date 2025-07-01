@@ -2,8 +2,10 @@ package com.harusari.chainware.warehouse.query.controller;
 
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.common.dto.PageResponse;
+import com.harusari.chainware.warehouse.query.dto.request.WarehouseInventorySearchRequest;
 import com.harusari.chainware.warehouse.query.dto.request.WarehouseSearchRequest;
 import com.harusari.chainware.warehouse.query.dto.response.WarehouseDetailResponse;
+import com.harusari.chainware.warehouse.query.dto.response.WarehouseInventoryInfo;
 import com.harusari.chainware.warehouse.query.dto.response.WarehouseSearchResponse;
 import com.harusari.chainware.warehouse.query.service.WarehouseQueryService;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,16 @@ public class WarehouseQueryController {
             @PathVariable Long warehouseId
     ) {
         WarehouseDetailResponse response = warehouseQueryService.findWarehouseDetailById(warehouseId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    // 보유 재고 목록 조회
+    @GetMapping("/inventory")
+    public ResponseEntity<ApiResponse<PageResponse<WarehouseInventoryInfo>>> getWarehouseInventories(
+            @ModelAttribute WarehouseInventorySearchRequest request,
+            @PageableDefault(size=10) Pageable pageable
+    ) {
+        PageResponse<WarehouseInventoryInfo> response = warehouseQueryService.getWarehouseInventories(request, pageable);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
