@@ -1,5 +1,7 @@
 package com.harusari.chainware.warehouse.command.application.service;
 
+import com.harusari.chainware.common.domain.vo.Address;
+import com.harusari.chainware.common.mapstruct.AddressMapStruct;
 import com.harusari.chainware.warehouse.command.application.dto.WarehouseInventoryCommandResponse;
 import com.harusari.chainware.warehouse.command.application.dto.request.WarehouseInventoryCreateRequest;
 import com.harusari.chainware.warehouse.command.application.dto.request.WarehouseInventoryUpdateRequest;
@@ -23,6 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WarehouseCommandServiceImpl implements WarehouseCommandService{
 
+    private final AddressMapStruct addressMapStruct;
     private final WarehouseRepository warehouseRepository;
     private final WarehouseInventoryRepository warehouseInventoryRepository;
 
@@ -33,10 +36,12 @@ public class WarehouseCommandServiceImpl implements WarehouseCommandService{
         Warehouse warehouse = warehouseRepository.findById(warehouseId)
                 .orElseThrow(() -> new WarehouseException(WarehouseErrorCode.WAREHOUSE_NOT_FOUND));
 
+        Address address = addressMapStruct.toAddress(request.getWarehouseAddress());
+
         // 2. 창고 정보 수정
         warehouse.updateInfo(
                 request.getWarehouseName(),
-                request.getWarehouseAddress(),
+                address,
                 request.isWarehouseStatus(),
                 LocalDateTime.now()
         );
