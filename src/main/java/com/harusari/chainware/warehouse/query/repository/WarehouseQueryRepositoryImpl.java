@@ -1,9 +1,11 @@
 package com.harusari.chainware.warehouse.query.repository;
 
+import com.harusari.chainware.common.domain.vo.Address;
 import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryMethod;
 import com.harusari.chainware.member.command.domain.aggregate.QMember;
 import com.harusari.chainware.warehouse.query.dto.request.WarehouseSearchRequest;
 import com.harusari.chainware.warehouse.query.dto.response.*;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -37,7 +39,7 @@ public class WarehouseQueryRepositoryImpl implements WarehouseQueryRepositoryCus
     @Override
     public Page<WarehouseSearchResponse> searchWarehouses(WarehouseSearchRequest request, Pageable pageable) {
         List<WarehouseSearchResponse> contents = queryFactory
-                .select(Projections.constructor(WarehouseSearchResponse.class,
+                .select(new QWarehouseSearchResponse(
                         warehouse.warehouseId,
                         warehouse.warehouseName,
                         warehouse.warehouseAddress,
@@ -59,6 +61,7 @@ public class WarehouseQueryRepositoryImpl implements WarehouseQueryRepositoryCus
                 .orderBy(getOrderSpecifier(pageable.getSort()))
                 .fetch();
 
+
         Long count = queryFactory
                 .select(warehouse.count())
                 .from(warehouse)
@@ -78,7 +81,7 @@ public class WarehouseQueryRepositoryImpl implements WarehouseQueryRepositoryCus
     public WarehouseDetailResponse findWarehouseDetailById(Long warehouseId) {
         // 1. 창고 기본 정보
         WarehouseBasicInfo warehouseInfo = queryFactory
-                .select(Projections.constructor(WarehouseBasicInfo.class,
+                .select(new QWarehouseBasicInfo(
                         warehouse.warehouseName,
                         warehouse.warehouseAddress,
                         warehouse.warehouseStatus,
@@ -149,8 +152,13 @@ public class WarehouseQueryRepositoryImpl implements WarehouseQueryRepositoryCus
         return (name != null && !name.isBlank()) ? warehouse.warehouseName.containsIgnoreCase(name) : null;
     }
 
-    private BooleanExpression addressContains(String address) {
-        return (address != null && !address.isBlank()) ? warehouse.warehouseAddress.containsIgnoreCase(address) : null;
+    private BooleanExpression addressContains(String keyword) {
+        if (keyword != null && !keyword.isBlank()) {
+            return warehouse.warehouseAddress.zipcode.containsIgnoreCase(keyword)
+                    .or(warehouse.warehouseAddress.addressRoad.containsIgnoreCase(keyword))
+                    .or(warehouse.warehouseAddress.addressDetail.containsIgnoreCase(keyword));
+        }
+        return null;
     }
 
     private BooleanExpression statusEq(Boolean status) {

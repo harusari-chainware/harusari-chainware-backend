@@ -2,7 +2,6 @@ package com.harusari.chainware.delivery.query.repository;
 
 import com.harusari.chainware.delivery.query.dto.request.DeliverySearchRequest;
 import com.harusari.chainware.delivery.query.dto.response.*;
-import com.harusari.chainware.order.query.dto.response.OrderProductInfo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -95,8 +94,14 @@ public class DeliveryQueryRepositoryImpl implements DeliveryQueryRepositoryCusto
         }
 
         if (request.getWarehouseAddress() != null && !request.getWarehouseAddress().isBlank()) {
-            builder.and(warehouse.warehouseAddress.containsIgnoreCase(request.getWarehouseAddress()));
+            String keyword = request.getWarehouseAddress();
+            builder.and(
+                    warehouse.warehouseAddress.zipcode.containsIgnoreCase(keyword)
+                            .or(warehouse.warehouseAddress.addressRoad.containsIgnoreCase(keyword))
+                            .or(warehouse.warehouseAddress.addressDetail.containsIgnoreCase(keyword))
+            );
         }
+
 
         if (request.getWarehouseStatus() != null) {
             builder.and(warehouse.warehouseStatus.eq(request.getWarehouseStatus()));

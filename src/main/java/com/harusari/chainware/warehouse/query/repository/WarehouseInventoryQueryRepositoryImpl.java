@@ -1,13 +1,13 @@
 package com.harusari.chainware.warehouse.query.repository;
 
-import com.harusari.chainware.common.dto.PageResponse;
+import com.harusari.chainware.common.domain.vo.Address;
 import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInventory;
 import com.harusari.chainware.warehouse.exception.WarehouseException;
 import com.harusari.chainware.warehouse.exception.WarehouseErrorCode;
 import com.harusari.chainware.warehouse.query.dto.request.WarehouseInventorySearchRequest;
 import com.harusari.chainware.warehouse.query.dto.response.*;
-import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -34,7 +34,6 @@ import static com.harusari.chainware.product.command.domain.aggregate.QProduct.p
 import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouse.warehouse;
 import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouseInventory.warehouseInventory;
 import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouseInbound.warehouseInbound;
-import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouseOutbound.warehouseOutbound;
 import static com.harusari.chainware.order.command.domain.aggregate.QOrder.order;
 import static com.harusari.chainware.order.command.domain.aggregate.QOrderDetail.orderDetail;
 
@@ -48,7 +47,7 @@ public class WarehouseInventoryQueryRepositoryImpl implements WarehouseInventory
     @Override
     public Page<WarehouseInventoryInfo> getWarehouseInventories(WarehouseInventorySearchRequest request, Pageable pageable) {
         List<WarehouseInventoryInfo> contents = queryFactory
-                .select(Projections.constructor(WarehouseInventoryInfo.class,
+                .select(new QWarehouseInventoryInfo(
                         warehouseInventory.warehouseInventoryId,
                         warehouse.warehouseId,
                         warehouse.warehouseName,
@@ -105,64 +104,58 @@ public class WarehouseInventoryQueryRepositoryImpl implements WarehouseInventory
     }
 
 
+    // 보유 재고 상세 조회
     @Override
     public WarehouseInventoryDetailResponse findWarehouseInventoryDetail(Long warehouseInventoryId) {
-
         // 1. 창고 보유 재고 기본 정보 (창고, 상품, 재고)
-        Tuple inventoryTuple = queryFactory
-                .select(
+        WarehouseSimpleInfo warehouseInfo = queryFactory
+                .select(new QWarehouseSimpleInfo(
                         warehouse.warehouseId,
                         warehouse.warehouseName,
-                        warehouse.warehouseAddress,
-                        warehouse.warehouseStatus,
-                        product.productId,
-                        product.productCode,
-                        product.productName,
-                        product.basePrice,
-                        product.storeType,
-                        category.categoryId,
-                        category.categoryName,
-                        topCategory.topCategoryId,
-                        topCategory.topCategoryName,
-                        warehouseInventory.quantity,
-                        warehouseInventory.reservedQuantity
-                )
+                        Projections.constructor(Address.class,
+                                warehouse.warehouseAddress.zipcode,
+                                warehouse.warehouseAddress.addressRoad,
+                                warehouse.warehouseAddress.addressDetail
+                        ),
+                        warehouse.warehouseStatus
+                ))
                 .from(warehouseInventory)
-                .join(product).on(warehouseInventory.productId.eq(product.productId))
-                .join(category).on(product.categoryId.eq(category.categoryId))
-                .join(topCategory).on(topCategory.topCategoryId.eq(category.topCategoryId))
                 .join(warehouse).on(warehouseInventory.warehouseId.eq(warehouse.warehouseId))
                 .where(warehouseInventory.warehouseInventoryId.eq(warehouseInventoryId))
                 .fetchOne();
 
-        if (inventoryTuple == null) {
+        ProductSimpleInfo productInfo = queryFactory
+                .select(new QProductSimpleInfo(
+                        product.productId,
+                        product.productCode,
+                        product.productName,
+                        topCategory.topCategoryName,
+                        category.categoryName,
+                        product.basePrice,
+                        product.storeType
+                ))
+                .from(warehouseInventory)
+                .join(product).on(warehouseInventory.productId.eq(product.productId))
+                .join(category).on(product.categoryId.eq(category.categoryId))
+                .join(topCategory).on(category.topCategoryId.eq(topCategory.topCategoryId))
+                .where(warehouseInventory.warehouseInventoryId.eq(warehouseInventoryId))
+                .fetchOne();
+
+        InventorySimpleInfo inventoryInfo = queryFactory
+                .select(new QInventorySimpleInfo(
+                        warehouseInventory.quantity,
+                        warehouseInventory.reservedQuantity
+                ))
+                .from(warehouseInventory)
+                .where(warehouseInventory.warehouseInventoryId.eq(warehouseInventoryId))
+                .fetchOne();
+
+        if (warehouseInfo == null || productInfo == null || inventoryInfo == null) {
             throw new WarehouseException(WarehouseErrorCode.INVENTORY_NOT_FOUND);
         }
 
-        WarehouseSimpleInfo warehouseInfo = new WarehouseSimpleInfo(
-                inventoryTuple.get(warehouse.warehouseId),
-                inventoryTuple.get(warehouse.warehouseName),
-                inventoryTuple.get(warehouse.warehouseAddress),
-                inventoryTuple.get(warehouse.warehouseStatus)
-        );
-
-        ProductSimpleInfo productInfo = new ProductSimpleInfo(
-                inventoryTuple.get(product.productId),
-                inventoryTuple.get(product.productCode),
-                inventoryTuple.get(product.productName),
-                inventoryTuple.get(topCategory.topCategoryName),
-                inventoryTuple.get(category.categoryName),
-                inventoryTuple.get(product.basePrice),
-                inventoryTuple.get(product.storeType)
-        );
-
-        InventorySimpleInfo inventoryInfo = new InventorySimpleInfo(
-                inventoryTuple.get(warehouseInventory.quantity),
-                inventoryTuple.get(warehouseInventory.reservedQuantity)
-        );
-
-        Long productId = inventoryTuple.get(product.productId);
-        Long warehouseId = inventoryTuple.get(warehouse.warehouseId);
+        Long productId = productInfo.getProductId();
+        Long warehouseId = warehouseInfo.getWarehouseId();
 
         // 2. 입고 이력 (최근 10건)
         List<InboundHistory> inboundHistories = queryFactory
@@ -221,8 +214,13 @@ public class WarehouseInventoryQueryRepositoryImpl implements WarehouseInventory
         return (name != null && !name.isBlank()) ? warehouse.warehouseName.containsIgnoreCase(name) : null;
     }
 
-    private BooleanExpression addressContains(String address) {
-        return (address != null && !address.isBlank()) ? warehouse.warehouseAddress.containsIgnoreCase(address) : null;
+    private BooleanExpression addressContains(String keyword) {
+        if (keyword != null && !keyword.isBlank()) {
+            return warehouse.warehouseAddress.zipcode.containsIgnoreCase(keyword)
+                    .or(warehouse.warehouseAddress.addressRoad.containsIgnoreCase(keyword))
+                    .or(warehouse.warehouseAddress.addressDetail.containsIgnoreCase(keyword));
+        }
+        return null;
     }
 
     private BooleanExpression statusEq(Boolean status) {

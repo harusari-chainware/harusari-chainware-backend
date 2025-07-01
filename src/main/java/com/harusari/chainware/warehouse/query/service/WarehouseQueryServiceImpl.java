@@ -40,6 +40,7 @@ public class WarehouseQueryServiceImpl implements WarehouseQueryService{
         return PageResponse.from(warehouseInventoryQueryRepository.getWarehouseInventories(request, pageable));
     }
 
+    // 보유 재고 상세 조회
     @Override
     public WarehouseInventoryDetailResponse getWarehouseInventoryDetail(Long warehouseInventoryId) {
         return warehouseInventoryQueryRepository.findWarehouseInventoryDetail(warehouseInventoryId);
