@@ -108,7 +108,7 @@ public class PurchaseOrderCommandController {
     public ResponseEntity<ApiResponse<Void>> inboundPurchaseOrder(
             @PathVariable Long purchaseOrderId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @ModelAttribute PurchaseInboundRequest request
+            @RequestBody PurchaseInboundRequest request
     ) {
         purchaseOrderCommandService.inboundPurchaseOrder(purchaseOrderId, userDetails.getMemberId(), request);
         return ResponseEntity.ok(ApiResponse.success(null));

@@ -31,8 +31,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -230,9 +232,20 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
             throw new PurchaseOrderException(PurchaseOrderErrorCode.NO_PURCHASE_ORDER_DETAILS);
         }
 
+        Set<Long> validDetailIds = details.stream()
+                .map(PurchaseOrderDetail::getPurchaseOrderDetailId)
+                .collect(Collectors.toSet());
+
         // 3. 요청으로 받은 유통기한 매핑
-        Map<Long, LocalDate> expirationDateMap = request.getProducts().stream()
-                .collect(Collectors.toMap(PurchaseInboundItem::getPurchaseOrderDetailId, PurchaseInboundItem::getExpirationDate));
+        Map<Long, LocalDate> expirationDateMap = new HashMap<>();
+        for (PurchaseInboundItem item : request.getProducts()) {
+            Long detailId = item.getPurchaseOrderDetailId();
+            if (!validDetailIds.contains(detailId)) {
+                throw new PurchaseOrderException(PurchaseOrderErrorCode.INVALID_PURCHASE_ORDER_DETAIL_ID);
+            }
+            expirationDateMap.put(detailId, item.getExpirationDate());
+        }
+
 
         // 4. 입고 기록 저장 (warehouse_inbound)
         List<WarehouseInbound> inboundList = details.stream().map(detail -> {
