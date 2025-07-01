@@ -17,7 +17,7 @@ import com.harusari.chainware.takeback.command.domain.repository.TakeBackReposit
 import com.harusari.chainware.takeback.exception.TakeBackErrorCode;
 import com.harusari.chainware.takeback.exception.TakeBackException;
 import com.harusari.chainware.warehouse.command.domain.aggregate.Warehouse;
-import com.harusari.chainware.warehouse.command.infrastructure.repository.JpaWarehouseRepository;
+import com.harusari.chainware.warehouse.command.domain.repository.WarehouseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +37,7 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
 
     private final OrderDetailRepository orderDetailRepository;
     private final DeliveryRepository deliveryRepository;
-    private final JpaWarehouseRepository warehouseRepository;
+    private final WarehouseRepository warehouseRepository;
 
     // 반품 신청
     @Override

@@ -56,7 +56,6 @@ class DeliveryCommandControllerTest {
         // given
         DeliveryStartRequest request = DeliveryStartRequest.builder()
                 .carrier("CJ대한통운")
-                .trackingNumber("1234567890")
                 .build();
 
         when(deliveryCommandService.startDelivery(eq(1L), any())).thenReturn(response);
@@ -77,7 +76,6 @@ class DeliveryCommandControllerTest {
         // given
         DeliveryStartRequest request = DeliveryStartRequest.builder()
                 .carrier("CJ대한통운")
-                .trackingNumber("1234567890")
                 .build();
         when(deliveryCommandService.startDelivery(eq(1L), any()))
                 .thenThrow(new DeliveryException(DeliveryErrorCode.DELIVERY_NOT_FOUND));

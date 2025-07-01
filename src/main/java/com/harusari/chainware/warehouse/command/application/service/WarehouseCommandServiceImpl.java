@@ -1,5 +1,7 @@
 package com.harusari.chainware.warehouse.command.application.service;
 
+import com.harusari.chainware.common.domain.vo.Address;
+import com.harusari.chainware.common.mapstruct.AddressMapStruct;
 import com.harusari.chainware.warehouse.command.application.dto.WarehouseInventoryCommandResponse;
 import com.harusari.chainware.warehouse.command.application.dto.request.WarehouseInventoryCreateRequest;
 import com.harusari.chainware.warehouse.command.application.dto.request.WarehouseInventoryUpdateRequest;
@@ -7,8 +9,8 @@ import com.harusari.chainware.warehouse.command.application.dto.request.Warehous
 import com.harusari.chainware.warehouse.command.application.dto.response.WarehouseCommandResponse;
 import com.harusari.chainware.warehouse.command.domain.aggregate.Warehouse;
 import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInventory;
-import com.harusari.chainware.warehouse.command.infrastructure.repository.JpaWarehouseInventoryRepository;
-import com.harusari.chainware.warehouse.command.infrastructure.repository.JpaWarehouseRepository;
+import com.harusari.chainware.warehouse.command.domain.repository.WarehouseInventoryRepository;
+import com.harusari.chainware.warehouse.command.domain.repository.WarehouseRepository;
 import com.harusari.chainware.warehouse.exception.WarehouseErrorCode;
 import com.harusari.chainware.warehouse.exception.WarehouseException;
 import lombok.RequiredArgsConstructor;
@@ -23,20 +25,23 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WarehouseCommandServiceImpl implements WarehouseCommandService{
 
-    private final JpaWarehouseRepository jpaWarehouseRepository;
-    private final JpaWarehouseInventoryRepository jpaWarehouseInventoryRepository;
+    private final AddressMapStruct addressMapStruct;
+    private final WarehouseRepository warehouseRepository;
+    private final WarehouseInventoryRepository warehouseInventoryRepository;
 
     // 창고 마스터 수정
     @Override
     public WarehouseCommandResponse updateWarehouse(Long warehouseId, WarehouseUpdateRequest request) {
         // 1. 창고 조회
-        Warehouse warehouse = jpaWarehouseRepository.findById(warehouseId)
+        Warehouse warehouse = warehouseRepository.findById(warehouseId)
                 .orElseThrow(() -> new WarehouseException(WarehouseErrorCode.WAREHOUSE_NOT_FOUND));
+
+        Address address = addressMapStruct.toAddress(request.getWarehouseAddress());
 
         // 2. 창고 정보 수정
         warehouse.updateInfo(
                 request.getWarehouseName(),
-                request.getWarehouseAddress(),
+                address,
                 request.isWarehouseStatus(),
                 LocalDateTime.now()
         );
@@ -48,7 +53,7 @@ public class WarehouseCommandServiceImpl implements WarehouseCommandService{
     @Override
     public WarehouseCommandResponse deleteWarehouse(Long warehouseId) {
         // 1. 창고 조회
-        Warehouse warehouse = jpaWarehouseRepository.findById(warehouseId)
+        Warehouse warehouse = warehouseRepository.findById(warehouseId)
                 .orElseThrow(() -> new WarehouseException(WarehouseErrorCode.WAREHOUSE_NOT_FOUND));
 
         // 2. 창고 상태 검증
@@ -66,7 +71,7 @@ public class WarehouseCommandServiceImpl implements WarehouseCommandService{
     @Override
     public WarehouseCommandResponse registerInventory(Long warehouseId, WarehouseInventoryCreateRequest request) {
         // 1. 창고 검증
-        Warehouse warehouse = jpaWarehouseRepository.findById(warehouseId)
+        Warehouse warehouse = warehouseRepository.findById(warehouseId)
                 .orElseThrow(() -> new WarehouseException(WarehouseErrorCode.WAREHOUSE_NOT_FOUND));
 
         // 2. 요청한 보유 재고 확인
@@ -80,7 +85,7 @@ public class WarehouseCommandServiceImpl implements WarehouseCommandService{
         ).toList();
 
         // 3. 보유 재고 등록
-        jpaWarehouseInventoryRepository.saveAll(inventories);
+        warehouseInventoryRepository.saveAll(inventories);
 
         return toWarehouseResponse(warehouse);
     }
@@ -89,7 +94,7 @@ public class WarehouseCommandServiceImpl implements WarehouseCommandService{
     @Override
     public WarehouseInventoryCommandResponse updateInventory(Long inventoryId, WarehouseInventoryUpdateRequest request) {
         // 1. 창고 검증
-        WarehouseInventory inventory = jpaWarehouseInventoryRepository.findById(inventoryId)
+        WarehouseInventory inventory = warehouseInventoryRepository.findById(inventoryId)
                 .orElseThrow(() -> new WarehouseException(WarehouseErrorCode.INVENTORY_NOT_FOUND));
 
         // 2. 재고 수량 수정
@@ -102,11 +107,11 @@ public class WarehouseCommandServiceImpl implements WarehouseCommandService{
     @Override
     public WarehouseInventoryCommandResponse deleteInventory(Long inventoryId) {
         // 1. 창고 검증
-        WarehouseInventory inventory = jpaWarehouseInventoryRepository.findById(inventoryId)
+        WarehouseInventory inventory = warehouseInventoryRepository.findById(inventoryId)
                 .orElseThrow(() -> new WarehouseException(WarehouseErrorCode.INVENTORY_NOT_FOUND));
 
         // 2. 재고 삭제
-        jpaWarehouseInventoryRepository.delete(inventory);
+        warehouseInventoryRepository.delete(inventory);
 
         return toInventoryResponse(inventory);
     }

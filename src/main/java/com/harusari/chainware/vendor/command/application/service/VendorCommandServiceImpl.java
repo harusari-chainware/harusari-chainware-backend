@@ -2,7 +2,6 @@ package com.harusari.chainware.vendor.command.application.service;
 
 import com.harusari.chainware.common.infrastructure.storage.StorageUploader;
 import com.harusari.chainware.member.command.application.dto.request.vendor.MemberWithVendorRequest;
-import com.harusari.chainware.vendor.command.application.dto.VendorCreateRequestDto;
 import com.harusari.chainware.vendor.command.application.dto.VendorStatusChangeRequestDto;
 import com.harusari.chainware.vendor.command.application.dto.VendorUpdateRequestDto;
 import com.harusari.chainware.vendor.command.domain.aggregate.Vendor;
@@ -25,6 +24,15 @@ public class VendorCommandServiceImpl implements VendorCommandService {
     private final VendorMapStruct vendorMapStruct;
     private final StorageUploader s3Uploader;
     private final VendorRepository vendorRepository;
+
+    @Override
+    public void createVendorWithAgreement(
+            Long memberId, MemberWithVendorRequest memberWithVendorRequest, MultipartFile agreementFile
+    ) {
+        Vendor vendor = vendorMapStruct.toVendor(memberWithVendorRequest.vendorCreateRequest(), memberId);
+        applyAgreementFileToVendor(agreementFile, vendor);
+        vendorRepository.save(vendor);
+    }
 
     @Override
     public void updateVendor(Long vendorId, VendorUpdateRequestDto dto) {
@@ -53,17 +61,11 @@ public class VendorCommandServiceImpl implements VendorCommandService {
         vendorRepository.save(vendor);
     }
 
-    @Override
-    public void createVendorWithAgreement(
-            Long memberId, MemberWithVendorRequest memberWithVendorRequest, MultipartFile agreementFile
-    ) {
-        Vendor vendor = vendorMapStruct.toVendor(memberWithVendorRequest.vendorCreateRequest(), memberId);
+    private void applyAgreementFileToVendor(MultipartFile agreementFile, Vendor vendor) {
         String filePath = s3Uploader.uploadAgreement(agreementFile, VENDOR_DIRECTORY_NAME);
         vendor.updateAgreementInfo(
-                filePath,
-                agreementFile.getOriginalFilename(),
-                agreementFile.getSize(),
-                LocalDateTime.now().withNano(0)
+                filePath, agreementFile.getOriginalFilename(),
+                agreementFile.getSize(), LocalDateTime.now().withNano(0)
         );
         vendorRepository.save(vendor);
     }

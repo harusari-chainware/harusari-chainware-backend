@@ -1,6 +1,8 @@
 package com.harusari.chainware.warehouse.command.application.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.harusari.chainware.common.domain.vo.Address;
+import com.harusari.chainware.common.dto.AddressRequest;
 import com.harusari.chainware.warehouse.command.application.dto.WarehouseInventoryCommandResponse;
 import com.harusari.chainware.warehouse.command.application.dto.request.WarehouseInventoryCreateRequest;
 import com.harusari.chainware.warehouse.command.application.dto.request.WarehouseInventoryUpdateRequest;
@@ -48,22 +50,37 @@ class WarehouseCommandControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    WarehouseUpdateRequest updateRequest;
-    WarehouseCommandResponse warehouseResponse;
-    WarehouseInventoryCommandResponse inventoryResponse;
+    private Address address;
+    private AddressRequest addressRequest;
+
+    private WarehouseUpdateRequest updateRequest;
+    private WarehouseCommandResponse warehouseResponse;
+    private WarehouseInventoryCommandResponse inventoryResponse;
 
     @BeforeEach
     void setUp() {
+        addressRequest = AddressRequest.builder()
+                .zipcode("67890")
+                .addressRoad("New Address")
+                .addressDetail("New Address Detail")
+                .build();
+
+        address = Address.builder()
+                .zipcode("12345")
+                .addressRoad("Updated Address")
+                .addressDetail("Updated Address Detail")
+                .build();
+
         updateRequest = WarehouseUpdateRequest.builder()
                 .warehouseName("Updated Name")
-                .warehouseAddress("Updated Address")
+                .warehouseAddress(addressRequest)
                 .warehouseStatus(true)
                 .build();
 
         warehouseResponse = WarehouseCommandResponse.builder()
                 .warehouseId(1L)
                 .warehouseName("Updated Name")
-                .warehouseAddress("Updated Address")
+                .warehouseAddress(address)
                 .warehouseStatus(true)
                 .build();
 
@@ -95,7 +112,7 @@ class WarehouseCommandControllerTest {
         // given
         WarehouseUpdateRequest request = WarehouseUpdateRequest.builder()
                 .warehouseName("New")
-                .warehouseAddress("New Address")
+                .warehouseAddress(addressRequest)
                 .warehouseStatus(false)
                 .build();
 

@@ -3,6 +3,7 @@ package com.harusari.chainware.franchise.query.controller;
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.common.dto.PageResponse;
 import com.harusari.chainware.franchise.query.dto.request.FranchiseSearchRequest;
+import com.harusari.chainware.franchise.query.dto.resposne.FranchisePresignedUrlResponse;
 import com.harusari.chainware.franchise.query.dto.resposne.FranchiseSearchDetailResponse;
 import com.harusari.chainware.franchise.query.dto.resposne.FranchiseSearchResponse;
 import com.harusari.chainware.franchise.query.service.FranchiseQueryService;
@@ -36,13 +37,24 @@ public class FranchiseQueryController {
 
     @GetMapping("/franchises/{franchiseId}")
     public ResponseEntity<ApiResponse<FranchiseSearchDetailResponse>> searchFranchise(
-        @PathVariable(name = "franchiseId") Long franchiseId
+            @PathVariable(name = "franchiseId") Long franchiseId
     ) {
         FranchiseSearchDetailResponse franchiseSearchDetailResponse = franchiseQueryService.getFranchiseDetail(franchiseId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(franchiseSearchDetailResponse));
+    }
+
+    @GetMapping("/franchises/{franchiseId}/agreement/download")
+    public ResponseEntity<ApiResponse<FranchisePresignedUrlResponse>> getAgreementDownloadUrl(
+            @PathVariable(name = "franchiseId") Long franchiseId
+    ) {
+        FranchisePresignedUrlResponse presignedUrlResponse = franchiseQueryService.generateDownloadUrl(franchiseId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(presignedUrlResponse));
     }
 
 }

@@ -102,4 +102,9 @@ public class PurchaseOrder {
         this.purchaseOrderStatus = PurchaseOrderStatus.SHIPPED;
         this.modifiedAt = LocalDateTime.now();
     }
+
+    public void warehoused(PurchaseOrderStatus status) {
+        this.purchaseOrderStatus = status;
+        this.modifiedAt = LocalDateTime.now();
+    }
 }

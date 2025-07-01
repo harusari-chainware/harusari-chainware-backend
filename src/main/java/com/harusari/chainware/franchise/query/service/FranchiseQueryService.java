@@ -1,6 +1,7 @@
 package com.harusari.chainware.franchise.query.service;
 
 import com.harusari.chainware.franchise.query.dto.request.FranchiseSearchRequest;
+import com.harusari.chainware.franchise.query.dto.resposne.FranchisePresignedUrlResponse;
 import com.harusari.chainware.franchise.query.dto.resposne.FranchiseSearchDetailResponse;
 import com.harusari.chainware.franchise.query.dto.resposne.FranchiseSearchResponse;
 import org.springframework.data.domain.Page;
@@ -11,5 +12,7 @@ public interface FranchiseQueryService {
     Page<FranchiseSearchResponse> searchFranchises(FranchiseSearchRequest franchiseSearchRequest, Pageable pageable);
 
     FranchiseSearchDetailResponse getFranchiseDetail(Long franchiseId);
+
+    FranchisePresignedUrlResponse generateDownloadUrl(Long franchiseId);
 
 }
