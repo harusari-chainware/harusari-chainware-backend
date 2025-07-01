@@ -16,14 +16,19 @@ public class WarehouseInbound {
     @Column(name = "inbound_id")
     private Long inboundId;
 
+    @Column(name = "purchase_order_id")
     private Long purchaseOrderId;
 
+    @Column(name = "warehouse_id")
     private Long warehouseId;
 
+    @Column(name = "product_id")
     private Long productId;
 
+    @Column(name = "unit_quantity")
     private int unitQuantity;
 
+    @Column(name = "inbounded_at")
     private LocalDateTime inboundedAt;
 
     @Builder
