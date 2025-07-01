@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Builder
 public record FranchiseSearchDetailResponse(
         Long memberId, String name, String phoneNumber, Long franchiseId, String franchiseName, String franchiseContact,
-        String franchiseTaxId, Address franchiseAddress, String agreementFilePath, String agreementOriginalFileName,
-        Long agreementFileSize, LocalDate contractStartDate, LocalDate contractEndDate, FranchiseStatus franchiseStatus
+        String franchiseTaxId, Address franchiseAddress, String agreementOriginalFileName, Long agreementFileSize,
+        LocalDate contractStartDate, LocalDate contractEndDate, FranchiseStatus franchiseStatus
 ) {
 }
