@@ -113,6 +113,8 @@ public enum SecurityPolicy {
     PURCHASE_APPROVE_PUT("/api/v1/purchases/{purchaseOrderId}/approve", PUT, ROLE_BASED, List.of(VENDOR_MANAGER)), // 발주 승인
     PURCHASE_REJECT_PUT("/api/v1/purchases/{purchaseOrderId}/reject", PUT, ROLE_BASED, List.of(VENDOR_MANAGER)), // 발주 거절
     PURCHASE_SHIPPED_PUT("/api/v1/purchases/{purchaseOrderId}/shipped", PUT, ROLE_BASED, List.of(VENDOR_MANAGER)), // 출고 완료 처리
+    PURCHASE_PURCHASE_INBOUND("/api/v1/purchases/{purchaseOrderId}/inbound", PUT, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 입고 완료 처리
+
 
     /* Take Back */
     TAKEBACK_REGISTER("/api/v1/takeback", POST, ROLE_BASED, List.of(FRANCHISE_MANAGER)), // 반품 신청
