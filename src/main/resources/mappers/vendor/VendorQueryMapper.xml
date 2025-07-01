@@ -74,7 +74,9 @@
         <result property="phoneNumber" column="member_phone"/>
         <result property="vendorName" column="vendor_name"/>
         <result property="vendorType" column="vendor_type" javaType="com.harusari.chainware.vendor.command.domain.aggregate.VendorType"/>
-        <result property="vendorAddress" column="vendor_address"/>
+        <result property="vendorZipcode" column="vendor_zipcode"/>
+        <result property="vendorAddressRoad" column="vendor_address_road"/>
+        <result property="vendorAddressDetail" column="vendor_address_detail"/>
         <result property="vendorTaxId" column="vendor_tax_id"/>
         <result property="vendorMemo" column="vendor_memo"/>
         <result property="vendorStatus" column="vendor_status" javaType="com.harusari.chainware.vendor.command.domain.aggregate.VendorStatus"/>
@@ -92,7 +94,9 @@
         v.vendor_name,
 <!--        v.vendor_contact,-->
         v.vendor_type,
-        v.vendor_address,
+        v.vendor_zipcode,
+        v.vendor_address_road,
+        v.vendor_address_detail,
         v.vendor_tax_id,
         v.vendor_memo,
         v.vendor_status,
