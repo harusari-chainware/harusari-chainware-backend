@@ -8,9 +8,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface TakeBackCommandService {
-    TakeBackCommandResponse createTakeBack(TakeBackCreateRequest request, List<MultipartFile> imageFiles);
-    TakeBackCommandResponse cancelTakeBack(Long takeBackId);
-    TakeBackCommandResponse collectTakeBack(Long takeBackId);
-    TakeBackCommandResponse approveTakeBack(Long takeBackId);
+    TakeBackCommandResponse createTakeBack(TakeBackCreateRequest request, List<MultipartFile> imageFiles, Long memberId);
+    TakeBackCommandResponse cancelTakeBack(Long takeBackId, Long memberId);
+    TakeBackCommandResponse collectTakeBack(Long takeBackId, Long memberId);
+    TakeBackCommandResponse approveTakeBack(Long takeBackId, Long memberId);
     TakeBackCommandResponse rejectTakeBack(Long takeBackId, TakeBackRejectRequest request, Long memberId);
 }

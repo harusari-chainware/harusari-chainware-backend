@@ -22,7 +22,9 @@ public enum DeliveryErrorCode {
     PRODUCT_NOT_FOUND_IN_ORDER("10007", "주문에 포함되지 않은 제품입니다.", HttpStatus.BAD_REQUEST),
     INVALID_DELIVERY_QUANTITY("10008", "배송 불가능한 수량입니다.", HttpStatus.BAD_REQUEST),
     TAKE_BACK_DETAIL_NOT_FOUND("10009", "존재하는 반품이 아닙니다.", HttpStatus.BAD_REQUEST),
-    INVALID_DELIVERY_DETAIL_ID("10010", "존재하지 않는 배송 상세입니다.", HttpStatus.BAD_REQUEST);
+    INVALID_DELIVERY_DETAIL_ID("10010", "존재하지 않는 배송 상세입니다.", HttpStatus.BAD_REQUEST),
+    UNAUTHORIZED_WAREHOUSE_MANAGER("10011", "해당 창고의 관리자만 배송을 시작할 수 있습니다.", HttpStatus.FORBIDDEN),
+    UNAUTHORIZED_ORDER_MANAGER("10012", "해당 주문의 관리자만 배송을 완료할 수 있습니다.", HttpStatus.FORBIDDEN);
 
     private final String errorCode;
     private final String errorMessage;

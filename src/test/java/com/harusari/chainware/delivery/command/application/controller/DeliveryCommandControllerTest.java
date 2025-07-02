@@ -8,6 +8,7 @@ import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryStatus;
 import com.harusari.chainware.delivery.exception.DeliveryErrorCode;
 import com.harusari.chainware.delivery.exception.DeliveryException;
 import com.harusari.chainware.delivery.exception.handler.DeliveryExceptionHandler;
+import com.harusari.chainware.securitysupport.WithMockCustomUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,13 +53,15 @@ class DeliveryCommandControllerTest {
 
     @Test
     @DisplayName("[배송 시작] 성공 테스트")
+    @WithMockCustomUser(memberId = 100L, position = "WAREHOUSE_MANAGER")
     void testStartDeliverySuccess() throws Exception {
         // given
         DeliveryStartRequest request = DeliveryStartRequest.builder()
                 .carrier("CJ대한통운")
                 .build();
 
-        when(deliveryCommandService.startDelivery(eq(1L), any())).thenReturn(response);
+        when(deliveryCommandService.startDelivery(eq(1L), any(DeliveryStartRequest.class), eq(100L)))
+                .thenReturn(response);
 
         // when & then
         mockMvc.perform(put("/api/v1/delivery/1/start")
@@ -72,12 +75,14 @@ class DeliveryCommandControllerTest {
 
     @Test
     @DisplayName("[배송 시작] 존재하지 않는 배송 ID 예외 테스트")
+    @WithMockCustomUser(memberId = 100L, position = "WAREHOUSE_MANAGER")
     void testStartDelivery_NotFound() throws Exception {
         // given
         DeliveryStartRequest request = DeliveryStartRequest.builder()
                 .carrier("CJ대한통운")
                 .build();
-        when(deliveryCommandService.startDelivery(eq(1L), any()))
+
+        when(deliveryCommandService.startDelivery(eq(1L), any(DeliveryStartRequest.class), eq(100L)))
                 .thenThrow(new DeliveryException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
 
         // when & then
@@ -91,6 +96,7 @@ class DeliveryCommandControllerTest {
 
     @Test
     @DisplayName("[배송 완료] 성공 테스트")
+    @WithMockCustomUser(memberId = 200L, position = "FRANCHISE_MANAGER")
     void testCompleteDeliverySuccess() throws Exception {
         // given
         DeliveryCommandResponse completeResponse = DeliveryCommandResponse.builder()
@@ -98,7 +104,8 @@ class DeliveryCommandControllerTest {
                 .deliveryStatus(DeliveryStatus.DELIVERED)
                 .build();
 
-        when(deliveryCommandService.completeDelivery(1L)).thenReturn(completeResponse);
+        when(deliveryCommandService.completeDelivery(1L, 200L))
+                .thenReturn(completeResponse);
 
         // when & then
         mockMvc.perform(put("/api/v1/delivery/1/complete"))
@@ -110,9 +117,10 @@ class DeliveryCommandControllerTest {
 
     @Test
     @DisplayName("[배송 완료] 상태가 '배송 중'이 아님 예외 테스트")
+    @WithMockCustomUser(memberId = 200L, position = "FRANCHISE_MANAGER")
     void testCompleteDelivery_InvalidStatus() throws Exception {
         // given
-        when(deliveryCommandService.completeDelivery(1L))
+        when(deliveryCommandService.completeDelivery(1L, 200L))
                 .thenThrow(new DeliveryException(DeliveryErrorCode.DELIVERY_STATUS_NOT_IN_TRANSIT));
 
         // when & then

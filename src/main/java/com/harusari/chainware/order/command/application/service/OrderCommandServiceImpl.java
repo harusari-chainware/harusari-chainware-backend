@@ -4,6 +4,8 @@ import com.harusari.chainware.delivery.command.domain.aggregate.Delivery;
 import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryMethod;
 import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryStatus;
 import com.harusari.chainware.delivery.command.domain.repository.DeliveryRepository;
+import com.harusari.chainware.franchise.command.domain.aggregate.Franchise;
+import com.harusari.chainware.franchise.command.domain.repository.FranchiseRepository;
 import com.harusari.chainware.order.command.application.dto.request.*;
 import com.harusari.chainware.order.command.application.dto.response.OrderCommandResponse;
 import com.harusari.chainware.order.command.domain.aggregate.Order;
@@ -42,8 +44,8 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
     private final DeliveryRepository deliveryRepository;
     private final WarehouseInventoryRepository warehouseInventoryRepository;
-    private final JpaProductRepository jpaProductRepository;
     private final ProductRepository ProductRepository;
+    private final FranchiseRepository franchiseRepository;
 
     private final RedissonClient redissonClient;
 
@@ -54,6 +56,11 @@ public class OrderCommandServiceImpl implements OrderCommandService {
         if (request.getOrderDetails() == null || request.getOrderDetails().isEmpty()) {
             throw new OrderException(OrderErrorCode.EMPTY_ORDER_DETAIL);
         }
+
+        Franchise franchise = franchiseRepository.findFranchiseIdByMemberId(memberId)
+                .orElseThrow(() -> new OrderException(OrderErrorCode.FRANCHISE_NOT_FOUND_FOR_MANAGER));
+
+        Long franchiseId = franchise.getFranchiseId();
 
         // 1. 가격 계산
         int productCount = request.getOrderDetails().size();
@@ -92,7 +99,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
         // 2. 주문 엔티티 생성 및 저장
         Order order = Order.builder()
-                .franchiseId(request.getFranchiseId())
+                .franchiseId(franchiseId)
                 .memberId(memberId)
                 .orderCode(generateOrderCode())
                 .deliveryDueDate(request.getDeliveryDueDate())

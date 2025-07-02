@@ -20,7 +20,8 @@ public enum WarehouseErrorCode {
     INVENTORY_NOT_FOUND("10004", "재고가 없는 제품입니다.", HttpStatus.BAD_REQUEST),
     INVENTORY_CANNOT_BE_DELETED_WHILE_QUANTITY_EXISTS("20014","현재 보유 재고 또는 예약 재고가 남아 있어 재고를 삭제할 수 없습니다.", HttpStatus.BAD_REQUEST),
     QUANTITY_LESS_THAN_SAFETY_STOCK("10005", "보유 재고는 안전 재고보다 작을 수 없습니다.", HttpStatus.BAD_REQUEST ),
-    QUANTITY_LESS_THAN_RESERVED_STOCK("10006", "보유 재고는 예약 재고보다 작을 수 없습니다.", HttpStatus.BAD_REQUEST);
+    QUANTITY_LESS_THAN_RESERVED_STOCK("10006", "보유 재고는 예약 재고보다 작을 수 없습니다.", HttpStatus.BAD_REQUEST),
+    UNAUTHORIZED_ACCESS_TO_WAREHOUSE("10007","해당 창고에 접근할 권한이 없습니다.", HttpStatus.BAD_REQUEST);
 
     private final String errorCode;
     private final String errorMessage;

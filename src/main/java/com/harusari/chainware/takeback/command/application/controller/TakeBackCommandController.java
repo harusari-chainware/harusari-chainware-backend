@@ -26,38 +26,40 @@ public class TakeBackCommandController {
     @PostMapping
     public ResponseEntity<ApiResponse<TakeBackCommandResponse>> createTakeBack(
             @RequestPart TakeBackCreateRequest request,
-            @RequestPart List<MultipartFile> imageFiles
+            @RequestPart List<MultipartFile> imageFiles,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        TakeBackCommandResponse response = takeBackCommandService.createTakeBack(request, imageFiles);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(response));
+        TakeBackCommandResponse response = takeBackCommandService.createTakeBack(request, imageFiles, userDetails.getMemberId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(response));
     }
 
     // 반품 취소
     @PutMapping("/{takeBackId}/cancel")
     public ResponseEntity<ApiResponse<TakeBackCommandResponse>> cancelTakeBack(
-            @PathVariable Long takeBackId
+            @PathVariable Long takeBackId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        TakeBackCommandResponse response = takeBackCommandService.cancelTakeBack(takeBackId);
+        TakeBackCommandResponse response = takeBackCommandService.cancelTakeBack(takeBackId, userDetails.getMemberId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     // 반품 수거
     @PutMapping("/{takeBackId}/collect")
     public ResponseEntity<ApiResponse<TakeBackCommandResponse>> collectTakeBack(
-            @PathVariable Long takeBackId
+            @PathVariable Long takeBackId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        TakeBackCommandResponse response = takeBackCommandService.collectTakeBack(takeBackId);
+        TakeBackCommandResponse response = takeBackCommandService.collectTakeBack(takeBackId, userDetails.getMemberId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     // 반품 승인
     @PutMapping("/{takeBackId}/approve")
     public ResponseEntity<ApiResponse<TakeBackCommandResponse>> approveTakeBack(
-            @PathVariable Long takeBackId
+            @PathVariable Long takeBackId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        TakeBackCommandResponse response = takeBackCommandService.approveTakeBack(takeBackId);
+        TakeBackCommandResponse response = takeBackCommandService.approveTakeBack(takeBackId, userDetails.getMemberId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

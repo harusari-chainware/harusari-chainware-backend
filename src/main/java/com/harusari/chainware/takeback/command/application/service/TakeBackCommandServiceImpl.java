@@ -5,8 +5,14 @@ import com.harusari.chainware.delivery.command.domain.aggregate.Delivery;
 import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryMethod;
 import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryStatus;
 import com.harusari.chainware.delivery.command.domain.repository.DeliveryRepository;
+import com.harusari.chainware.delivery.exception.DeliveryErrorCode;
+import com.harusari.chainware.delivery.exception.DeliveryException;
+import com.harusari.chainware.order.command.domain.aggregate.Order;
 import com.harusari.chainware.order.command.domain.aggregate.OrderDetail;
 import com.harusari.chainware.order.command.domain.repository.OrderDetailRepository;
+import com.harusari.chainware.order.command.domain.repository.OrderRepository;
+import com.harusari.chainware.order.exception.OrderErrorCode;
+import com.harusari.chainware.order.exception.OrderException;
 import com.harusari.chainware.takeback.command.application.dto.request.TakeBackCreateRequest;
 import com.harusari.chainware.takeback.command.application.dto.request.TakeBackRejectRequest;
 import com.harusari.chainware.takeback.command.application.dto.response.TakeBackCommandResponse;
@@ -38,6 +44,7 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
     private final TakeBackRepository takeBackRepository;
     private final TakeBackDetailRepository takeBackDetailRepository;
 
+    private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final DeliveryRepository deliveryRepository;
     private final WarehouseRepository warehouseRepository;
@@ -47,8 +54,15 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
 
     // 반품 신청
     @Override
-    public TakeBackCommandResponse createTakeBack(TakeBackCreateRequest request, List<MultipartFile> imageFiles) {
+    public TakeBackCommandResponse createTakeBack(TakeBackCreateRequest request, List<MultipartFile> imageFiles, Long memberId) {
         // 0. 유효성 검증
+        Order order = orderRepository.findById(request.getOrderId())
+                .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND));
+
+        if (!order.getMemberId().equals(memberId)) {
+            throw new TakeBackException(TakeBackErrorCode.UNAUTHORIZED_ACCESS_TO_ORDER);
+        }
+
         List<TakeBackCreateRequest.TakeBackItemRequest> items = request.getItems();
 
         if (items == null || items.isEmpty()) {
@@ -104,12 +118,17 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
 
     // 반품 취소
     @Override
-    public TakeBackCommandResponse cancelTakeBack(Long takeBackId) {
-        // 1. 반품 조회
+    public TakeBackCommandResponse cancelTakeBack(Long takeBackId, Long memberId) {
+        // 1. 반품 및 사용자 조회
         TakeBack takeBack = takeBackRepository.findById(takeBackId)
                 .orElseThrow(() -> new TakeBackException(TakeBackErrorCode.TAKE_BACK_NOT_FOUND));
+        Order order = orderRepository.findById(takeBack.getOrderId())
+                .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND));
 
-        // 2. 상태 검증 (REQUESTED 상태만 취소 가능)
+        // 2. 사용자 및 상태 검증
+        if (!order.getMemberId().equals(memberId)) {
+            throw new TakeBackException(TakeBackErrorCode.UNAUTHORIZED_ACCESS_TO_ORDER);
+        }
         if (!TakeBackStatus.REQUESTED.equals(takeBack.getTakeBackStatus())) {
             throw new TakeBackException(TakeBackErrorCode.INVALID_TAKE_BACK_STATUS_FOR_CANCEL);
         }
@@ -125,8 +144,9 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
 
     // 반품 수거
     @Override
-    public TakeBackCommandResponse collectTakeBack(Long takeBackId) {
+    public TakeBackCommandResponse collectTakeBack(Long takeBackId, Long memberId) {
         // 1. 반품 조회
+        validateWarehouseManager(takeBackId, memberId);
         TakeBack takeBack = takeBackRepository.findById(takeBackId)
                 .orElseThrow(() -> new TakeBackException(TakeBackErrorCode.TAKE_BACK_NOT_FOUND));
 
@@ -146,8 +166,9 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
 
     // 반품 승인
     @Override
-    public TakeBackCommandResponse approveTakeBack(Long takeBackId) {
+    public TakeBackCommandResponse approveTakeBack(Long takeBackId, Long memberId) {
         // 1. 반품 조회
+        validateWarehouseManager(takeBackId, memberId);
         TakeBack takeBack = takeBackRepository.findById(takeBackId)
                 .orElseThrow(() -> new TakeBackException(TakeBackErrorCode.TAKE_BACK_NOT_FOUND));
 
@@ -169,6 +190,7 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
     @Override
     public TakeBackCommandResponse rejectTakeBack(Long takeBackId, TakeBackRejectRequest request, Long memberId) {
         // 1. 반품 조회
+        validateWarehouseManager(takeBackId, memberId);
         TakeBack takeBack = takeBackRepository.findById(takeBackId)
                 .orElseThrow(() -> new TakeBackException(TakeBackErrorCode.TAKE_BACK_NOT_FOUND));
 
@@ -219,5 +241,21 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
 
         return "TB-" + datePart + sequencePart;
     }
+
+    private void validateWarehouseManager(Long takeBackId, Long memberId) {
+        TakeBack takeBack = takeBackRepository.findById(takeBackId)
+                .orElseThrow(() -> new TakeBackException(TakeBackErrorCode.TAKE_BACK_NOT_FOUND));
+
+        Delivery delivery = deliveryRepository.findByOrderId(takeBack.getOrderId())
+                .orElseThrow(() -> new DeliveryException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
+
+        Warehouse warehouse = warehouseRepository.findById(delivery.getWarehouseId())
+                .orElseThrow(() -> new TakeBackException(TakeBackErrorCode.WAREHOUSE_NOT_FOUND));
+
+        if (!warehouse.getMemberId().equals(memberId)) {
+            throw new TakeBackException(TakeBackErrorCode.UNAUTHORIZED_ACCESS_TO_WAREHOUSE);
+        }
+    }
+
 
 }

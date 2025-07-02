@@ -1,5 +1,6 @@
 package com.harusari.chainware.warehouse.command.application.controller;
 
+import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.warehouse.command.application.dto.WarehouseInventoryCommandResponse;
 import com.harusari.chainware.warehouse.command.application.dto.request.WarehouseInventoryCreateRequest;
@@ -9,6 +10,7 @@ import com.harusari.chainware.warehouse.command.application.dto.response.Warehou
 import com.harusari.chainware.warehouse.command.application.service.WarehouseCommandService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -41,9 +43,10 @@ public class WarehouseCommandController {
     @PostMapping("/{warehouseId}/inventory")
     public ResponseEntity<ApiResponse<WarehouseCommandResponse>> registerInventory(
             @PathVariable Long warehouseId,
-            @RequestBody WarehouseInventoryCreateRequest request
+            @RequestBody WarehouseInventoryCreateRequest request,
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        WarehouseCommandResponse response = warehouseCommandService.registerInventory(warehouseId, request);
+        WarehouseCommandResponse response = warehouseCommandService.registerInventory(warehouseId, request, user.getMemberId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -51,18 +54,20 @@ public class WarehouseCommandController {
     @PutMapping("/inventory/{inventoryId}")
     public ResponseEntity<ApiResponse<WarehouseInventoryCommandResponse>> updateInventory(
             @PathVariable Long inventoryId,
-            @RequestBody WarehouseInventoryUpdateRequest request
+            @RequestBody WarehouseInventoryUpdateRequest request,
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        WarehouseInventoryCommandResponse response = warehouseCommandService.updateInventory(inventoryId, request);
+        WarehouseInventoryCommandResponse response = warehouseCommandService.updateInventory(inventoryId, request, user.getMemberId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     // 보유 재고 삭제
     @DeleteMapping("/inventory/{inventoryId}")
     public ResponseEntity<ApiResponse<WarehouseInventoryCommandResponse>> deleteInventory(
-            @PathVariable Long inventoryId
+            @PathVariable Long inventoryId,
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        WarehouseInventoryCommandResponse response = warehouseCommandService.deleteInventory(inventoryId);
+        WarehouseInventoryCommandResponse response = warehouseCommandService.deleteInventory(inventoryId, user.getMemberId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

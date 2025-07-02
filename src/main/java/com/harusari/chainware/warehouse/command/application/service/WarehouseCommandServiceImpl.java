@@ -74,10 +74,14 @@ public class WarehouseCommandServiceImpl implements WarehouseCommandService{
 
     // 보유 재고 등록
     @Override
-    public WarehouseCommandResponse registerInventory(Long warehouseId, WarehouseInventoryCreateRequest request) {
+    public WarehouseCommandResponse registerInventory(Long warehouseId, WarehouseInventoryCreateRequest request, Long memberId) {
         // 1. 창고 검증
         Warehouse warehouse = warehouseRepository.findById(warehouseId)
                 .orElseThrow(() -> new WarehouseException(WarehouseErrorCode.WAREHOUSE_NOT_FOUND));
+
+        if (!warehouse.getMemberId().equals(memberId)) {
+            throw new WarehouseException(WarehouseErrorCode.UNAUTHORIZED_ACCESS_TO_WAREHOUSE);
+        }
 
         // 2. 등록하려는 보유 재고 제품 ID 추출
         List<Long> productIds = request.getItems().stream()
@@ -123,10 +127,17 @@ public class WarehouseCommandServiceImpl implements WarehouseCommandService{
 
     // 보유 재고 수정
     @Override
-    public WarehouseInventoryCommandResponse updateInventory(Long inventoryId, WarehouseInventoryUpdateRequest request) {
+    public WarehouseInventoryCommandResponse updateInventory(Long inventoryId, WarehouseInventoryUpdateRequest request, Long memberId) {
         // 1. 보유 재고 조회
         WarehouseInventory inventory = warehouseInventoryRepository.findById(inventoryId)
                 .orElseThrow(() -> new WarehouseException(WarehouseErrorCode.INVENTORY_NOT_FOUND));
+
+        Warehouse warehouse = warehouseRepository.findById(inventory.getWarehouseId())
+                .orElseThrow(() -> new WarehouseException(WarehouseErrorCode.WAREHOUSE_NOT_FOUND));
+
+        if (!warehouse.getMemberId().equals(memberId)) {
+            throw new WarehouseException(WarehouseErrorCode.UNAUTHORIZED_ACCESS_TO_WAREHOUSE);
+        }
 
         Integer newQuantity = request.getQuantity();
 
@@ -147,10 +158,17 @@ public class WarehouseCommandServiceImpl implements WarehouseCommandService{
 
     // 보유 재고 삭제
     @Override
-    public WarehouseInventoryCommandResponse deleteInventory(Long inventoryId) {
+    public WarehouseInventoryCommandResponse deleteInventory(Long inventoryId, Long memberId) {
         // 1. 창고 검증
         WarehouseInventory inventory = warehouseInventoryRepository.findById(inventoryId)
                 .orElseThrow(() -> new WarehouseException(WarehouseErrorCode.INVENTORY_NOT_FOUND));
+
+        Warehouse warehouse = warehouseRepository.findById(inventory.getWarehouseId())
+                .orElseThrow(() -> new WarehouseException(WarehouseErrorCode.WAREHOUSE_NOT_FOUND));
+
+        if (!warehouse.getMemberId().equals(memberId)) {
+            throw new WarehouseException(WarehouseErrorCode.UNAUTHORIZED_ACCESS_TO_WAREHOUSE);
+        }
 
         // 2. 현재 보유 수량 및 예약 수량 확인
         if (inventory.getQuantity() > 0 || inventory.getReservedQuantity() > 0) {
