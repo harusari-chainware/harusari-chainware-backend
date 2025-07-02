@@ -75,7 +75,7 @@ public enum SecurityPolicy {
     WAREHOUSE_DELETE("/api/v1/warehouse/{warehouseId}", DELETE, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 창고 마스터 삭제
     WAREHOUSE_INVENTORY_REGISTER("/api/v1/warehouse/{warehouseId}/inventory", POST, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 보유 재고 등록
     WAREHOUSE_INVENTORY_UPDATE("/api/v1/warehouse/inventory/{inventoryId}", PUT, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 보유 재고 수정
-    WAREHOUSE_INVENTORY_DELETE("/api/v1/warehouse/inventory/{inventoryId}", PUT, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 보유 재고 삭제
+    WAREHOUSE_INVENTORY_DELETE("/api/v1/warehouse/inventory/{inventoryId}", DELETE, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 보유 재고 삭제
 
     WAREHOUSE_LIST_GET("/api/v1/warehouse", GET, ROLE_BASED, List.of(WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 창고 마스터 목록 조회
     WAREHOUSE_DETAIL_GET("/api/v1/warehouse/{warehouseId}", GET, ROLE_BASED, List.of(WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 창고 마스터 상세 조회
