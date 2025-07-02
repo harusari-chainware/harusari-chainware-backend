@@ -67,12 +67,20 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
                 TakeBackDetail detail = takeBackDetailRepository.findById(item.getTakeBackDetailId())
                         .orElseThrow(() -> new DeliveryException(DeliveryErrorCode.TAKE_BACK_DETAIL_NOT_FOUND));
 
+                if (!detail.getTakeBackId().equals(takeBackId)) {
+                    throw new DeliveryException(DeliveryErrorCode.TAKE_BACK_DETAIL_NOT_FOUND);
+                }
+
                 productId = detail.getProductId();
                 quantity = detail.getQuantity();
             } else if (orderId != null && item.getOrderDetailId() != null) {
                 // 주문 기반 배송
                 OrderDetail detail = orderDetailRepository.findById(item.getOrderDetailId())
                         .orElseThrow(() -> new DeliveryException(DeliveryErrorCode.ORDER_DETAIL_NOT_FOUND_FOR_DELIVERY));
+
+                if (!detail.getOrderId().equals(orderId)) {
+                    throw new DeliveryException(DeliveryErrorCode.ORDER_DETAIL_NOT_FOUND_FOR_DELIVERY);
+                }
 
                 productId = detail.getProductId();
                 quantity = detail.getQuantity();
