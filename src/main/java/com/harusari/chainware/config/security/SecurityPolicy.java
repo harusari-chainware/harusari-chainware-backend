@@ -43,9 +43,9 @@ public enum SecurityPolicy {
     TOP_CATEGORY_POST("/api/v1/topcategory", POST, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 상위 카테고리 등록
     TOP_CATEGORY_PUT("/api/v1/topcategory/{topCategoryId}", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 상위 카테고리 수정
     TOP_CATEGORY_DELETE("/api/v1/topcategory/{topCategoryId}", DELETE, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 상위 카테고리 삭제
-    CATEGORY_LIST_GET("/api/v1/categories", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, FRANCHISE_MANAGER, VENDOR_MANAGER)), // 전체 카테고리 목록 조회
-    CATEGORY_LIST_BY_TOP_GET("/api/v1/categories/top/{topCategoryId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, FRANCHISE_MANAGER, VENDOR_MANAGER)), // 특정 상위 카테고리와 카테고리, 제품 목록 조회
-    CATEGORY_DETAIL_BY_ID_GET("/api/v1/categories/{categoryId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, FRANCHISE_MANAGER, VENDOR_MANAGER)), // 특정 카테고리와 상위 카테고리, 제품 목록 조회
+    CATEGORY_LIST_GET("/api/v1/categories", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, FRANCHISE_MANAGER)), // 전체 카테고리 목록 조회
+    CATEGORY_LIST_BY_TOP_GET("/api/v1/categories/top/{topCategoryId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, FRANCHISE_MANAGER)), // 특정 상위 카테고리와 카테고리, 제품 목록 조회
+    CATEGORY_DETAIL_BY_ID_GET("/api/v1/categories/{categoryId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, FRANCHISE_MANAGER)), // 특정 카테고리와 상위 카테고리, 제품 목록 조회
 
     /* Contract */
     CONTRACT_POST("/api/v1/contract", POST, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 거래처 별 제품 정보 등록
