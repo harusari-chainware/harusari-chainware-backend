@@ -9,13 +9,16 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class DeliverySearchResponse {
-
-    private String trackingNumber;        // 운송장 번호
-//    private String warehouseName;         // 창고명
-    private String franchiseName;         // 가맹점명
-    private String carrier;               // 택배사
-    private String orderCode;             // 배송되는 주문 코드
-    private DeliveryStatus deliveryStatus;// 배송 상태
-    private LocalDateTime startedAt;      // 배송 요청 일시
-    private LocalDateTime deliveredAt;    // 배송 완료 일시
+    private Long deliveryId;
+    private Long orderId;
+    private Long takeBackId;
+    private String trackingNumber;
+    private String warehouseName;
+    private String franchiseName;
+    private String carrier;
+    private String orderCode;
+    private DeliveryStatus deliveryStatus;
+    private LocalDateTime startedAt;
+    private LocalDateTime deliveredAt;
+    private LocalDateTime createdAt;
 }

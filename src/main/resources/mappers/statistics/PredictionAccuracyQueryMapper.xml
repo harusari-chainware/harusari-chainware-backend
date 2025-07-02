@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.harusari.chainware.statistics.query.mapper.PredictionAccuracyQueryMapper">
+
+    <select id="findDailyAccuracyByFranchise"
+            resultType="com.harusari.chainware.statistics.query.dto.predictionAccuracy.PredictionAccuracyResponseDto">
+        SELECT
+        pr.prediction_type AS predictionType,
+        pr.target_date AS targetDate,
+        pa.actual_value AS actualTotal,
+        pr.predicted_value AS predictedTotal,
+        pa.mae,
+        pa.rmse,
+        pa.mape,
+        f.franchise_name AS franchiseName
+        FROM prediction_accuracy pa
+        JOIN prediction_result pr ON pa.prediction_result_id = pr.prediction_result_id
+        LEFT JOIN franchise f ON pr.franchise_id = f.franchise_id
+        WHERE pr.prediction_type = #{type}
+        AND pr.target_date = #{targetDate}
+        AND pr.franchise_id = #{franchiseId}
+    </select>
+
+    <select id="findDailyAccuracyByType"
+            resultType="com.harusari.chainware.statistics.query.dto.predictionAccuracy.PredictionAccuracyResponseDto">
+        SELECT
+        pr.prediction_type AS predictionType,
+        pr.target_date AS targetDate,
+        SUM(pa.actual_value) AS actualTotal,
+        SUM(pr.predicted_value) AS predictedTotal,
+        NULL AS mae,
+        NULL AS rmse,
+        NULL AS mape,
+        NULL AS franchiseName
+        FROM prediction_accuracy pa
+        JOIN prediction_result pr ON pa.prediction_result_id = pr.prediction_result_id
+        WHERE pr.prediction_type = #{type}
+        AND pr.target_date = #{targetDate}
+        GROUP BY pr.prediction_type, pr.target_date
+    </select>
+
+    <select id="findWeeklyAccuracyByFranchise"
+            resultType="com.harusari.chainware.statistics.query.dto.predictionAccuracy.PredictionAccuracyResponseDto">
+        SELECT
+        pr.prediction_type AS predictionType,
+        pr.target_date AS targetDate,
+        pa.actual_value AS actualTotal,
+        pr.predicted_value AS predictedTotal,
+        pa.mae,
+        pa.rmse,
+        pa.mape,
+        f.franchise_name AS franchiseName
+        FROM prediction_accuracy pa
+        JOIN prediction_result pr ON pa.prediction_result_id = pr.prediction_result_id
+        LEFT JOIN franchise f ON pr.franchise_id = f.franchise_id
+        WHERE pr.prediction_type = #{type}
+        AND pr.target_date BETWEEN #{startDate} AND #{endDate}
+        AND pr.franchise_id = #{franchiseId}
+    </select>
+
+    <select id="findWeeklyAccuracyByType"
+            resultType="com.harusari.chainware.statistics.query.dto.predictionAccuracy.PredictionAccuracyResponseDto">
+        SELECT
+        pr.prediction_type AS predictionType,
+        pr.target_date AS targetDate,
+        SUM(pa.actual_value) AS actualTotal,
+        SUM(pr.predicted_value) AS predictedTotal,
+        NULL AS mae,
+        NULL AS rmse,
+        NULL AS mape,
+        NULL AS franchiseName
+        FROM prediction_accuracy pa
+        JOIN prediction_result pr ON pa.prediction_result_id = pr.prediction_result_id
+        WHERE pr.prediction_type = #{type}
+        AND pr.target_date BETWEEN #{startDate} AND #{endDate}
+        GROUP BY pr.prediction_type, pr.target_date
+    </select>
+
+
+</mapper>

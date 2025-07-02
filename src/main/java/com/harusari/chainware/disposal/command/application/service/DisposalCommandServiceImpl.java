@@ -2,9 +2,12 @@ package com.harusari.chainware.disposal.command.application.service;
 
 import com.harusari.chainware.disposal.command.application.dto.DisposalCommandRequestDto;
 import com.harusari.chainware.disposal.command.domain.aggregate.Disposal;
-import com.harusari.chainware.disposal.command.infrastructure.repository.JpaDisposalRepository;
+import com.harusari.chainware.disposal.command.domain.repository.DisposalRepository;
+import com.harusari.chainware.disposal.exception.DisposalErrorCode;
+import com.harusari.chainware.disposal.exception.DisposalException;
 import com.harusari.chainware.franchise.command.domain.repository.FranchiseRepository;
 import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
+import com.harusari.chainware.warehouse.command.domain.repository.WarehouseInventoryRepository;
 import com.harusari.chainware.warehouse.command.domain.repository.WarehouseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,9 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class DisposalCommandServiceImpl implements DisposalCommandService {
 
-    private final JpaDisposalRepository disposalRepository;
+    private final DisposalRepository disposalRepository;
     private final FranchiseRepository franchiseRepository;
     private final WarehouseRepository warehouseRepository;
+    private final WarehouseInventoryRepository warehouseInventoryRepository;
 
     @Transactional
     @Override
@@ -27,13 +31,15 @@ public class DisposalCommandServiceImpl implements DisposalCommandService {
         switch (authorityType) {
             case FRANCHISE_MANAGER -> {
                 franchiseId = franchiseRepository.findFranchiseIdByMemberId(memberId)
-                        .orElseThrow(() -> new RuntimeException("해당 가맹점 정보를 찾을 수 없습니다.")).getFranchiseId();
+                        .orElseThrow(() -> new DisposalException(DisposalErrorCode.FRANCHISE_NOT_FOUND))
+                        .getFranchiseId();
             }
             case WAREHOUSE_MANAGER -> {
                 warehouseId = warehouseRepository.findWarehouseIdByMemberId(memberId)
-                        .orElseThrow(() -> new RuntimeException("해당 창고 정보를 찾을 수 없습니다.")).getWarehouseId();
+                        .orElseThrow(() -> new DisposalException(DisposalErrorCode.WAREHOUSE_NOT_FOUND))
+                        .getWarehouseId();
             }
-            default -> throw new RuntimeException("폐기를 등록할 권한이 없습니다.");
+            default -> throw new DisposalException(DisposalErrorCode.NO_DISPOSAL_AUTHORITY);
         }
 
         Disposal disposal = Disposal.builder()
@@ -47,6 +53,16 @@ public class DisposalCommandServiceImpl implements DisposalCommandService {
 
         disposalRepository.save(disposal);
 
-        // TODO: 재고 감소 처리 (추후 구현)
+        if (warehouseId != null && request.getTakeBackId() == null) {
+            warehouseInventoryRepository.findByWarehouseIdAndProductId(warehouseId, request.getProductId())
+                    .ifPresentOrElse(inventory -> {
+                        if (inventory.getQuantity() < request.getQuantity()) {
+                            throw new DisposalException(DisposalErrorCode.INSUFFICIENT_INVENTORY);
+                        }
+                        inventory.decreaseQuantity(request.getQuantity());
+                    }, () -> {
+                        throw new DisposalException(DisposalErrorCode.INVENTORY_NOT_FOUND);
+                    });
+        }
     }
 }

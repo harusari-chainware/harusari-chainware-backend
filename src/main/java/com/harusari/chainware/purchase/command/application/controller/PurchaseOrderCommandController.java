@@ -4,6 +4,7 @@ package com.harusari.chainware.purchase.command.application.controller;
 import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.purchase.command.application.dto.request.CancelPurchaseOrderRequest;
+import com.harusari.chainware.purchase.command.application.dto.request.PurchaseInboundRequest;
 import com.harusari.chainware.purchase.command.application.dto.request.RejectPurchaseOrderRequest;
 import com.harusari.chainware.purchase.command.application.dto.request.UpdatePurchaseOrderRequest;
 import com.harusari.chainware.purchase.command.application.service.PurchaseOrderCommandService;
@@ -91,7 +92,7 @@ public class PurchaseOrderCommandController {
     @PutMapping("/{purchaseOrderId}/shipped")
     @Operation(summary = "발주 요청 품목 출고 완료", description = "요청 받은 발주 출고 처리 완료.")
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "발주 출고 완료")    })
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "발주 출고 완료")})
     public ResponseEntity<ApiResponse<Void>> shippedPurchaseOrder(
             @PathVariable Long purchaseOrderId,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -100,4 +101,20 @@ public class PurchaseOrderCommandController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
+    @PutMapping("/{purchaseOrderId}/inbound")
+    @Operation(summary = "발주 입고 처리 완료", description = "발주 입고 처리 완료.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "발주 입고 완료")    })
+    public ResponseEntity<ApiResponse<Void>> inboundPurchaseOrder(
+            @PathVariable Long purchaseOrderId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody PurchaseInboundRequest request
+    ) {
+        purchaseOrderCommandService.inboundPurchaseOrder(purchaseOrderId, userDetails.getMemberId(), request);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
 }
+
+
+

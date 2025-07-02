@@ -6,6 +6,8 @@ import com.harusari.chainware.exception.requisition.RequisitionErrorCode;
 import com.harusari.chainware.exception.requisition.RequisitionException;
 import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
 import com.harusari.chainware.purchase.command.application.dto.request.CancelPurchaseOrderRequest;
+import com.harusari.chainware.purchase.command.application.dto.request.PurchaseInboundRequest;
+import com.harusari.chainware.purchase.command.application.dto.request.PurchaseInboundItem;
 import com.harusari.chainware.purchase.command.application.dto.request.RejectPurchaseOrderRequest;
 import com.harusari.chainware.purchase.command.application.dto.request.UpdatePurchaseOrderRequest;
 import com.harusari.chainware.purchase.command.domain.aggregate.PurchaseOrder;
@@ -19,12 +21,21 @@ import com.harusari.chainware.requisition.query.dto.response.RequisitionItemResp
 import com.harusari.chainware.requisition.query.mapper.RequisitionQueryMapper;
 import com.harusari.chainware.vendor.query.dto.VendorDetailDto;
 import com.harusari.chainware.vendor.query.service.VendorQueryService;
+import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInbound;
+import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInventory;
+import com.harusari.chainware.warehouse.command.domain.repository.WarehouseInboundRepository;
+import com.harusari.chainware.warehouse.command.domain.repository.WarehouseInventoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +46,8 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
     private final PurchaseOrderCodeGenerator codeGenerator;
     private final RequisitionQueryMapper requisitionQueryMapper;
     private final VendorQueryService vendorQueryService;
+    private final WarehouseInboundRepository warehouseInboundRepository;
+    private final WarehouseInventoryRepository warehouseInventoryRepository;
 
     @Override
     @Transactional
@@ -141,7 +154,7 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
     @Transactional
     public void approvePurchaseOrder(Long purchaseOrderId, Long memberId) {
         PurchaseOrder order = purchaseOrderRepository.findById(purchaseOrderId)
-                .orElseThrow(() -> new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_UNAUTHORIZED_VENDOR));
+                .orElseThrow(() -> new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_NOT_FOUND));
 
         if (!order.getPurchaseOrderStatus().equals(PurchaseOrderStatus.REQUESTED)) {
             throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_APPROVE_INVALID_STATUS);
@@ -200,5 +213,76 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
         order.shipped();
     }
 
+    @Override
+    @Transactional
+    public void inboundPurchaseOrder(Long purchaseOrderId, Long memberId, PurchaseInboundRequest request) {
+        // 1. 발주서 조회 및 상태 검증
+        PurchaseOrder order = purchaseOrderRepository.findById(purchaseOrderId)
+                .orElseThrow(() -> new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_NOT_FOUND));
+
+        if (!order.getPurchaseOrderStatus().equals(PurchaseOrderStatus.SHIPPED)) {
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_SHIP_INVALID_STATUS);
+        }
+
+        Long warehouseId = order.getWarehouseId();
+
+        // 2. 발주 상세 품목 조회
+        List<PurchaseOrderDetail> details = purchaseOrderDetailRepository.findByPurchaseOrderId(purchaseOrderId);
+        if (details.isEmpty()) {
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.NO_PURCHASE_ORDER_DETAILS);
+        }
+
+        Set<Long> validDetailIds = details.stream()
+                .map(PurchaseOrderDetail::getPurchaseOrderDetailId)
+                .collect(Collectors.toSet());
+
+        // 3. 요청으로 받은 유통기한 매핑
+        Map<Long, LocalDate> expirationDateMap = new HashMap<>();
+        for (PurchaseInboundItem item : request.getProducts()) {
+            Long detailId = item.getPurchaseOrderDetailId();
+            if (!validDetailIds.contains(detailId)) {
+                throw new PurchaseOrderException(PurchaseOrderErrorCode.INVALID_PURCHASE_ORDER_DETAIL_ID);
+            }
+            expirationDateMap.put(detailId, item.getExpirationDate());
+        }
+
+
+        // 4. 입고 기록 저장 (warehouse_inbound)
+        List<WarehouseInbound> inboundList = details.stream().map(detail -> {
+            LocalDate expirationDate = expirationDateMap.get(detail.getPurchaseOrderDetailId());
+            if (expirationDate == null) {
+                throw new PurchaseOrderException(PurchaseOrderErrorCode.EXPIRATION_DATE_REQUIRED);
+            }
+            return WarehouseInbound.builder()
+                    .purchaseOrderId(order.getPurchaseOrderId())
+                    .warehouseId(warehouseId)
+                    .productId(detail.getProductId())
+                    .unitQuantity(detail.getQuantity())
+                    .expirationDate(expirationDate)
+                    .inboundedAt(LocalDateTime.now())
+                    .build();
+        }).toList();
+        warehouseInboundRepository.saveAll(inboundList);
+
+        // 5. 재고 반영 (warehouse_inventory)
+        for (PurchaseOrderDetail detail : details) {
+            warehouseInventoryRepository.findByWarehouseIdAndProductId(warehouseId, detail.getProductId())
+                    .ifPresentOrElse(
+                            inventory -> inventory.updateQuantity(inventory.getQuantity() + detail.getQuantity(), LocalDateTime.now()),
+                            () -> {
+                                WarehouseInventory newInventory = WarehouseInventory.builder()
+                                        .warehouseId(warehouseId)
+                                        .productId(detail.getProductId())
+                                        .quantity(detail.getQuantity())
+                                        .reservedQuantity(0)
+                                        .build();
+                                warehouseInventoryRepository.save(newInventory);
+                            }
+                    );
+        }
+
+        // 6. 상태 전이 → WAREHOUSED
+        order.warehoused(PurchaseOrderStatus.WAREHOUSED);
+    }
 
 }
