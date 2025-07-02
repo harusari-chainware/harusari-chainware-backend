@@ -20,7 +20,9 @@ public enum TakeBackErrorCode {
     INVALID_TAKE_BACK_STATUS_FOR_REJECT("10005", "수거 상태가 아닌 반품은 반려할 수 없습니다.", HttpStatus.BAD_REQUEST),
     ORDER_DETAIL_NOT_FOUND("10005", "반품할 수 있는 주문 상세 제품이 아닙니다.", HttpStatus.BAD_REQUEST),
     WAREHOUSE_NOT_FOUND("10006", "해당 사용자가 관리하는 창고가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
-
+    INVALID_TAKE_BACK_ITEMS("10011", "반품 항목 정보가 없습니다.", HttpStatus.BAD_REQUEST),
+    IMAGE_COUNT_MISMATCH("10012", "반품 이미지 개수가 반품 항목 개수와 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
+    IMAGE_FILE_NOT_FOUND("10013", "반품 이미지가 누락되었습니다.", HttpStatus.BAD_REQUEST),
     INVENTORY_NOT_FOUND("10003", "재고가 없는 제품입니다.", HttpStatus.BAD_REQUEST);
 
     private final String errorCode;

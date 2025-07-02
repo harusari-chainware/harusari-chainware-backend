@@ -6,11 +6,12 @@ import com.harusari.chainware.takeback.command.application.dto.request.TakeBackC
 import com.harusari.chainware.takeback.command.application.dto.request.TakeBackRejectRequest;
 import com.harusari.chainware.takeback.command.application.dto.response.TakeBackCommandResponse;
 import com.harusari.chainware.takeback.command.application.service.TakeBackCommandService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -24,10 +25,13 @@ public class TakeBackCommandController {
     // 반품 신청
     @PostMapping
     public ResponseEntity<ApiResponse<TakeBackCommandResponse>> createTakeBack(
-            @RequestBody @Valid TakeBackCreateRequest request
+            @RequestPart TakeBackCreateRequest request,
+            @RequestPart List<MultipartFile> imageFiles
     ) {
-        TakeBackCommandResponse response = takeBackCommandService.createTakeBack(request);
-        return ResponseEntity.ok(ApiResponse.success(response));
+        TakeBackCommandResponse response = takeBackCommandService.createTakeBack(request, imageFiles);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success(response));
     }
 
     // 반품 취소

@@ -1,5 +1,6 @@
 package com.harusari.chainware.takeback.command.application.service;
 
+import com.harusari.chainware.common.infrastructure.storage.StorageUploader;
 import com.harusari.chainware.delivery.command.domain.aggregate.Delivery;
 import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryMethod;
 import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryStatus;
@@ -21,11 +22,13 @@ import com.harusari.chainware.warehouse.command.domain.repository.WarehouseRepos
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.IntStream;
 
 @Service
 @Transactional
@@ -38,10 +41,24 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
     private final OrderDetailRepository orderDetailRepository;
     private final DeliveryRepository deliveryRepository;
     private final WarehouseRepository warehouseRepository;
+    private final StorageUploader storageUploader;
+
+    private static final String TAKE_BACK_IMAGE_DIR = "takeback";
 
     // 반품 신청
     @Override
-    public TakeBackCommandResponse createTakeBack(TakeBackCreateRequest request) {
+    public TakeBackCommandResponse createTakeBack(TakeBackCreateRequest request, List<MultipartFile> imageFiles) {
+        // 0. 유효성 검증
+        List<TakeBackCreateRequest.TakeBackItemRequest> items = request.getItems();
+
+        if (items == null || items.isEmpty()) {
+            throw new TakeBackException(TakeBackErrorCode.INVALID_TAKE_BACK_ITEMS);
+        }
+
+        if (imageFiles == null || imageFiles.size() != items.size()) {
+            throw new TakeBackException(TakeBackErrorCode.IMAGE_COUNT_MISMATCH);
+        }
+
         // 1. 반품 엔티티 저장
         String takeBackCode = generateTakeBackCode();
         TakeBack takeBack = takeBackRepository.save(TakeBack.builder()
@@ -49,20 +66,33 @@ public class TakeBackCommandServiceImpl implements TakeBackCommandService {
                 .takeBackCode(takeBackCode)
                 .build());
 
-        // 2. 반품 상세 저장 (OrderDetail 조회 후 정보 채움)
-        List<TakeBackDetail> details = request.getItems().stream().map(item -> {
-            OrderDetail orderDetail = orderDetailRepository.findById(item.getOrderDetailId())
-                    .orElseThrow(() -> new TakeBackException(TakeBackErrorCode.ORDER_DETAIL_NOT_FOUND));
+        // 2. 반품 상세 저장 (반품 이미지 포함)
+        List<TakeBackDetail> details = IntStream.range(0, items.size())
+                .mapToObj(i -> {
+                    TakeBackCreateRequest.TakeBackItemRequest item = items.get(i);
 
-            return TakeBackDetail.builder()
-                    .takeBackId(takeBack.getTakeBackId())
-                    .productId(orderDetail.getProductId())
-                    .quantity(orderDetail.getQuantity())
-                    .price(orderDetail.getUnitPrice())
-                    .takeBackReason(item.getTakeBackReason())
-                    .takeBackImage(item.getTakeBackImage())
-                    .build();
-        }).toList();
+                    // 반품 이미지 불러오기
+                    MultipartFile imageFile = imageFiles.get(i);
+
+                    if (imageFile == null || imageFile.isEmpty()) {
+                        throw new TakeBackException(TakeBackErrorCode.IMAGE_FILE_NOT_FOUND);
+                    }
+
+                    String filePath = storageUploader.uploadTakeBackImage(imageFile, TAKE_BACK_IMAGE_DIR);
+
+                    // 반품 상세 불러오기
+                    OrderDetail orderDetail = orderDetailRepository.findById(item.getOrderDetailId())
+                            .orElseThrow(() -> new TakeBackException(TakeBackErrorCode.ORDER_DETAIL_NOT_FOUND));
+
+                    return TakeBackDetail.builder()
+                            .takeBackId(takeBack.getTakeBackId())
+                            .productId(orderDetail.getProductId())
+                            .quantity(orderDetail.getQuantity())
+                            .price(orderDetail.getUnitPrice())
+                            .takeBackReason(item.getTakeBackReason())
+                            .takeBackImage(filePath)
+                            .build();
+                }).toList();
 
         takeBackDetailRepository.saveAll(details);
 
