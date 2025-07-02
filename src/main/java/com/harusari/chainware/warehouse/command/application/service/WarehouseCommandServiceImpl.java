@@ -124,11 +124,22 @@ public class WarehouseCommandServiceImpl implements WarehouseCommandService{
     // 보유 재고 수정
     @Override
     public WarehouseInventoryCommandResponse updateInventory(Long inventoryId, WarehouseInventoryUpdateRequest request) {
-        // 1. 창고 검증
+        // 1. 보유 재고 조회
         WarehouseInventory inventory = warehouseInventoryRepository.findById(inventoryId)
                 .orElseThrow(() -> new WarehouseException(WarehouseErrorCode.INVENTORY_NOT_FOUND));
 
-        // 2. 재고 수량 수정
+        Integer newQuantity = request.getQuantity();
+
+        // 2. 안전 재고 및 예약 재고에 대한 수량 검증
+        if (newQuantity < inventory.getSafetyQuantity()) {
+            throw new WarehouseException(WarehouseErrorCode.QUANTITY_LESS_THAN_SAFETY_STOCK);
+        }
+
+        if (newQuantity < inventory.getReservedQuantity()) {
+            throw new WarehouseException(WarehouseErrorCode.QUANTITY_LESS_THAN_RESERVED_STOCK);
+        }
+
+        // 3. 재고 수량 수정
         inventory.updateQuantity(request.getQuantity(), LocalDateTime.now());
 
         return toInventoryResponse(inventory);
@@ -140,6 +151,11 @@ public class WarehouseCommandServiceImpl implements WarehouseCommandService{
         // 1. 창고 검증
         WarehouseInventory inventory = warehouseInventoryRepository.findById(inventoryId)
                 .orElseThrow(() -> new WarehouseException(WarehouseErrorCode.INVENTORY_NOT_FOUND));
+
+        // 2. 현재 보유 수량 및 예약 수량 확인
+        if (inventory.getQuantity() > 0 || inventory.getReservedQuantity() > 0) {
+            throw new WarehouseException(WarehouseErrorCode.INVENTORY_CANNOT_BE_DELETED_WHILE_QUANTITY_EXISTS);
+        }
 
         // 2. 재고 삭제
         warehouseInventoryRepository.delete(inventory);
