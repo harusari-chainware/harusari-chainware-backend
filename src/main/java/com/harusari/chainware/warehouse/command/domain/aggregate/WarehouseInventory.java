@@ -71,4 +71,11 @@ public class WarehouseInventory {
         this.modifiedAt = modifiedAt;
     }
 
+    public void decreaseQuantity(int amount) {
+        if (amount > quantity) {
+            throw new IllegalArgumentException("재고 부족");
+        }
+        this.quantity -= amount;
+    }
+
 }
