@@ -1,11 +1,9 @@
 package com.harusari.chainware.warehouse.query.repository;
 
-import com.harusari.chainware.common.domain.vo.Address;
 import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryMethod;
 import com.harusari.chainware.member.command.domain.aggregate.QMember;
 import com.harusari.chainware.warehouse.query.dto.request.WarehouseSearchRequest;
 import com.harusari.chainware.warehouse.query.dto.response.*;
-import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;

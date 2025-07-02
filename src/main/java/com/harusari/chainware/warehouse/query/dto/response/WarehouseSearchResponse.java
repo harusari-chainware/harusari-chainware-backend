@@ -2,13 +2,13 @@ package com.harusari.chainware.warehouse.query.dto.response;
 
 import com.harusari.chainware.common.domain.vo.Address;
 import com.querydsl.core.annotations.QueryProjection;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 @Getter
 public class WarehouseSearchResponse {
+
     private Long warehouseId;
     private String warehouseName;
     private Address warehouseAddress;

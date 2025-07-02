@@ -7,6 +7,7 @@ import lombok.Getter;
 
 @Getter
 public class ProductSimpleInfo {
+
     private Long productId;
     private String productCode;
     private String productName;
@@ -16,9 +17,11 @@ public class ProductSimpleInfo {
     private StoreType storeType;
 
     @QueryProjection
-    public ProductSimpleInfo(Long productId, String productCode, String productName,
-                             String topCategoryName, String categoryName,
-                             Integer basePrice, StoreType storeType) {
+    public ProductSimpleInfo(
+            Long productId, String productCode, String productName,
+            String topCategoryName, String categoryName,
+            Integer basePrice, StoreType storeType
+    ) {
         this.productId = productId;
         this.productCode = productCode;
         this.productName = productName;
@@ -27,4 +30,5 @@ public class ProductSimpleInfo {
         this.basePrice = basePrice;
         this.storeType = storeType;
     }
+
 }

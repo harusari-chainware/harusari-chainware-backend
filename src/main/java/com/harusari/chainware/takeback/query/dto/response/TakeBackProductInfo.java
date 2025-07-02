@@ -1,7 +1,6 @@
 package com.harusari.chainware.takeback.query.dto.response;
 
 import com.querydsl.core.annotations.QueryProjection;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter

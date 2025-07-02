@@ -14,13 +14,16 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class TakeBackQueryServiceImpl implements TakeBackQueryService {
+
     private final TakeBackQueryRepository takeBackQueryRepository;
 
+    // 반품 목록 조회
     @Override
     public PageResponse<TakeBackSearchResponse> getTakeBackList(TakeBackSearchRequest request, Pageable pageable) {
         return PageResponse.from(takeBackQueryRepository.searchTakeBackList(request, pageable));
     }
 
+    // 반품 상세 조회
     @Override
     public TakeBackDetailResponse getTakeBackDetail(Long takeBackId) {
         return takeBackQueryRepository.findTakeBackDetailById(takeBackId);

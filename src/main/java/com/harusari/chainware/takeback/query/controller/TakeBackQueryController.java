@@ -21,6 +21,7 @@ public class TakeBackQueryController {
 
     private final TakeBackQueryService takeBackQueryService;
 
+    // 반품 목록 조회
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<TakeBackSearchResponse>>> getTakeBackList(
             TakeBackSearchRequest request,
@@ -30,6 +31,7 @@ public class TakeBackQueryController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    // 반품 상세 조회
     @GetMapping("/{takeBackId}")
     public ResponseEntity<ApiResponse<TakeBackDetailResponse>> getTakeBackDetail(
             @PathVariable Long takeBackId

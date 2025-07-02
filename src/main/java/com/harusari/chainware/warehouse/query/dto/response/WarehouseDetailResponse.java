@@ -11,6 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 public class WarehouseDetailResponse {
     private WarehouseBasicInfo warehouseInfo;
-    private List<InboundHistoryInfo> inboundHistory;     // 입고 이력
-    private List<OutboundHistoryInfo> outboundHistory;   // 배송 이력
+    private List<InboundHistoryInfo> inboundHistory;
+    private List<OutboundHistoryInfo> outboundHistory;
 }

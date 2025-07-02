@@ -32,4 +32,5 @@ public class TakeBackDetailResponse {
         this.orderInfo = orderInfo;
         this.productInfos = productInfos;
     }
+
 }

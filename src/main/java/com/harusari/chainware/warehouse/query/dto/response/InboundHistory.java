@@ -13,6 +13,6 @@ public class InboundHistory {
     private String purchaseOrderCode;
     private Long purchaseOrderId;
     private Integer quantity;
-//    private LocalDate expirationDate;
+    private LocalDate expirationDate;
     private LocalDateTime inboundedAt;
 }

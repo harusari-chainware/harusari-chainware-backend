@@ -1,15 +1,12 @@
 package com.harusari.chainware.takeback.query.repository;
 
-import com.harusari.chainware.delivery.command.domain.aggregate.QDelivery;
 import com.harusari.chainware.delivery.query.dto.response.FranchiseInfo;
 import com.harusari.chainware.delivery.query.dto.response.WarehouseInfo;
 import com.harusari.chainware.takeback.command.domain.aggregate.TakeBackStatus;
 import com.harusari.chainware.takeback.query.dto.request.TakeBackSearchRequest;
 import com.harusari.chainware.takeback.query.dto.response.*;
-import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,7 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,6 +33,7 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
 
     private final JPAQueryFactory queryFactory;
 
+    // 반품 목록 조회
     @Override
     public Page<TakeBackSearchResponse> searchTakeBackList(TakeBackSearchRequest request, Pageable pageable) {
         List<TakeBackSearchResponse> contents = queryFactory
@@ -92,10 +89,9 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
         return new PageImpl<>(contents, pageable, Optional.ofNullable(total).orElse(0L));
     }
 
+    // 반품 상세 조회
     @Override
     public TakeBackDetailResponse findTakeBackDetailById(Long takeBackId) {
-
-        // 1. 기본 정보 + 조인 정보 조회
         Tuple basic = queryFactory
                 .select(
                         takeBack.takeBackCode,
@@ -130,7 +126,6 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
                 .where(takeBack.takeBackId.eq(takeBackId))
                 .fetchOne();
 
-        // 2. 반품 상세 목록 조회
         List<TakeBackProductInfo> productInfos = queryFactory
                 .select(new QTakeBackProductInfo(
                         product.productId,
@@ -148,7 +143,6 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
                 .where(takeBackDetail.takeBackId.eq(takeBackId))
                 .fetch();
 
-        // 3. 응답 조립
         TakeBackBasicInfo takeBackInfo = new TakeBackBasicInfo(
                 basic.get(takeBack.takeBackCode),
                 basic.get(takeBack.takeBackStatus),

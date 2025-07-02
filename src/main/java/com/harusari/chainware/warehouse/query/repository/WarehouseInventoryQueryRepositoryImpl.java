@@ -6,8 +6,6 @@ import com.harusari.chainware.warehouse.exception.WarehouseException;
 import com.harusari.chainware.warehouse.exception.WarehouseErrorCode;
 import com.harusari.chainware.warehouse.query.dto.request.WarehouseInventorySearchRequest;
 import com.harusari.chainware.warehouse.query.dto.response.*;
-import com.querydsl.core.Tuple;
-import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -103,7 +101,6 @@ public class WarehouseInventoryQueryRepositoryImpl implements WarehouseInventory
         return new PageImpl<>(contents, pageable, Optional.ofNullable(total).orElse(0L));
     }
 
-
     // 보유 재고 상세 조회
     @Override
     public WarehouseInventoryDetailResponse findWarehouseInventoryDetail(Long warehouseInventoryId) {
@@ -164,7 +161,7 @@ public class WarehouseInventoryQueryRepositoryImpl implements WarehouseInventory
                         purchaseOrder.purchaseOrderCode,
                         purchaseOrder.purchaseOrderId,
                         warehouseInbound.unitQuantity,
-//                        warehouseInbound.expiraionDate,
+                        warehouseInbound.expirationDate,
                         warehouseInbound.inboundedAt
                 ))
                 .from(warehouseInbound)
