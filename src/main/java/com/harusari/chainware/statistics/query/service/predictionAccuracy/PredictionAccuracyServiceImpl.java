@@ -1,5 +1,7 @@
 package com.harusari.chainware.statistics.query.service.predictionAccuracy;
 
+import com.harusari.chainware.statistics.exception.StatisticsErrorCode;
+import com.harusari.chainware.statistics.exception.StatisticsException;
 import com.harusari.chainware.statistics.query.dto.predictionAccuracy.PredictionAccuracyResponseDto;
 import com.harusari.chainware.statistics.query.mapper.PredictionAccuracyQueryMapper;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +21,15 @@ public class PredictionAccuracyServiceImpl implements PredictionAccuracyService 
     @Override
     @Transactional(readOnly = true)
     public Object getSummary(String predictionType, String periodType, LocalDate targetDate, Long franchiseId) {
+        if (targetDate == null) {
+            targetDate = LocalDate.now().minusDays(1);
+        }
+
         return switch (periodType.toUpperCase()) {
             case "DAILY" -> getDailySummary(predictionType, targetDate, franchiseId);
             case "WEEKLY" -> getRangeSummary(predictionType, targetDate.minusDays(6), targetDate, franchiseId);
             case "MONTHLY" -> getRangeSummary(predictionType, targetDate.minusDays(29), targetDate, franchiseId);
-            default -> throw new IllegalArgumentException("Invalid periodType: " + periodType);
+            default -> throw new StatisticsException(StatisticsErrorCode.INVALID_PREDICTION_PERIOD);
         };
     }
 
@@ -32,6 +38,10 @@ public class PredictionAccuracyServiceImpl implements PredictionAccuracyService 
                 ? mapper.findDailyAccuracyByType(predictionType, targetDate)
                 : mapper.findDailyAccuracyByFranchise(predictionType, targetDate, franchiseId);
 
+        if (dto == null) {
+            throw new StatisticsException(StatisticsErrorCode.PREDICTION_DATA_NOT_FOUND);
+        }
+
         return calculateMetrics(dto);
     }
 
@@ -39,6 +49,10 @@ public class PredictionAccuracyServiceImpl implements PredictionAccuracyService 
         List<PredictionAccuracyResponseDto> dtos = (franchiseId == null)
                 ? mapper.findWeeklyAccuracyByType(predictionType, startDate, endDate)
                 : mapper.findWeeklyAccuracyByFranchise(predictionType, startDate, endDate, franchiseId);
+
+        if (dtos == null || dtos.isEmpty()) {
+            throw new StatisticsException(StatisticsErrorCode.PREDICTION_DATA_NOT_FOUND);
+        }
 
         return dtos.stream().map(this::calculateMetrics).collect(Collectors.toList());
     }
@@ -55,4 +69,3 @@ public class PredictionAccuracyServiceImpl implements PredictionAccuracyService 
         return dto;
     }
 }
-
