@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Auto Assign Reviewers and Assignees
-        uses: kentaro-m/auto-assign-action@v1.2.1
+        uses: hkusu/auto-assign-action@v1.2.1
         with:
-          repo-token: "${{ secrets.PERSONAL_ACCESS_TOKEN }}"
-          configuration-path: .github/pr-auto-assign-config.yml
+          assignees: ${{ github.actor }}
+          reviewers: memory-h, z00m-1n, jang9465, Lee-gi-yeun, jihye25
