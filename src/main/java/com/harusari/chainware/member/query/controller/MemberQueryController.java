@@ -1,5 +1,6 @@
 package com.harusari.chainware.member.query.controller;
 
+import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.common.dto.PageResponse;
 import com.harusari.chainware.member.command.application.dto.response.EmailExistsResponse;
@@ -7,6 +8,7 @@ import com.harusari.chainware.member.query.dto.request.MemberSearchRequest;
 import com.harusari.chainware.member.query.dto.response.LoginHistoryResponse;
 import com.harusari.chainware.member.query.dto.response.MemberSearchDetailResponse;
 import com.harusari.chainware.member.query.dto.response.MemberSearchResponse;
+import com.harusari.chainware.member.query.dto.response.MyMemberDetailResponse;
 import com.harusari.chainware.member.query.service.MemberQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -61,7 +64,7 @@ public class MemberQueryController {
                 .body(ApiResponse.success(pageResponse));
     }
 
-    @Operation(summary = "회원 상세 조회", description = "특정 회원의 상세 정보를 조회합니다.")
+    @Operation(summary = "회원 상세 조회 [마스터]", description = "특정 회원의 상세 정보를 조회합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "회원 상세 조회 성공")
     })
@@ -75,6 +78,22 @@ public class MemberQueryController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(memberSearchDetailResponse));
+    }
+
+    @Operation(summary = "회원 상세 조회 [회원 본인]", description = "특정 회원의 상세 정보를 조회합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "회원 상세 조회 성공")
+    })
+    @GetMapping("/members/me")
+    public ResponseEntity<ApiResponse<MyMemberDetailResponse>> getMyProfile(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long memberId = userDetails.getMemberId();
+        MyMemberDetailResponse myMemberDetailResponse = memberQueryService.getMyProfile(memberId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(myMemberDetailResponse));
     }
 
     @Operation(summary = "회원 로그인 이력 조회", description = "회원의 로그인 이력을 조회합니다.")

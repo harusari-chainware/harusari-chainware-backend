@@ -6,6 +6,7 @@ import com.harusari.chainware.franchise.command.application.service.FranchiseCom
 import com.harusari.chainware.member.command.application.dto.request.MemberCreateRequest;
 import com.harusari.chainware.member.command.application.dto.request.PasswordChangeRequest;
 import com.harusari.chainware.member.command.application.dto.request.UpdateMemberRequest;
+import com.harusari.chainware.member.command.application.dto.request.UpdateMyInfoRequest;
 import com.harusari.chainware.member.command.application.dto.request.franchise.MemberWithFranchiseRequest;
 import com.harusari.chainware.member.command.application.dto.request.vendor.MemberWithVendorRequest;
 import com.harusari.chainware.member.command.application.dto.request.warehouse.MemberWithWarehouseRequest;
@@ -58,7 +59,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
             registerMember(memberCreateRequest);
             deleteEmailVerificationToken(memberCreateRequest.validationToken());
         } else {
-            throw new InvalidMemberAuthorityException(MemberErrorCode.INVALID_MEMBER_AUTHORITY);
+            throw new InvalidMemberAuthorityException(INVALID_MEMBER_AUTHORITY);
         }
     }
 
@@ -71,7 +72,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
             franchiseCommandService.createFranchiseWithAgreement(member.getMemberId(), memberWithFranchiseRequest, agreementFile);
             deleteEmailVerificationToken(memberCreateRequest.validationToken());
         } else {
-            throw new InvalidMemberAuthorityException(MemberErrorCode.INVALID_MEMBER_AUTHORITY);
+            throw new InvalidMemberAuthorityException(INVALID_MEMBER_AUTHORITY);
         }
     }
 
@@ -84,7 +85,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
             vendorCommandService.createVendorWithAgreement(member.getMemberId(), memberWithVendorRequest, agreementFile);
             deleteEmailVerificationToken(memberCreateRequest.validationToken());
         } else {
-            throw new InvalidMemberAuthorityException(MemberErrorCode.INVALID_MEMBER_AUTHORITY);
+            throw new InvalidMemberAuthorityException(INVALID_MEMBER_AUTHORITY);
         }
     }
 
@@ -98,7 +99,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
             warehouseRepository.save(warehouse);
             deleteEmailVerificationToken(memberCreateRequest.validationToken());
         } else {
-            throw new InvalidMemberAuthorityException(MemberErrorCode.INVALID_MEMBER_AUTHORITY);
+            throw new InvalidMemberAuthorityException(INVALID_MEMBER_AUTHORITY);
         }
     }
 
@@ -114,13 +115,21 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     }
 
     @Override
-    public void updateMemberRequest(Long memberId, UpdateMemberRequest updateMemberRequest) {
+    public void updateMemberInfo(Long memberId, UpdateMemberRequest updateMemberRequest) {
         Member member = memberCommandRepository.findMemberByMemberId(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND_EXCEPTION));
 
         Authority authority = authorityCommandRepository.findByAuthorityName(updateMemberRequest.authorityName());
 
         member.updateMember(authority.getAuthorityId(), updateMemberRequest);
+    }
+
+    @Override
+    public void updateMyInfo(Long memberId, UpdateMyInfoRequest updateMyInfoRequest) {
+        Member member = memberCommandRepository.findMemberByMemberId(memberId)
+                .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND_EXCEPTION));
+
+        member.updateMyInfo(updateMyInfoRequest);
     }
 
     @Override
@@ -135,7 +144,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         validateEmailVerification(memberCreateRequest.email(), memberCreateRequest.validationToken());
 
         if (memberCommandRepository.existsByEmail(memberCreateRequest.email())) {
-            throw new EmailAlreadyExistsException(MemberErrorCode.EMAIL_ALREADY_EXISTS);
+            throw new EmailAlreadyExistsException(EMAIL_ALREADY_EXISTS);
         }
 
         Member member = memberMapStruct.toMember(memberCreateRequest);
@@ -154,7 +163,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         String emailInRedis = redisTemplate.opsForValue().get(redisKey);
 
         if (emailInRedis == null || !emailInRedis.equals(email)) {
-            throw new EmailVerificationRequiredException(MemberErrorCode.EMAIL_VERIFICATION_REQUIRED);
+            throw new EmailVerificationRequiredException(EMAIL_VERIFICATION_REQUIRED);
         }
     }
 

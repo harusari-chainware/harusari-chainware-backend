@@ -6,6 +6,7 @@ import com.harusari.chainware.member.query.dto.request.MemberSearchRequest;
 import com.harusari.chainware.member.query.dto.response.LoginHistoryResponse;
 import com.harusari.chainware.member.query.dto.response.MemberSearchDetailResponse;
 import com.harusari.chainware.member.query.dto.response.MemberSearchResponse;
+import com.harusari.chainware.member.query.dto.response.MyMemberDetailResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -99,6 +100,21 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepositoryCustom {
                         authority.authorityLabelKr, member.phoneNumber,
                         member.birthDate, member.position, member.joinAt,
                         member.modifiedAt, member.isDeleted
+                ))
+                .from(member)
+                .leftJoin(authority).on(member.authorityId.eq(authority.authorityId))
+                .where(member.memberId.eq(memberId))
+                .fetchOne()
+        );
+    }
+
+    @Override
+    public Optional<MyMemberDetailResponse> findMyMemberDetailById(Long memberId) {
+        return Optional.ofNullable(queryFactory
+                .select(Projections.constructor(MyMemberDetailResponse.class,
+                        member.memberId, member.email, member.name,
+                        authority.authorityLabelKr, member.phoneNumber,
+                        member.birthDate, member.position
                 ))
                 .from(member)
                 .leftJoin(authority).on(member.authorityId.eq(authority.authorityId))
