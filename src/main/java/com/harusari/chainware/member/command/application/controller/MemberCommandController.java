@@ -4,6 +4,7 @@ import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.member.command.application.dto.request.MemberCreateRequest;
 import com.harusari.chainware.member.command.application.dto.request.PasswordChangeRequest;
+import com.harusari.chainware.member.command.application.dto.request.UpdateMyInfoRequest;
 import com.harusari.chainware.member.command.application.dto.request.UpdateMemberRequest;
 import com.harusari.chainware.member.command.application.dto.request.franchise.MemberWithFranchiseRequest;
 import com.harusari.chainware.member.command.application.dto.request.vendor.MemberWithVendorRequest;
@@ -112,7 +113,7 @@ public class MemberCommandController {
                 .body(ApiResponse.success(null));
     }
 
-    @Operation(summary = "회원 정보 수정", description = "회원 정보를 수정합니다.")
+    @Operation(summary = "회원 정보 수정 [마스터]", description = "회원 정보를 수정합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "회원 정보 수정 성공")
     })
@@ -123,7 +124,25 @@ public class MemberCommandController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "회원 수정 요청")
             @RequestBody UpdateMemberRequest updateMemberRequest
     ) {
-        memberCommandService.updateMemberRequest(memberId, updateMemberRequest);
+        memberCommandService.updateMemberInfo(memberId, updateMemberRequest);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(null));
+    }
+
+    @Operation(summary = "회원 정보 수정 [회원 본인]", description = "회원 정보를 수정합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "회원 정보 수정 성공")
+    })
+    @PutMapping("/members/me")
+    public ResponseEntity<ApiResponse<Void>> updateMyInfo(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "회원 수정 요청")
+            @RequestBody UpdateMyInfoRequest updateMyInfoRequest,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long memberId = userDetails.getMemberId();
+        memberCommandService.updateMyInfo(memberId, updateMyInfoRequest);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

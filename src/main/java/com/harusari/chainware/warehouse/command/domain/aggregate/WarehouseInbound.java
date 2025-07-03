@@ -3,6 +3,7 @@ package com.harusari.chainware.warehouse.command.domain.aggregate;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -28,18 +29,21 @@ public class WarehouseInbound {
     @Column(name = "unit_quantity")
     private int unitQuantity;
 
+    private LocalDate expirationDate;
+
     @Column(name = "inbounded_at")
     private LocalDateTime inboundedAt;
 
     @Builder
     public WarehouseInbound(Long inboundId, Long purchaseOrderId, Long warehouseId,
-                            Long productId, int unitQuantity, LocalDateTime inboundedAt
+                            Long productId, int unitQuantity, LocalDate expirationDate, LocalDateTime inboundedAt
                          ) {
         this.inboundId = inboundId;
         this.purchaseOrderId = purchaseOrderId;
         this.warehouseId = warehouseId;
         this.productId = productId;
         this.unitQuantity = unitQuantity;
+        this.expirationDate = expirationDate;
         this.inboundedAt = inboundedAt;
     }
 }

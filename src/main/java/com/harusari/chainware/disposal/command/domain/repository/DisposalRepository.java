@@ -1,4 +1,7 @@
 package com.harusari.chainware.disposal.command.domain.repository;
 
-public interface DisposalRepository {
+import com.harusari.chainware.disposal.command.domain.aggregate.Disposal;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface DisposalRepository extends JpaRepository<Disposal, Long> {
 }

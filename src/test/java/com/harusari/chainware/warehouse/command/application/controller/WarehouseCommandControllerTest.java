@@ -170,6 +170,7 @@ class WarehouseCommandControllerTest {
 
     @Test
     @DisplayName("[보유 재고 등록] 성공 테스트")
+    @WithMockCustomUser(memberId = 200L, position = "WAREHOUSE_MANAGER")
     void testRegisterInventorySuccess() throws Exception {
         // given
         WarehouseInventoryCreateRequest request = WarehouseInventoryCreateRequest.builder()
@@ -179,7 +180,8 @@ class WarehouseCommandControllerTest {
                         .build()))
                 .build();
 
-        when(warehouseCommandService.registerInventory(eq(1L), any())).thenReturn(warehouseResponse);
+        when(warehouseCommandService.registerInventory(eq(1L), any(), eq(200L)))
+                .thenReturn(warehouseResponse);
 
         // when & then
         mockMvc.perform(post("/api/v1/warehouse/1/inventory")
@@ -191,6 +193,7 @@ class WarehouseCommandControllerTest {
 
     @Test
     @DisplayName("[보유 재고 등록] 창고 없음 예외 테스트")
+    @WithMockCustomUser(memberId = 200L, position = "WAREHOUSE_MANAGER")
     void testRegisterInventory_WarehouseNotFound() throws Exception {
         // given
         WarehouseInventoryCreateRequest request = WarehouseInventoryCreateRequest.builder()
@@ -202,7 +205,7 @@ class WarehouseCommandControllerTest {
                 ))
                 .build();
 
-        when(warehouseCommandService.registerInventory(eq(1L), any()))
+        when(warehouseCommandService.registerInventory(eq(1L), any(), eq(200L)))
                 .thenThrow(new WarehouseException(WarehouseErrorCode.WAREHOUSE_NOT_FOUND));
 
         // when & then
@@ -216,13 +219,15 @@ class WarehouseCommandControllerTest {
 
     @Test
     @DisplayName("[보유 재고 수정] 성공 테스트")
+    @WithMockCustomUser(memberId = 200L, position = "WAREHOUSE_MANAGER")
     void testUpdateInventorySuccess() throws Exception {
         // given
         WarehouseInventoryUpdateRequest request = WarehouseInventoryUpdateRequest.builder()
                 .quantity(200)
                 .build();
 
-        when(warehouseCommandService.updateInventory(eq(1L), any())).thenReturn(inventoryResponse);
+        when(warehouseCommandService.updateInventory(eq(1L), any(), eq(200L)))
+                .thenReturn(inventoryResponse);
 
         // when & then
         mockMvc.perform(put("/api/v1/warehouse/inventory/1")
@@ -235,13 +240,14 @@ class WarehouseCommandControllerTest {
 
     @Test
     @DisplayName("[보유 재고 수정] 재고 없음 예외 테스트")
+    @WithMockCustomUser(memberId = 200L, position = "WAREHOUSE_MANAGER")
     void testUpdateInventory_NotFound() throws Exception {
         // given
         WarehouseInventoryUpdateRequest request = WarehouseInventoryUpdateRequest.builder()
                 .quantity(100)
                 .build();
 
-        when(warehouseCommandService.updateInventory(eq(1L), any()))
+        when(warehouseCommandService.updateInventory(eq(1L), any(), eq(200L)))
                 .thenThrow(new WarehouseException(WarehouseErrorCode.INVENTORY_NOT_FOUND));
 
         // when & then
@@ -255,9 +261,11 @@ class WarehouseCommandControllerTest {
 
     @Test
     @DisplayName("[보유 재고 삭제] 성공 테스트")
+    @WithMockCustomUser(memberId = 200L, position = "WAREHOUSE_MANAGER")
     void testDeleteInventorySuccess() throws Exception {
         // given
-        when(warehouseCommandService.deleteInventory(1L)).thenReturn(inventoryResponse);
+        when(warehouseCommandService.deleteInventory(eq(1L), eq(200L)))
+                .thenReturn(inventoryResponse);
 
         // when & then
         mockMvc.perform(delete("/api/v1/warehouse/inventory/1"))
@@ -267,9 +275,10 @@ class WarehouseCommandControllerTest {
 
     @Test
     @DisplayName("[보유 재고 삭제] 재고 없음 예외 테스트")
+    @WithMockCustomUser(memberId = 200L, position = "WAREHOUSE_MANAGER")
     void testDeleteInventory_NotFound() throws Exception {
         // given
-        when(warehouseCommandService.deleteInventory(eq(1L)))
+        when(warehouseCommandService.deleteInventory(eq(1L), eq(200L)))
                 .thenThrow(new WarehouseException(WarehouseErrorCode.INVENTORY_NOT_FOUND));
 
         // when & then

@@ -9,7 +9,7 @@ import java.util.List;
 @Builder
 public class DeliveryDetailResponse {
     private DeliveryDetailInfo deliveryInfo;
-//    private WarehouseInfo warehouseInfo;
+    private WarehouseInfo warehouseInfo;
     private FranchiseInfo franchiseInfo;
     private DeliveryOrderInfo orderInfo;
     private List<DeliveryProductInfo> products;

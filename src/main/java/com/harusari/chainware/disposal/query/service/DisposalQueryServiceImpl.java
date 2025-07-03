@@ -1,6 +1,8 @@
 package com.harusari.chainware.disposal.query.service;
 
 import com.harusari.chainware.common.dto.Pagination;
+import com.harusari.chainware.disposal.exception.DisposalErrorCode;
+import com.harusari.chainware.disposal.exception.DisposalException;
 import com.harusari.chainware.disposal.query.dto.DisposalListDto;
 import com.harusari.chainware.disposal.query.dto.DisposalListResponseDto;
 import com.harusari.chainware.disposal.query.dto.DisposalSearchRequestDto;
@@ -32,15 +34,20 @@ public class DisposalQueryServiceImpl implements DisposalQueryService {
 
         switch (authorityType) {
             case FRANCHISE_MANAGER -> franchiseId = franchiseRepository.findFranchiseIdByMemberId(memberId)
-                    .orElseThrow(() -> new RuntimeException("가맹점 없음")).getFranchiseId();
+                    .orElseThrow(() -> new DisposalException(DisposalErrorCode.DISPOSAL_QUERY_NO_FRANCHISE))
+                    .getFranchiseId();
+
             case WAREHOUSE_MANAGER -> warehouseId = warehouseRepository.findWarehouseIdByMemberId(memberId)
-                    .orElseThrow(() -> new RuntimeException("창고 없음")).getWarehouseId();
+                    .orElseThrow(() -> new DisposalException(DisposalErrorCode.DISPOSAL_QUERY_NO_WAREHOUSE))
+                    .getWarehouseId();
+
             case GENERAL_MANAGER, SENIOR_MANAGER, MASTER -> {
                 if (!memberCommandRepository.existsById(memberId)) {
-                    throw new RuntimeException("폐기 조회 권한 없음");
+                    throw new DisposalException(DisposalErrorCode.DISPOSAL_QUERY_UNAUTHORIZED);
                 }
             }
-            default -> throw new RuntimeException("폐기 조회 권한이 없는 사용자입니다.");
+
+            default -> throw new DisposalException(DisposalErrorCode.DISPOSAL_QUERY_UNAUTHORIZED);
         }
 
         List<DisposalListDto> items = mapper.findDisposals(request, franchiseId, warehouseId);
@@ -56,4 +63,5 @@ public class DisposalQueryServiceImpl implements DisposalQueryService {
                         .build())
                 .build();
     }
+
 }

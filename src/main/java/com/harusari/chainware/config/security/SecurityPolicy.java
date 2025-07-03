@@ -16,6 +16,16 @@ import static org.springframework.http.HttpMethod.*;
 public enum SecurityPolicy {
 
     /* Member */
+    // Permit All
+    LOGIN_POST("/api/v1/auth/login", POST, PERMIT_ALL, List.of()), // 로그인
+    REFRESH_POST("/api/v1/auth/refresh", POST, PERMIT_ALL, List.of()), // 리프레시 토큰 재발급
+
+    // Authenticated
+    LOGOUT_POST("/api/v1/auth/logout", POST, AUTHENTICATED, List.of()), // 로그아웃
+    PASSWORD_POST("/api/v1/auth/password", POST, AUTHENTICATED, List.of()), // 비밀번호 변경
+    MEMBERS_ME_GET("/api/v1/members/me", GET, AUTHENTICATED, List.of()), // 회원 정보 조회
+    MEMBERS_ME_PUT("/api/v1/members/me", PUT, AUTHENTICATED, List.of()), // 회원 정보 수정
+
     // Role Based
     EMAIL_EXISTS_GET("/api/v1/members/email-exists", GET, ROLE_BASED, List.of(MASTER)), // 이메일 중복 확인
     MEMBER_HEADQUARTERS_POST("/api/v1/members/headquarters", POST, ROLE_BASED, List.of(MASTER)), // 본사 직원 회원가입
@@ -28,14 +38,6 @@ public enum SecurityPolicy {
     MEMBERS_DELETE("/api/v1/members/{memberId}", DELETE, ROLE_BASED, List.of(MASTER)), // 회원 탈퇴
     LOGIN_HISTORY_GET("/api/v1/members/{memberId}/login-history", GET, ROLE_BASED, List.of(MASTER)), // 로그인 내역 조회
 
-    // Permit All
-    LOGIN_POST("/api/v1/auth/login", POST, PERMIT_ALL, List.of()), // 로그인
-    REFRESH_POST("/api/v1/auth/refresh", POST, PERMIT_ALL, List.of()), // 리프레시 토큰 재발급
-
-    // Authenticated
-    LOGOUT_POST("/api/v1/auth/logout", POST, AUTHENTICATED, List.of()), // 로그아웃
-    PASSWORD_POST("/api/v1/auth/password", POST, AUTHENTICATED, List.of()), // 비밀번호 변경
-
     /* Category */
     CATEGORY_POST("/api/v1/category", POST, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 카테고리 등록
     CATEGORY_PUT("/api/v1/category/{categoryId}", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 카테고리 수정
@@ -43,9 +45,9 @@ public enum SecurityPolicy {
     TOP_CATEGORY_POST("/api/v1/topcategory", POST, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 상위 카테고리 등록
     TOP_CATEGORY_PUT("/api/v1/topcategory/{topCategoryId}", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 상위 카테고리 수정
     TOP_CATEGORY_DELETE("/api/v1/topcategory/{topCategoryId}", DELETE, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 상위 카테고리 삭제
-    CATEGORY_LIST_GET("/api/v1/categories", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, FRANCHISE_MANAGER, VENDOR_MANAGER)), // 전체 카테고리 목록 조회
-    CATEGORY_LIST_BY_TOP_GET("/api/v1/categories/top/{topCategoryId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, FRANCHISE_MANAGER, VENDOR_MANAGER)), // 특정 상위 카테고리와 카테고리, 제품 목록 조회
-    CATEGORY_DETAIL_BY_ID_GET("/api/v1/categories/{categoryId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, FRANCHISE_MANAGER, VENDOR_MANAGER)), // 특정 카테고리와 상위 카테고리, 제품 목록 조회
+    CATEGORY_LIST_GET("/api/v1/categories", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, FRANCHISE_MANAGER)), // 전체 카테고리 목록 조회
+    CATEGORY_LIST_BY_TOP_GET("/api/v1/categories/top/{topCategoryId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, FRANCHISE_MANAGER)), // 특정 상위 카테고리와 카테고리, 제품 목록 조회
+    CATEGORY_DETAIL_BY_ID_GET("/api/v1/categories/{categoryId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, FRANCHISE_MANAGER)), // 특정 카테고리와 상위 카테고리, 제품 목록 조회
 
     /* Contract */
     CONTRACT_POST("/api/v1/contract", POST, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 거래처 별 제품 정보 등록
@@ -68,6 +70,10 @@ public enum SecurityPolicy {
     FRANCHISE_AGREEMENT_DOWNLOAD_URL("/api/v1/franchises/{franchiseId}/agreement/download", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 가맹점 계약서 다운로드
 
     /* Vendor */
+    VENDOR_UPDATE_INFO("/api/v1/vendors/{vendorId}", PUT, ROLE_BASED, List.of(MASTER)), // 거래처 정보 수정
+    VENDOR_UPDATE_STATUS("/api/v1/vendors/{vendorId}/status", PUT, ROLE_BASED, List.of(MASTER)), // 거래처 거래 상태 수정
+    VENDOR_LIST_GET("/api/v1/vendors", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 거래처 목록 조회
+    VENDOR_DETAIL_GET("/api/v1/vendors/{vendorId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 거래처 상세 조회
 
 
     /* Warehouse */
@@ -75,7 +81,12 @@ public enum SecurityPolicy {
     WAREHOUSE_DELETE("/api/v1/warehouse/{warehouseId}", DELETE, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 창고 마스터 삭제
     WAREHOUSE_INVENTORY_REGISTER("/api/v1/warehouse/{warehouseId}/inventory", POST, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 보유 재고 등록
     WAREHOUSE_INVENTORY_UPDATE("/api/v1/warehouse/inventory/{inventoryId}", PUT, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 보유 재고 수정
-    WAREHOUSE_INVENTORY_DELETE("/api/v1/warehouse/inventory/{inventoryId}", PUT, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 보유 재고 삭제
+    WAREHOUSE_INVENTORY_DELETE("/api/v1/warehouse/inventory/{inventoryId}", DELETE, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 보유 재고 삭제
+
+    WAREHOUSE_LIST_GET("/api/v1/warehouse", GET, ROLE_BASED, List.of(WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 창고 마스터 목록 조회
+    WAREHOUSE_DETAIL_GET("/api/v1/warehouse/{warehouseId}", GET, ROLE_BASED, List.of(WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 창고 마스터 상세 조회
+    WAREHOUSE_INVENTORY_LIST_GET("/api/v1/warehouse/inventory", GET, ROLE_BASED, List.of(WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 보유 재고 목록 조회
+    WAREHOUSE_INVENTORY_DETAIL_GET("/api/v1/warehouse/inventory/{inventoryId}", GET, ROLE_BASED, List.of(WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 보유 재고 상세 조회
 
     /* Order */
     ORDER_CREATE("/api/v1/orders", POST, ROLE_BASED, List.of(FRANCHISE_MANAGER)), // 주문 등록
@@ -113,7 +124,6 @@ public enum SecurityPolicy {
     PURCHASE_SHIPPED_PUT("/api/v1/purchases/{purchaseOrderId}/shipped", PUT, ROLE_BASED, List.of(VENDOR_MANAGER)), // 출고 완료 처리
     PURCHASE_PURCHASE_INBOUND("/api/v1/purchases/{purchaseOrderId}/inbound", PUT, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 입고 완료 처리
 
-
     /* Take Back */
     TAKEBACK_REGISTER("/api/v1/takeback", POST, ROLE_BASED, List.of(FRANCHISE_MANAGER)), // 반품 신청
     TAKEBACK_CANCEL("/api/v1/takeback/{takebackId}/cancel", PUT, ROLE_BASED, List.of(FRANCHISE_MANAGER)), // 반품 취소
@@ -126,10 +136,19 @@ public enum SecurityPolicy {
     TAKEBACK_DETAIL_GET("/api/v1/takeback/{takebackId}", GET, ROLE_BASED, List.of(FRANCHISE_MANAGER, WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 반품 상세 조회
 
     /* Disposal */
-
+    DISPOSAL_CREATE("/api/v1/disposal", POST, ROLE_BASED, List.of(FRANCHISE_MANAGER, WAREHOUSE_MANAGER)), // 폐기 등록
+    DISPOSAL_GET("/api/v1/disposal", GET, ROLE_BASED, List.of(FRANCHISE_MANAGER, WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 폐기 조회
 
     /* Statistics */
-    STATISTICS_PREDICTION_COMPARISON("/api/v1/statistics/prediction-comparison", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
+    STATISTICS_DISPOSAL_RATE("/api/v1/statistics/disposal-rate", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 폐기율 조회
+    STATISTICS_INVENTORY_TURNOVER_RATE("/api/v1/statistics/inventory-turnover", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 재고 회전율 조회
+    STATISTICS_MENU_SALES("/api/v1/statistics/menu-sales", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 메뉴별 매출 통계 조회
+    STATISTICS_PURCHASE_ORDER("/api/v1/statistics/purchase-order", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 발주량 통계 조회
+    STATISTICS_SALES_PATTERNS("/api/v1/statistics/patterns", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 매출 패턴 통계 조회
+    STATISTICS_STORE_ORDER("/api/v1/statistics/store-order", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 가맹점 주문량 조회
+    STATISTICS_TOTAL_SALES("/api/v1/statistics/total-sales", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 총 매출 통계 조회
+    STATISTICS_PREDICTION_COMPARISON("/api/v1/statistics/prediction-comparison", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 예측 조회
+    PREDICTION_ACCURACY("/api/v1/accuracy/summary", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 예측 결과값 조회
 
     /* Swagger */
     SWAGGER_UI("/swagger-ui/**", GET, PERMIT_ALL, List.of()),

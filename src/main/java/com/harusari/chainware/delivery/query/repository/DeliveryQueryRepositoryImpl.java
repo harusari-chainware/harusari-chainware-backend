@@ -2,7 +2,6 @@ package com.harusari.chainware.delivery.query.repository;
 
 import com.harusari.chainware.delivery.query.dto.request.DeliverySearchRequest;
 import com.harusari.chainware.delivery.query.dto.response.*;
-import com.harusari.chainware.order.query.dto.response.OrderProductInfo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -34,23 +33,27 @@ public class DeliveryQueryRepositoryImpl implements DeliveryQueryRepositoryCusto
     public Page<DeliverySearchResponse> searchDeliveries(DeliverySearchRequest request, Pageable pageable) {
         List<DeliverySearchResponse> contents = queryFactory
                 .select(Projections.constructor(DeliverySearchResponse.class,
+                        delivery.deliveryId,
+                        delivery.orderId,
+                        delivery.takeBackId,
                         delivery.trackingNumber,
-//                        warehouse.warehouseName,
+                        warehouse.warehouseName,
                         franchise.franchiseName,
                         delivery.carrier,
                         order.orderCode,
                         delivery.deliveryStatus,
                         delivery.startedAt,
-                        delivery.deliveredAt
+                        delivery.deliveredAt,
+                        delivery.createdAt
                 ))
                 .from(delivery)
                 .join(order).on(delivery.orderId.eq(order.orderId))
                 .join(franchise).on(order.franchiseId.eq(franchise.franchiseId))
-//                .join(warehouse).on(order.warehouseId.eq(warehouse.warehouseId))
+                .join(warehouse).on(delivery.warehouseId.eq(warehouse.warehouseId))
                 .where(buildConditions(request))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(delivery.startedAt.desc())
+                .orderBy(delivery.createdAt.desc())
                 .fetch();
 
         Long count = queryFactory
@@ -58,7 +61,7 @@ public class DeliveryQueryRepositoryImpl implements DeliveryQueryRepositoryCusto
                 .from(delivery)
                 .join(order).on(delivery.orderId.eq(order.orderId))
                 .join(franchise).on(order.franchiseId.eq(franchise.franchiseId))
-//                .join(warehouse).on(order.warehouseId.eq(warehouse.warehouseId))
+                .join(warehouse).on(delivery.warehouseId.eq(warehouse.warehouseId))
                 .where(buildConditions(request))
                 .fetchOne();
 
@@ -86,17 +89,23 @@ public class DeliveryQueryRepositoryImpl implements DeliveryQueryRepositoryCusto
             builder.and(delivery.deliveryStatus.eq(request.getDeliveryStatus()));
         }
 
-//        if (request.getWarehouseName() != null && !request.getWarehouseName().isBlank()) {
-//            builder.and(warehouse.warehouseName.containsIgnoreCase(request.getWarehouseName()));
-//        }
-//
-//        if (request.getWarehouseAddress() != null && !request.getWarehouseAddress().isBlank()) {
-//            builder.and(warehouse.warehouseAddress.containsIgnoreCase(request.getWarehouseAddress()));
-//        }
+        if (request.getWarehouseName() != null && !request.getWarehouseName().isBlank()) {
+            builder.and(warehouse.warehouseName.containsIgnoreCase(request.getWarehouseName()));
+        }
 
-//        if (request.getWarehouseStatus() != null) {
-//            builder.and(warehouse.warehouseStatus.eq(request.getWarehouseStatus()));
-//        }
+        if (request.getWarehouseAddress() != null && !request.getWarehouseAddress().isBlank()) {
+            String keyword = request.getWarehouseAddress();
+            builder.and(
+                    warehouse.warehouseAddress.zipcode.containsIgnoreCase(keyword)
+                            .or(warehouse.warehouseAddress.addressRoad.containsIgnoreCase(keyword))
+                            .or(warehouse.warehouseAddress.addressDetail.containsIgnoreCase(keyword))
+            );
+        }
+
+
+        if (request.getWarehouseStatus() != null) {
+            builder.and(warehouse.warehouseStatus.eq(request.getWarehouseStatus()));
+        }
 
         return builder;
     }
@@ -117,16 +126,17 @@ public class DeliveryQueryRepositoryImpl implements DeliveryQueryRepositoryCusto
                 .fetchOne();
 
         // 2. 창고 정보
-//        WarehouseInfo warehouseInfo = queryFactory
-//                .select(Projections.constructor(WarehouseInfo.class,
-//                        warehouse.warehouseName,
-//                        warehouse.warehouseAddress,
-//                        warehouse.warehouseManagerName
-//                ))
-//                .from(delivery)
-//                .join(warehouse).on(delivery.takeBackId.eq(warehouse.warehouseId))
-//                .where(delivery.deliveryId.eq(deliveryId))
-//                .fetchOne();
+        WarehouseInfo warehouseInfo = queryFactory
+                .select(Projections.constructor(WarehouseInfo.class,
+                        warehouse.warehouseName,
+                        warehouse.warehouseAddress,
+                        member.name
+                ))
+                .from(delivery)
+                .join(warehouse).on(delivery.warehouseId.eq(warehouse.warehouseId))
+                .join(member).on(warehouse.memberId.eq(member.memberId))
+                .where(delivery.deliveryId.eq(deliveryId))
+                .fetchOne();
 
         // 3. 가맹점 정보
         FranchiseInfo franchiseInfo = queryFactory
@@ -181,7 +191,7 @@ public class DeliveryQueryRepositoryImpl implements DeliveryQueryRepositoryCusto
 
         return DeliveryDetailResponse.builder()
                 .deliveryInfo(deliveryInfo)
-//                .warehouseInfo(warehouseInfo)
+                .warehouseInfo(warehouseInfo)
                 .franchiseInfo(franchiseInfo)
                 .orderInfo(orderInfo)
                 .products(products)

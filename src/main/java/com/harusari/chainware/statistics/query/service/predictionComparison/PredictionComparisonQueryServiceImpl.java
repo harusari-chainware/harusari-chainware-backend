@@ -1,5 +1,7 @@
 package com.harusari.chainware.statistics.query.service.predictionComparison;
 
+import com.harusari.chainware.statistics.exception.StatisticsErrorCode;
+import com.harusari.chainware.statistics.exception.StatisticsException;
 import com.harusari.chainware.statistics.query.dto.predictionComparison.PredictionComparisonDto;
 import com.harusari.chainware.statistics.query.mapper.PredictionComparisonQueryMapper;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +45,9 @@ public class PredictionComparisonQueryServiceImpl implements PredictionCompariso
                 result.addAll(mapper.getActualPurchaseQuantity(lastMonday, lastSunday));
                 result.addAll(mapper.getPredictedPurchaseQuantity(thisMonday, thisSunday));
             }
+            default -> throw new StatisticsException(StatisticsErrorCode.INVALID_PREDICTION_TYPE);
         }
+
         return result;
     }
 }
