@@ -68,6 +68,10 @@ public enum SecurityPolicy {
     FRANCHISE_AGREEMENT_DOWNLOAD_URL("/api/v1/franchises/{franchiseId}/agreement/download", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 가맹점 계약서 다운로드
 
     /* Vendor */
+    VENDOR_UPDATE_INFO("/api/v1/vendors/{vendorId}", PUT, ROLE_BASED, List.of(MASTER)), // 거래처 정보 수정
+    VENDOR_UPDATE_STATUS("/api/v1/vendors/{vendorId}/status", PUT, ROLE_BASED, List.of(MASTER)), // 거래처 거래 상태 수정
+    VENDOR_LIST_GET("/api/v1/vendors", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 거래처 목록 조회
+    VENDOR_DETAIL_GET("/api/v1/vendors/{vendorId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 거래처 상세 조회
 
 
     /* Warehouse */
