@@ -1,6 +1,7 @@
 package com.harusari.chainware.member.command.domain.aggregate;
 
 import com.harusari.chainware.member.command.application.dto.request.UpdateMemberRequest;
+import com.harusari.chainware.member.command.application.dto.request.UpdateMyInfoRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -81,6 +82,10 @@ public class Member {
         this.phoneNumber = updateMemberRequest.phoneNumber();
         this.position = updateMemberRequest.position();
         this.modifiedAt = LocalDateTime.now().withNano(0);
+    }
+
+    public void updateMyInfo(UpdateMyInfoRequest updateMyInfoRequest) {
+        this.phoneNumber = updateMyInfoRequest.phoneNumber();
     }
 
     public void softDelete() {

@@ -16,6 +16,16 @@ import static org.springframework.http.HttpMethod.*;
 public enum SecurityPolicy {
 
     /* Member */
+    // Permit All
+    LOGIN_POST("/api/v1/auth/login", POST, PERMIT_ALL, List.of()), // 로그인
+    REFRESH_POST("/api/v1/auth/refresh", POST, PERMIT_ALL, List.of()), // 리프레시 토큰 재발급
+
+    // Authenticated
+    LOGOUT_POST("/api/v1/auth/logout", POST, AUTHENTICATED, List.of()), // 로그아웃
+    PASSWORD_POST("/api/v1/auth/password", POST, AUTHENTICATED, List.of()), // 비밀번호 변경
+    MEMBERS_ME_GET("/api/v1/members/me", GET, AUTHENTICATED, List.of()), // 회원 정보 조회
+    MEMBERS_ME_PUT("/api/v1/members/me", PUT, AUTHENTICATED, List.of()), // 회원 정보 수정
+
     // Role Based
     EMAIL_EXISTS_GET("/api/v1/members/email-exists", GET, ROLE_BASED, List.of(MASTER)), // 이메일 중복 확인
     MEMBER_HEADQUARTERS_POST("/api/v1/members/headquarters", POST, ROLE_BASED, List.of(MASTER)), // 본사 직원 회원가입
@@ -27,14 +37,6 @@ public enum SecurityPolicy {
     MEMBERS_PUT("/api/v1/members/{memberId}", PUT, ROLE_BASED, List.of(MASTER)), // 회원 정보 수정
     MEMBERS_DELETE("/api/v1/members/{memberId}", DELETE, ROLE_BASED, List.of(MASTER)), // 회원 탈퇴
     LOGIN_HISTORY_GET("/api/v1/members/{memberId}/login-history", GET, ROLE_BASED, List.of(MASTER)), // 로그인 내역 조회
-
-    // Permit All
-    LOGIN_POST("/api/v1/auth/login", POST, PERMIT_ALL, List.of()), // 로그인
-    REFRESH_POST("/api/v1/auth/refresh", POST, PERMIT_ALL, List.of()), // 리프레시 토큰 재발급
-
-    // Authenticated
-    LOGOUT_POST("/api/v1/auth/logout", POST, AUTHENTICATED, List.of()), // 로그아웃
-    PASSWORD_POST("/api/v1/auth/password", POST, AUTHENTICATED, List.of()), // 비밀번호 변경
 
     /* Category */
     CATEGORY_POST("/api/v1/category", POST, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 카테고리 등록
@@ -68,6 +70,10 @@ public enum SecurityPolicy {
     FRANCHISE_AGREEMENT_DOWNLOAD_URL("/api/v1/franchises/{franchiseId}/agreement/download", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 가맹점 계약서 다운로드
 
     /* Vendor */
+    VENDOR_UPDATE_INFO("/api/v1/vendors/{vendorId}", PUT, ROLE_BASED, List.of(MASTER)), // 거래처 정보 수정
+    VENDOR_UPDATE_STATUS("/api/v1/vendors/{vendorId}/status", PUT, ROLE_BASED, List.of(MASTER)), // 거래처 거래 상태 수정
+    VENDOR_LIST_GET("/api/v1/vendors", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 거래처 목록 조회
+    VENDOR_DETAIL_GET("/api/v1/vendors/{vendorId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 거래처 상세 조회
 
 
     /* Warehouse */
@@ -75,7 +81,7 @@ public enum SecurityPolicy {
     WAREHOUSE_DELETE("/api/v1/warehouse/{warehouseId}", DELETE, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 창고 마스터 삭제
     WAREHOUSE_INVENTORY_REGISTER("/api/v1/warehouse/{warehouseId}/inventory", POST, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 보유 재고 등록
     WAREHOUSE_INVENTORY_UPDATE("/api/v1/warehouse/inventory/{inventoryId}", PUT, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 보유 재고 수정
-    WAREHOUSE_INVENTORY_DELETE("/api/v1/warehouse/inventory/{inventoryId}", PUT, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 보유 재고 삭제
+    WAREHOUSE_INVENTORY_DELETE("/api/v1/warehouse/inventory/{inventoryId}", DELETE, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 보유 재고 삭제
 
     WAREHOUSE_LIST_GET("/api/v1/warehouse", GET, ROLE_BASED, List.of(WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 창고 마스터 목록 조회
     WAREHOUSE_DETAIL_GET("/api/v1/warehouse/{warehouseId}", GET, ROLE_BASED, List.of(WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 창고 마스터 상세 조회
@@ -116,7 +122,6 @@ public enum SecurityPolicy {
     PURCHASE_REJECT_PUT("/api/v1/purchases/{purchaseOrderId}/reject", PUT, ROLE_BASED, List.of(VENDOR_MANAGER)), // 발주 거절
     PURCHASE_SHIPPED_PUT("/api/v1/purchases/{purchaseOrderId}/shipped", PUT, ROLE_BASED, List.of(VENDOR_MANAGER)), // 출고 완료 처리
     PURCHASE_PURCHASE_INBOUND("/api/v1/purchases/{purchaseOrderId}/inbound", PUT, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 입고 완료 처리
-
 
     /* Take Back */
     TAKEBACK_REGISTER("/api/v1/takeback", POST, ROLE_BASED, List.of(FRANCHISE_MANAGER)), // 반품 신청

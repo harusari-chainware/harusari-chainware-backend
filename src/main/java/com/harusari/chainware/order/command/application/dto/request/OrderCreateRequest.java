@@ -8,8 +8,6 @@ import java.util.List;
 @Getter
 @Builder
 public class OrderCreateRequest {
-    private Long franchiseId;
-    private Long memberId;
     private LocalDate deliveryDueDate;
     private List<OrderDetailCreateRequest> orderDetails;
 }

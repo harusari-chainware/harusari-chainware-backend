@@ -5,9 +5,8 @@ import com.harusari.chainware.delivery.command.application.dto.response.Delivery
 
 public interface DeliveryCommandService {
 
-    DeliveryCommandResponse startDelivery(Long deliveryId, DeliveryStartRequest request);
+    DeliveryCommandResponse startDelivery(Long deliveryId, DeliveryStartRequest request, Long memberId);
 
-    DeliveryCommandResponse completeDelivery(Long deliveryId);
-
+    DeliveryCommandResponse completeDelivery(Long deliveryId, Long memberId);
 
 }

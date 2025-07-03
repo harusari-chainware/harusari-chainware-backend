@@ -26,6 +26,7 @@ import static com.harusari.chainware.takeback.command.domain.aggregate.QTakeBack
 import static com.harusari.chainware.takeback.command.domain.aggregate.QTakeBackDetail.takeBackDetail;
 import static com.harusari.chainware.product.command.domain.aggregate.QProduct.product;
 import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouse.warehouse;
+import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouseOutbound.warehouseOutbound;
 
 @Repository
 @RequiredArgsConstructor
@@ -53,9 +54,13 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
                 .distinct()
                 .join(order).on(takeBack.orderId.eq(order.orderId))
                 .join(franchise).on(order.franchiseId.eq(franchise.franchiseId))
-                .leftJoin(delivery).on(delivery.takeBackId.eq(takeBack.takeBackId))
-                .leftJoin(warehouse).on(delivery.warehouseId.eq(warehouse.warehouseId))
                 .join(member).on(franchise.memberId.eq(member.memberId))
+                .leftJoin(delivery).on(
+                        delivery.orderId.eq(takeBack.orderId)
+                                .and(delivery.takeBackId.isNull())
+                )
+                .leftJoin(warehouseOutbound).on(warehouseOutbound.deliveryId.eq(delivery.deliveryId))
+                .leftJoin(warehouse).on(warehouseOutbound.warehouseId.eq(warehouse.warehouseId))
                 .where(
                         warehouseNameContains(request.getWarehouseName()),
                         warehouseAddressContains(request.getWarehouseAddress()),
@@ -74,9 +79,13 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
                 .distinct()
                 .join(order).on(takeBack.orderId.eq(order.orderId))
                 .join(franchise).on(order.franchiseId.eq(franchise.franchiseId))
-                .leftJoin(delivery).on(delivery.takeBackId.eq(takeBack.takeBackId))
-                .leftJoin(warehouse).on(delivery.warehouseId.eq(warehouse.warehouseId))
                 .join(member).on(franchise.memberId.eq(member.memberId))
+                .leftJoin(delivery).on(
+                        delivery.orderId.eq(takeBack.orderId)
+                                .and(delivery.takeBackId.isNull())
+                )
+                .leftJoin(warehouseOutbound).on(warehouseOutbound.deliveryId.eq(delivery.deliveryId))
+                .leftJoin(warehouse).on(warehouseOutbound.warehouseId.eq(warehouse.warehouseId))
                 .where(
                         warehouseNameContains(request.getWarehouseName()),
                         warehouseAddressContains(request.getWarehouseAddress()),

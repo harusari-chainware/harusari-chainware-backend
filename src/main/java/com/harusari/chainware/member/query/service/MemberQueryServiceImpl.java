@@ -6,6 +6,7 @@ import com.harusari.chainware.member.query.dto.request.MemberSearchRequest;
 import com.harusari.chainware.member.query.dto.response.LoginHistoryResponse;
 import com.harusari.chainware.member.query.dto.response.MemberSearchDetailResponse;
 import com.harusari.chainware.member.query.dto.response.MemberSearchResponse;
+import com.harusari.chainware.member.query.dto.response.MyMemberDetailResponse;
 import com.harusari.chainware.member.query.repository.MemberQueryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -53,6 +54,12 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     @Override
     public MemberSearchDetailResponse getMemberDetail(Long memberId) {
         return memberQueryRepository.findMemberSearchDetailById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND_EXCEPTION));
+    }
+
+    @Override
+    public MyMemberDetailResponse getMyProfile(Long memberId) {
+        return memberQueryRepository.findMyMemberDetailById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(MEMBER_NOT_FOUND_EXCEPTION));
     }
 

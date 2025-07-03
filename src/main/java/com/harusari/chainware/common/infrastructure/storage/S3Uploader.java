@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -35,6 +36,35 @@ public class S3Uploader implements StorageUploader {
         String extension = getExtension(Objects.requireNonNull(file.getOriginalFilename()));
 
         if (!extension.equals(ALLOWED_FILE_EXTENSION)) {
+            throw new InvalidFileException(StorageErrorCode.INVALID_FILE_EXTENSION);
+        }
+
+        String uuid = UUID.randomUUID().toString();
+        String storedFileName = uuid + FILE_NAME_DELIMITER + extension;
+        String s3Key = directory + S3_KEY_DELIMITER + storedFileName;
+
+        try {
+            PutObjectRequest request = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(s3Key)
+                    .contentType(file.getContentType())
+                    .build();
+
+            s3Client.putObject(request, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+
+            return s3Key;
+        } catch (IOException e) {
+            throw new FileUploadFailedException(StorageErrorCode.S3_UPLOAD_FAILED, e);
+        }
+    }
+
+    @Override
+    public String uploadTakeBackImage(MultipartFile file, String directory) {
+        validateFile(file);
+        String extension = getExtension(Objects.requireNonNull(file.getOriginalFilename()));
+
+        List<String> allowed = List.of("jpg", "jpeg", "png", "webp");
+        if (!allowed.contains(extension.toLowerCase())) {
             throw new InvalidFileException(StorageErrorCode.INVALID_FILE_EXTENSION);
         }
 

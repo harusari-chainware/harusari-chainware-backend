@@ -54,7 +54,6 @@ class OrderCommandControllerTest {
     @BeforeEach
     void setUp() {
         validRequest = OrderCreateRequest.builder()
-                .franchiseId(1L)
                 .deliveryDueDate(LocalDate.now().plusDays(3))
                 .orderDetails(List.of(
                         OrderDetailCreateRequest.builder()
@@ -116,7 +115,6 @@ class OrderCommandControllerTest {
     void testCreateOrder_EmptyDetails() throws Exception {
         // given
         OrderCreateRequest requestWithEmptyDetails = OrderCreateRequest.builder()
-                .franchiseId(validRequest.getFranchiseId())
                 .deliveryDueDate(validRequest.getDeliveryDueDate())
                 .orderDetails(List.of())  // 빈 리스트 전달
                 .build();
