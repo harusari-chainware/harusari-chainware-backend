@@ -7,8 +7,8 @@ assignees:
 
 # 자동으로 리뷰어로 등록할 사용자(또는 팀) 리스트 작성
 reviewers:
-  - harusari-chainware/memory-h
-  - harusari-chainware/z00m-1n
-  - harusari-chainware/jang9465
-  - harusari-chainware/Lee-gi-yeun
-  - harusari-chainware/jihye25
+  - memory-h
+  - z00m-1n
+  - jang9465
+  - Lee-gi-yeun
+  - jihye25
