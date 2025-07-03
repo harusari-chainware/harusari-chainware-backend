@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Auto Assign Reviewers and Assignees
-        uses: hkusu/auto-assign-action@v1.2.1
+        uses: hkusu/review-assign-action@v1
         with:
           assignees: ${{ github.actor }}
           reviewers: memory-h, z00m-1n, jang9465, Lee-gi-yeun, jihye25
