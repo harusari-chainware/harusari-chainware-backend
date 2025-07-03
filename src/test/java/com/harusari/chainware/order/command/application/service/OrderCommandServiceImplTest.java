@@ -104,7 +104,7 @@ class OrderCommandServiceImplTest {
                 .build();
         ReflectionTestUtils.setField(franchise, "franchiseId", 1L);
 
-        given(franchiseRepository.findFranchiseByFranchiseId(100L))
+        given(franchiseRepository.findFranchiseIdByMemberId(100L))
                 .willReturn(Optional.of(franchise));
 
         Order savedOrder = Order.builder()
