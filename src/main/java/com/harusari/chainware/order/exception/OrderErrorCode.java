@@ -26,7 +26,9 @@ public enum OrderErrorCode {
     CANNOT_APPROVE_ORDER("10011", "해당 주문은 현재 상태에서는 승인할 수 없습니다.", HttpStatus.BAD_REQUEST),
     CANNOT_REJECT_ORDER("10012", "해당 주문은 현재 상태에서는 반려할 수 없습니다.", HttpStatus.BAD_REQUEST),
     UNAUTHORIZED_ORDER_ACCESS("10013", "해당 주문에 대한 권한이 없습니다.", HttpStatus.FORBIDDEN),
-    REJECT_REASON_REQUIRED("10014", "반려 사유를 입력해야 합니다.", HttpStatus.BAD_REQUEST);
+    REJECT_REASON_REQUIRED("10014", "반려 사유를 입력해야 합니다.", HttpStatus.BAD_REQUEST),
+    FRANCHISE_NOT_FOUND_FOR_MANAGER("13005", "해당 관리자가 등록된 가맹점이 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+    ;
 
     private final String errorCode;
     private final String errorMessage;

@@ -6,4 +6,6 @@ public interface StorageUploader {
 
     String uploadAgreement(MultipartFile file, String directory);
 
+    String uploadTakeBackImage(MultipartFile file, String directory);
+
 }
