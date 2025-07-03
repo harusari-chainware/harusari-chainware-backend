@@ -90,7 +90,9 @@ class FranchiseTest {
                 "01099998888",
                 "0987654321",
                 OPERATING,
-                newAddress
+                newAddress,
+                LocalDate.parse("2025-06-29"),
+                LocalDate.parse("2030-08-10")
         );
 
         // then
@@ -100,6 +102,7 @@ class FranchiseTest {
         assertThat(franchise.getFranchiseStatus()).isEqualTo(OPERATING);
         assertThat(franchise.getFranchiseAddress()).isEqualTo(newAddress);
         assertThat(franchise.getModifiedAt()).isNotNull();
+        assertThat(franchise.getContractEndDate()).isEqualTo("2030-08-10");
     }
 
     @Test

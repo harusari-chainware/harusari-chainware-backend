@@ -152,6 +152,8 @@ class FranchiseCommandServiceImplTest {
                 .franchiseTaxId("9876543210")
                 .franchiseStatus(franchise.getFranchiseStatus())
                 .addressRequest(updateAddressRequest)
+                .contractStartDate(LocalDate.parse("2025-06-30"))
+                .contractEndDate(LocalDate.parse("2030-07-07"))
                 .build();
 
         when(franchiseRepository.findFranchiseByFranchiseId(franchiseId)).thenReturn(Optional.of(franchise));
@@ -172,6 +174,7 @@ class FranchiseCommandServiceImplTest {
         assertThat(franchise.getAgreementOriginalFileName()).isEqualTo("contract-update.pdf");
         assertThat(franchise.getAgreementFileSize()).isEqualTo(2048L);
         assertThat(franchise.getAgreementUploadedAt()).isNotNull();
+        assertThat(franchise.getContractEndDate()).isEqualTo("2030-07-07");
     }
 
     @Test
