@@ -12,7 +12,9 @@ public class VendorListDto {
     private Long vendorId;
     private String vendorName;
     private VendorType vendorType;
-    private String vendorAddress;
+    private String vendorZipcode;
+    private String vendorAddressRoad;
+    private String vendorAddressDetail;
     private VendorStatus vendorStatus;
     private LocalDate vendorEndDate;
 }

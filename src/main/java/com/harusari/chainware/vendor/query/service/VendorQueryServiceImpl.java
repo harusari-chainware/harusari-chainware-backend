@@ -16,7 +16,7 @@ public class VendorQueryServiceImpl implements VendorQueryService {
     private final VendorQueryMapper vendorMapper;
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public VendorListResponse getVendors(VendorSearchRequestDto request) {
         List<VendorListDto> vendors = vendorMapper.findVendors(request);
         long totalCount = vendorMapper.countVendors(request);
@@ -33,7 +33,7 @@ public class VendorQueryServiceImpl implements VendorQueryService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public VendorDetailResponse getVendorDetail(Long vendorId) {
         VendorDetailDto vendorDetail = vendorMapper.findVendorDetailById(vendorId);
         return VendorDetailResponse.builder()

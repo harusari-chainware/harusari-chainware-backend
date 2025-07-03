@@ -3,7 +3,7 @@ package com.harusari.chainware.vendor.query.controller;
 import com.harusari.chainware.vendor.query.dto.VendorDetailResponse;
 import com.harusari.chainware.vendor.query.dto.VendorListResponse;
 import com.harusari.chainware.vendor.query.dto.VendorSearchRequestDto;
-import com.harusari.chainware.vendor.query.service.VendorQueryServiceImpl;
+import com.harusari.chainware.vendor.query.service.VendorQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class VendorQueryController {
 
-    private final VendorQueryServiceImpl vendorQueryService;
+    private final VendorQueryService vendorQueryService;
 
     @GetMapping
     public VendorListResponse getVendors(VendorSearchRequestDto request) {
