@@ -1,5 +1,6 @@
 package com.harusari.chainware.category.query.service;
 
+import com.harusari.chainware.category.command.domain.repository.TopCategoryRepository;
 import com.harusari.chainware.category.query.dto.request.CategorySearchRequest;
 import com.harusari.chainware.category.query.dto.response.*;
 import com.harusari.chainware.category.query.mapper.CategoryQueryMapper;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 public class CategoryQueryServiceImpl implements CategoryQueryService {
 
     private final CategoryQueryMapper categoryQueryMapper;
+    private final TopCategoryRepository topCategoryRepository;
 
 
     @Override
@@ -42,6 +44,8 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
                             .categoryId(row.getCategoryId())
                             .categoryName(row.getCategoryName())
                             .productCount(row.getProductCount())
+                            .createdAt(row.getCreatedAt())
+                            .modifiedAt(row.getModifiedAt())
                             .build()
             );
 
@@ -155,5 +159,12 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
                 .products(products)
                 .pagination(Pagination.of(page, size, total))
                 .build();
+    }
+
+    @Override
+    public List<TopCategoryDto> getAllTopCategories() {
+        return topCategoryRepository.findAll().stream()
+                .map(TopCategoryDto::fromEntity)
+                .collect(Collectors.toList());
     }
 }

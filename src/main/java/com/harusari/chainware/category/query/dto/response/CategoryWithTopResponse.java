@@ -3,6 +3,8 @@ package com.harusari.chainware.category.query.dto.response;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 public class CategoryWithTopResponse {
@@ -11,4 +13,6 @@ public class CategoryWithTopResponse {
     private Long topCategoryId;
     private String topCategoryName;
     private long productCount;
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
 }
