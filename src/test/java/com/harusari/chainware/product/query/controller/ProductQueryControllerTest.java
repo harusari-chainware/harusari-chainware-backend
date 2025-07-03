@@ -112,6 +112,7 @@ class ProductQueryControllerTest {
                 .contracts(List.of(
                         VendorProductContractDto.builder()
                                 .contractId(1L)
+                                .vendorName("감자상사")
                                 .productName("감자칩")
                                 .contractPrice(1800)
                                 .build()))
@@ -133,8 +134,9 @@ class ProductQueryControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.product.productId").value(productId))
                 .andExpect(jsonPath("$.data.product.productName").value("감자칩"))
-                .andExpect(jsonPath("$.data.contracts[0].contractId").value(1))
-                .andExpect(jsonPath("$.data.contracts[0].productName").value("감자칩"));
+                .andExpect(jsonPath("$.data.contracts[0].vendorName").value("감자상사"))
+                .andExpect(jsonPath("$.data.vendors[0].vendorName").value("감자상사"))
+                .andExpect(jsonPath("$.data.pagination.totalItems").value(1));
 
         SecurityContextHolder.clearContext();
     }
