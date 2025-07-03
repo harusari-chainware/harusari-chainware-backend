@@ -12,5 +12,5 @@ jobs:
       - name: Auto Assign Reviewers and Assignees
         uses: kentaro-m/auto-assign-action@v1.2.1
         with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          repo-token: "${{ secrets.PERSONAL_ACCESS_TOKEN }}"
           configuration-path: .github/pr-auto-assign-config.yml
