@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductCommandServiceImpl implements ProductCommandService {
 
     private final ProductRepository productRepository;
-    private final ProductMapStruct productMapstruct;
+    private final ProductMapStruct productMapStruct;
 
     /* 상품 등록 */
     @Transactional
@@ -32,7 +32,7 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
         String productCode = generateProductCode(request.getCategoryCode());
 
-        Product newProduct = productMapstruct.toEntity(request);
+        Product newProduct = productMapStruct.toEntity(request);
 
         Product productWithCode = Product.builder()
                 .categoryId(newProduct.getCategoryId())

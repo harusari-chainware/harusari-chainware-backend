@@ -2,35 +2,41 @@ package com.harusari.chainware.contract.query.dto.response;
 
 import com.harusari.chainware.contract.command.domain.aggregate.ContractStatus;
 import com.harusari.chainware.product.command.domain.aggregate.StoreType;
+
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class VendorProductContractDto {
-    private Long contractId;
-    private String vendorName;
-    private String productName;
-    private Integer basePrice;
-    private Integer contractPrice;
-    private Integer minOrderQty;
-    private Integer leadTime;
-    private ContractStatus contractStatus;
-    private LocalDate contractStartDate;
-    private LocalDate contractEndDate;
-
     private Long vendorId;
+
     private Long productId;
-    private String unitQuantity;
-    private String unitSpec;
-    private StoreType storeType;
+    private String productName;
     private Long topCategoryId;
     private String topCategoryName;
     private Long categoryId;
     private String categoryName;
+    private StoreType storeType;
+    private Integer basePrice;
+    private String unitQuantity;
+    private String unitSpec;
+
+    private Long contractId;
+    private Integer contractPrice;
+    private Integer minOrderQty;
+    private Integer leadTime;
+    private LocalDate contractStartDate;
+    private LocalDate contractEndDate;
+    private ContractStatus contractStatus;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
+
 }

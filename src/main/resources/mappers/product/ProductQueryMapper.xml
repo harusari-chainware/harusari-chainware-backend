@@ -150,6 +150,7 @@
     </resultMap>
 
     <select id="findVendorContractsByProductId"
+            parameterType="com.harusari.chainware.contract.query.dto.request.VendorByProductRequest"
             resultMap="VendorProductContractMap">
         SELECT
         c.contract_id,
@@ -167,7 +168,7 @@
         p.base_price,
         p.unit_quantity,
         p.unit_spec,
-        p.category_id,
+        p.category_id AS product_category_id,
         p.store_type,
 
         v.vendor_id,
@@ -189,19 +190,13 @@
     </select>
 
     <select id="findVendorsByProductId"
-            resultType="com.harusari.chainware.vendor.query.dto.VendorDetailDto">
+            resultType="com.harusari.chainware.vendor.query.dto.VendorDto">
         SELECT
         v.vendor_id,
         v.vendor_name,
         v.vendor_type,
-        v.vendor_zipcode,
-        v.vendor_address_road,
-        v.vendor_address_detail,
         v.vendor_tax_id,
-        v.vendor_memo,
-        v.vendor_status,
-        v.vendor_start_date,
-        v.vendor_end_date
+        v.vendor_status
         FROM vendor v
         JOIN contract c ON v.vendor_id = c.vendor_id
         WHERE c.product_id = #{productId}
