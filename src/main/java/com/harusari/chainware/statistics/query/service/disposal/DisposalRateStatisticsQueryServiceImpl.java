@@ -2,7 +2,9 @@ package com.harusari.chainware.statistics.query.service.disposal;
 
 import com.harusari.chainware.statistics.exception.StatisticsErrorCode;
 import com.harusari.chainware.statistics.exception.StatisticsException;
+import com.harusari.chainware.statistics.query.dto.disposal.DisposalRateStatisticsResponse;
 import com.harusari.chainware.statistics.query.dto.disposal.DisposalRateStatisticsResponseBase;
+import com.harusari.chainware.statistics.query.dto.disposal.DisposalRateTrendGroupedResponse;
 import com.harusari.chainware.statistics.query.mapper.DisposalRateStatisticsQueryMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,8 +34,8 @@ public class DisposalRateStatisticsQueryServiceImpl implements DisposalRateStati
             case "DAILY" -> startDate = endDate = baseDate;
 
             case "WEEKLY" -> {
-                startDate = baseDate.with(DayOfWeek.MONDAY);
-                endDate = baseDate.with(DayOfWeek.SUNDAY);
+                startDate = baseDate.minusDays(6);
+                endDate = baseDate;
                 if (today.isBefore(endDate)) {
                     throw new StatisticsException(StatisticsErrorCode.PERIOD_NOT_COMPLETED);
                 }
@@ -55,5 +57,21 @@ public class DisposalRateStatisticsQueryServiceImpl implements DisposalRateStati
         } else {
             return mapper.getDisposalRate(startDate, endDate, warehouseId, franchiseId);
         }
+    }
+
+    @Override
+    @Transactional
+    public DisposalRateTrendGroupedResponse getGroupedTrend(String period, LocalDate targetDate) {
+        LocalDate baseDate = (targetDate != null) ? targetDate : LocalDate.now().minusDays(1);
+
+        List<DisposalRateStatisticsResponse> total = mapper.getTrendForTotal(period, baseDate);
+        List<DisposalRateStatisticsResponse> headquarters = mapper.getTrendForHeadquarters(period, baseDate);
+        List<DisposalRateStatisticsResponse> franchises = mapper.getTrendForFranchises(period, baseDate);
+
+        return DisposalRateTrendGroupedResponse.builder()
+                .total(total)
+                .headquarters(headquarters)
+                .franchises(franchises)
+                .build();
     }
 }

@@ -55,11 +55,12 @@ class TotalSalesStatisticsQueryServiceImplTest {
         @Test
         @DisplayName("2. WEEKLY + franchiseId 없음")
         void testWeeklyForAll() {
-            LocalDate date = LocalDate.of(2025, 6, 12); // Wednesday
-            LocalDate start = date.with(DayOfWeek.MONDAY);
-            LocalDate end = date.with(DayOfWeek.SUNDAY);
-            LocalDate prevStart = start.minusWeeks(1);
-            LocalDate prevEnd = end.minusWeeks(1);
+            LocalDate date = LocalDate.of(2025, 6, 12); // 기준일
+
+            LocalDate start = date.minusDays(6);        // 6/6 ~ 6/12
+            LocalDate end = date;
+            LocalDate prevStart = date.minusDays(13);   // 5/30 ~ 6/5
+            LocalDate prevEnd = date.minusDays(7);
 
             when(mapper.getTotalAmount(null, start, end)).thenReturn(15000L);
             when(mapper.getTotalAmount(null, prevStart, prevEnd)).thenReturn(10000L);
@@ -75,10 +76,11 @@ class TotalSalesStatisticsQueryServiceImplTest {
         @DisplayName("3. MONTHLY + franchiseId 있음")
         void testMonthlyWithFranchise() {
             LocalDate date = LocalDate.of(2025, 6, 5);
-            LocalDate start = date.withDayOfMonth(1);
-            LocalDate end = date.withDayOfMonth(date.lengthOfMonth());
-            LocalDate prevStart = start.minusMonths(1).withDayOfMonth(1);
-            LocalDate prevEnd = prevStart.withDayOfMonth(prevStart.lengthOfMonth());
+
+            LocalDate start = date.minusDays(29);       // 5/7 ~ 6/5
+            LocalDate end = date;
+            LocalDate prevStart = date.minusDays(59);   // 4/6 ~ 5/6
+            LocalDate prevEnd = date.minusDays(30);
 
             when(mapper.getTotalAmount(2L, start, end)).thenReturn(20000L);
             when(mapper.getTotalAmount(2L, prevStart, prevEnd)).thenReturn(25000L);
@@ -89,19 +91,19 @@ class TotalSalesStatisticsQueryServiceImplTest {
             assertThat(response.getChangeRate()).isEqualTo(-20.0);
             assertThat(response.getFranchiseName()).isNull();
         }
-    }
 
-    @Nested
-    @DisplayName("예외 케이스")
-    class ExceptionCases {
+        @Nested
+        @DisplayName("예외 케이스")
+        class ExceptionCases {
 
-        @Test
-        @DisplayName("4. 지원하지 않는 period → 예외 발생")
-        void testUnsupportedPeriod() {
-            assertThatThrownBy(() ->
-                    service.getStatistics("YEARLY", null, null))
-                    .isInstanceOf(StatisticsException.class)
-                    .hasMessageContaining(StatisticsErrorCode.UNSUPPORTED_PERIOD.getMessage());
+            @Test
+            @DisplayName("4. 지원하지 않는 period → 예외 발생")
+            void testUnsupportedPeriod() {
+                assertThatThrownBy(() ->
+                        service.getStatistics("YEARLY", null, null))
+                        .isInstanceOf(StatisticsException.class)
+                        .hasMessageContaining(StatisticsErrorCode.UNSUPPORTED_PERIOD.getMessage());
+            }
         }
     }
 }

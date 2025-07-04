@@ -31,16 +31,16 @@ public class TotalSalesStatisticsQueryServiceImpl implements TotalSalesStatistic
                 prevStartDate = prevEndDate = target.minusDays(1);
             }
             case "WEEKLY" -> {
-                startDate = target.with(DayOfWeek.MONDAY);
-                endDate = target.with(DayOfWeek.SUNDAY);
-                prevStartDate = startDate.minusWeeks(1);
-                prevEndDate = endDate.minusWeeks(1);
+                endDate = target;
+                startDate = target.minusDays(6);
+                prevEndDate = target.minusDays(7);
+                prevStartDate = target.minusDays(13);
             }
             case "MONTHLY" -> {
-                startDate = target.withDayOfMonth(1);
-                endDate = target.withDayOfMonth(target.lengthOfMonth());
-                prevStartDate = startDate.minusMonths(1).withDayOfMonth(1);
-                prevEndDate = prevStartDate.withDayOfMonth(prevStartDate.lengthOfMonth());
+                endDate = target;
+                startDate = target.minusDays(29);
+                prevEndDate = target.minusDays(30);
+                prevStartDate = target.minusDays(59);
             }
             default -> throw new StatisticsException(StatisticsErrorCode.UNSUPPORTED_PERIOD);
         }
@@ -59,3 +59,4 @@ public class TotalSalesStatisticsQueryServiceImpl implements TotalSalesStatistic
         );
     }
 }
+

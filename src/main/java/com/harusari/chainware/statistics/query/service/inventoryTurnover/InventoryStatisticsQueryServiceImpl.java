@@ -2,7 +2,8 @@ package com.harusari.chainware.statistics.query.service.inventoryTurnover;
 
 import com.harusari.chainware.statistics.exception.StatisticsErrorCode;
 import com.harusari.chainware.statistics.exception.StatisticsException;
-import com.harusari.chainware.statistics.query.dto.invertoryTurnover.InventoryTurnoverResponse;
+import com.harusari.chainware.statistics.query.dto.inventoryTurnover.InventoryTurnoverResponse;
+import com.harusari.chainware.statistics.query.dto.inventoryTurnover.InventoryTurnoverTrendResponse;
 import com.harusari.chainware.statistics.query.mapper.InventoryStatisticsMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -54,5 +55,20 @@ public class InventoryStatisticsQueryServiceImpl implements InventoryStatisticsQ
         LocalDate startDate = baseDate.withDayOfMonth(1);
         LocalDate endDate = baseDate.withDayOfMonth(baseDate.lengthOfMonth());
         return inventoryStatisticsMapper.getMonthlyTurnover(startDate, endDate);
+    }
+
+    @Override
+    @Transactional
+    public List<InventoryTurnoverTrendResponse> getTrend(String period, Long franchiseId, LocalDate targetDate) {
+        LocalDate baseDate = (targetDate != null) ? targetDate : LocalDate.now().minusMonths(1).withDayOfMonth(1);
+
+        switch (period.toUpperCase()) {
+            case "MONTHLY":
+                return inventoryStatisticsMapper.getMonthlyTurnoverTrend(baseDate, franchiseId);
+            case "WEEKLY":
+                return inventoryStatisticsMapper.getWeeklyTurnoverTrend(baseDate, franchiseId);
+            default:
+                throw new StatisticsException(StatisticsErrorCode.UNSUPPORTED_PERIOD_TYPE); // 커스텀 예외 추천
+        }
     }
 }

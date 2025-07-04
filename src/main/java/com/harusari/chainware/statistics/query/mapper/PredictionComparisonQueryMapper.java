@@ -10,36 +10,19 @@ import java.util.List;
 @Mapper
 public interface PredictionComparisonQueryMapper {
 
-    List<PredictionComparisonDto> getActualSales(
-            @Param("startDate") LocalDate start,
-            @Param("endDate") LocalDate end,
-            @Param("franchiseId") Long franchiseId
-    );
-    List<PredictionComparisonDto> getPredictedSales(
-            @Param("startDate") LocalDate start,
-            @Param("endDate") LocalDate end,
-            @Param("franchiseId") Long franchiseId
-    );
+    // SALES
+    List<PredictionComparisonDto> getActualSales(LocalDate startDate, LocalDate endDate, Long franchiseId);
+    List<PredictionComparisonDto> getPredictedSales(LocalDate startDate, LocalDate endDate, Long franchiseId);
+    List<PredictionComparisonDto> getActualSalesAllFranchises(LocalDate startDate, LocalDate endDate);
+    List<PredictionComparisonDto> getPredictedSalesAllFranchises(LocalDate startDate, LocalDate endDate);
 
+    // ORDER
+    List<PredictionComparisonDto> getActualOrderQuantity(LocalDate startDate, LocalDate endDate, Long franchiseId);
+    List<PredictionComparisonDto> getPredictedOrderQuantity(LocalDate startDate, LocalDate endDate, Long franchiseId);
+    List<PredictionComparisonDto> getActualOrderQuantityAllFranchises(LocalDate startDate, LocalDate endDate);
+    List<PredictionComparisonDto> getPredictedOrderQuantityAllFranchises(LocalDate startDate, LocalDate endDate);
 
-    List<PredictionComparisonDto> getActualOrderQuantity(
-            @Param("startDate") LocalDate start,
-            @Param("endDate") LocalDate end,
-            @Param("franchiseId") Long franchiseId
-    );
-    List<PredictionComparisonDto> getPredictedOrderQuantity(
-            @Param("startDate") LocalDate start,
-            @Param("endDate") LocalDate end,
-            @Param("franchiseId") Long franchiseId
-    );
-
-
-    List<PredictionComparisonDto> getActualPurchaseQuantity(
-            @Param("startDate") LocalDate start,
-            @Param("endDate") LocalDate end
-    );
-    List<PredictionComparisonDto> getPredictedPurchaseQuantity(
-            @Param("startDate") LocalDate start,
-            @Param("endDate") LocalDate end
-    );
+    // PURCHASE
+    List<PredictionComparisonDto> getActualPurchaseQuantity(LocalDate startDate, LocalDate endDate);
+    List<PredictionComparisonDto> getPredictedPurchaseQuantity(LocalDate startDate, LocalDate endDate);
 }

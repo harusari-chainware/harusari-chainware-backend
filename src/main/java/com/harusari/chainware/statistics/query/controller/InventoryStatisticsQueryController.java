@@ -1,7 +1,8 @@
 package com.harusari.chainware.statistics.query.controller;
 
 import com.harusari.chainware.common.dto.ApiResponse;
-import com.harusari.chainware.statistics.query.dto.invertoryTurnover.InventoryTurnoverResponse;
+import com.harusari.chainware.statistics.query.dto.inventoryTurnover.InventoryTurnoverResponse;
+import com.harusari.chainware.statistics.query.dto.inventoryTurnover.InventoryTurnoverTrendResponse;
 import com.harusari.chainware.statistics.query.service.inventoryTurnover.InventoryStatisticsQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -47,5 +48,17 @@ public class InventoryStatisticsQueryController {
         return ResponseEntity.ok(ApiResponse.success(
                 inventoryStatisticsQueryService.getTurnover(period, franchiseId, targetDate)
         ));
+    }
+
+    @Operation(summary = "재고 회전율 추이 조회")
+    @GetMapping("/trend")
+    public ResponseEntity<ApiResponse<List<InventoryTurnoverTrendResponse>>> getInventoryTurnoverTrend(
+            @RequestParam(defaultValue = "MONTHLY") String period,
+            @RequestParam(required = false) Long franchiseId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
+    ) {
+        List<InventoryTurnoverTrendResponse> result =
+                inventoryStatisticsQueryService.getTrend(period.toUpperCase(), franchiseId, targetDate);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 }

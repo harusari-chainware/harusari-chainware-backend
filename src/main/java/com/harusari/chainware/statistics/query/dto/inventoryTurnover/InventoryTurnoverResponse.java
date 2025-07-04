@@ -1,4 +1,4 @@
-package com.harusari.chainware.statistics.query.dto.invertoryTurnover;
+package com.harusari.chainware.statistics.query.dto.inventoryTurnover;
 
 import lombok.Getter;
 
