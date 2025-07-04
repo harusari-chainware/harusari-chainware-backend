@@ -27,10 +27,7 @@ public class Vendor {
     private String vendorName;
 
     @Enumerated(EnumType.STRING)
-    @Column(
-            name = "vendor_type",
-            columnDefinition = "ENUM('SUPPLIER', 'TRUST_CONTRACTOR', 'LOGISTICS', 'AGENCY') COMMENT '업체 유형'"
-    )
+    @Column(name = "vendor_type")
     private VendorType vendorType;
 
     @Embedded
@@ -48,10 +45,7 @@ public class Vendor {
     private String vendorMemo;
 
     @Enumerated(EnumType.STRING)
-    @Column(
-            name = "vendor_status",
-            columnDefinition = "ENUM('ACTIVE', 'EXPIRED') COMMENT '계약 상태'"
-    )
+    @Column(name = "vendor_status")
     private VendorStatus vendorStatus;
 
     @Column(name = "agreement_file_path")
@@ -71,6 +65,12 @@ public class Vendor {
 
     @Column(name = "vendor_end_date")
     private LocalDate vendorEndDate;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "modified_at")
+    private LocalDateTime modifiedAt;
 
     @Builder
     public Vendor(
@@ -92,6 +92,23 @@ public class Vendor {
         this.agreementUploadedAt = agreementUploadedAt;
         this.vendorStartDate = vendorStartDate;
         this.vendorEndDate = vendorEndDate;
+        this.createdAt = LocalDateTime.now().withNano(0);
+    }
+
+    public void updateVendor(
+            String vendorName, VendorType vendorType, String vendorTaxId,
+            Address vendorAddress, String vendorMemo, VendorStatus vendorStatus,
+            LocalDate vendorStartDate, LocalDate vendorEndDate
+    ) {
+        this.vendorName = vendorName;
+        this.vendorType = vendorType;
+        this.vendorTaxId = vendorTaxId;
+        this.vendorAddress = vendorAddress;
+        this.vendorMemo = vendorMemo;
+        this.vendorStatus = vendorStatus;
+        this.vendorStartDate = vendorStartDate;
+        this.vendorEndDate = vendorEndDate;
+        this.modifiedAt = LocalDateTime.now().withNano(0);
     }
 
     public void updateAgreementInfo(

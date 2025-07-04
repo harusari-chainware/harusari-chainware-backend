@@ -36,7 +36,7 @@ public class FranchiseCommandController {
             @Parameter(description = "수정할 가맹점 정보")
             @RequestPart UpdateFranchiseRequest updateFranchiseRequest,
 
-            @Parameter(description = "계약서 파일 (PDF)", required = true)
+            @Parameter(description = "계약서 파일 (PDF)")
             @RequestPart(required = false) MultipartFile agreementFile
     ) {
         franchiseCommandService.updateFranchise(franchiseId, updateFranchiseRequest, agreementFile);
