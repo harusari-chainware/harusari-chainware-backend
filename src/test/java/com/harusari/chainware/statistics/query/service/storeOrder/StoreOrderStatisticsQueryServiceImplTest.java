@@ -83,32 +83,32 @@ class StoreOrderStatisticsQueryServiceImplTest {
     class ExceptionCases {
 
         @Test
-        @DisplayName("4. WEEKLY - 기간이 아직 완료되지 않음")
+        @DisplayName("4. WEEKLY - 기간이 아직 완료되지 않음 (rolling 기준)")
         void testWeeklyPeriodNotCompleted() {
-            // 다음 주 화요일을 사용해야 예외 조건이 확실히 만족됨
-            LocalDate futureWeek = LocalDate.now().plusWeeks(1).with(DayOfWeek.TUESDAY);
+            LocalDate futureTarget = LocalDate.of(2025, 7, 6); // 일요일
+            LocalDate fakeToday = LocalDate.of(2025, 7, 5);    // 토요일
 
-            assertThatThrownBy(() ->
-                    service.getStatistics("WEEKLY", null, futureWeek, false))
-                    .isInstanceOf(StatisticsException.class)
-                    .hasMessageContaining(StatisticsErrorCode.PERIOD_NOT_COMPLETED.getMessage());
-        }
-
-
-
-        @Test
-        @DisplayName("5. MONTHLY - 기간이 아직 완료되지 않음")
-        void testMonthlyPeriodNotCompleted() {
-            // given
-            LocalDate futureMonth = LocalDate.of(2025, 6, 5);
-            LocalDate fakeToday = LocalDate.of(2025, 6, 10);
-
-            try (MockedStatic<LocalDate> mocked = mockStatic(LocalDate.class, CALLS_REAL_METHODS)) {
+            try (MockedStatic<LocalDate> mocked = mockStatic(LocalDate.class)) {
                 mocked.when(LocalDate::now).thenReturn(fakeToday);
 
-                // when & then
                 assertThatThrownBy(() ->
-                        service.getStatistics("MONTHLY", null, futureMonth, false))
+                        service.getStatistics("WEEKLY", null, futureTarget, false))
+                        .isInstanceOf(StatisticsException.class)
+                        .hasMessageContaining(StatisticsErrorCode.PERIOD_NOT_COMPLETED.getMessage());
+            }
+        }
+
+        @Test
+        @DisplayName("5. MONTHLY - 기간이 아직 완료되지 않음 (rolling 기준)")
+        void testMonthlyPeriodNotCompleted() {
+            LocalDate targetDate = LocalDate.of(2025, 7, 30);
+            LocalDate fakeToday = LocalDate.of(2025, 7, 29);
+
+            try (MockedStatic<LocalDate> mocked = mockStatic(LocalDate.class)) {
+                mocked.when(LocalDate::now).thenReturn(fakeToday);
+
+                assertThatThrownBy(() ->
+                        service.getStatistics("MONTHLY", null, targetDate, false))
                         .isInstanceOf(StatisticsException.class)
                         .hasMessageContaining(StatisticsErrorCode.PERIOD_NOT_COMPLETED.getMessage());
             }

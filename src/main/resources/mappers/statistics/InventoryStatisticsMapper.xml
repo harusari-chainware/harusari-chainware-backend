@@ -6,7 +6,7 @@
 <mapper namespace="com.harusari.chainware.statistics.query.mapper.InventoryStatisticsMapper">
 
     <!-- 본사 주간 회전율 -->
-    <select id="getWeeklyTurnover" resultType="com.harusari.chainware.statistics.query.dto.invertoryTurnover.InventoryTurnoverResponse">
+    <select id="getWeeklyTurnover" resultType="com.harusari.chainware.statistics.query.dto.inventoryTurnover.InventoryTurnoverResponse">
         SELECT
         p.product_id AS productId,
         p.product_name AS productName,
@@ -42,7 +42,7 @@
     </select>
 
     <!-- 본사 월간 회전율 -->
-    <select id="getMonthlyTurnover" resultType="com.harusari.chainware.statistics.query.dto.invertoryTurnover.InventoryTurnoverResponse">
+    <select id="getMonthlyTurnover" resultType="com.harusari.chainware.statistics.query.dto.inventoryTurnover.InventoryTurnoverResponse">
         SELECT
         p.product_id AS productId,
         p.product_name AS productName,
@@ -78,7 +78,7 @@
     </select>
 
     <!-- 가맹점 월간 회전율 -->
-    <select id="getFranchiseMonthlyTurnover" resultType="com.harusari.chainware.statistics.query.dto.invertoryTurnover.InventoryTurnoverResponse">
+    <select id="getFranchiseMonthlyTurnover" resultType="com.harusari.chainware.statistics.query.dto.inventoryTurnover.InventoryTurnoverResponse">
         SELECT
         p.product_id AS productId,
         p.product_name AS productName,
@@ -100,7 +100,7 @@
         JOIN bill_of_material bom ON m.menu_id = bom.menu_id
         JOIN product p ON bom.product_id = p.product_id
         LEFT JOIN (
-        SELECT product_id, AVG(unit_quantity) AS unit_quantity
+        SELECT product_id, AVG(quantity) AS unit_quantity
         FROM franchise_inventory
         WHERE franchise_id = #{franchiseId}
         GROUP BY product_id
@@ -112,6 +112,66 @@
         )
         GROUP BY p.product_id, p.product_name, fi.unit_quantity
         ORDER BY turnover DESC
+    </select>
+
+    <!-- 주별 재고 회전율 추이 -->
+    <select id="getWeeklyTurnoverTrend" resultType="com.harusari.chainware.statistics.query.dto.inventoryTurnover.InventoryTurnoverTrendResponse">
+        SELECT
+        STR_TO_DATE(CONCAT(YEARWEEK(ws.snapshot_date, 1), ' Monday'), '%X%V %W') AS date,
+        ROUND(SUM(wo.total_outbound) / NULLIF(SUM(ws.avg_inventory), 0), 2) AS turnoverRate
+        FROM (
+        SELECT
+        product_id,
+        snapshot_date,
+        AVG(quantity) AS avg_inventory,
+        YEARWEEK(snapshot_date, 1) AS yw
+        FROM warehouse_inventory_snapshot
+        WHERE snapshot_date &lt;= #{baseDate}
+        GROUP BY product_id, yw
+        ) ws
+        JOIN (
+        SELECT
+        product_id,
+        outbounded_at,
+        SUM(quantity) AS total_outbound,
+        YEARWEEK(outbounded_at, 1) AS yw
+        FROM warehouse_outbound
+        WHERE outbounded_at &lt;= #{baseDate}
+        GROUP BY product_id, yw
+        ) wo ON ws.product_id = wo.product_id AND ws.yw = wo.yw
+        GROUP BY ws.yw
+        ORDER BY date ASC
+        LIMIT 6
+    </select>
+
+    <!-- 월별 재고 회전율 추이 -->
+    <select id="getMonthlyTurnoverTrend" resultType="com.harusari.chainware.statistics.query.dto.inventoryTurnover.InventoryTurnoverTrendResponse">
+        SELECT
+        DATE_FORMAT(ws.snapshot_date, '%Y-%m-01') AS date,
+        ROUND(SUM(wo.total_outbound) / NULLIF(SUM(ws.avg_inventory), 0), 2) AS turnoverRate
+        FROM (
+        SELECT
+        product_id,
+        DATE(snapshot_date) AS snapshot_date,
+        AVG(quantity) AS avg_inventory
+        FROM warehouse_inventory_snapshot
+        WHERE snapshot_date &lt;= #{baseDate}
+        GROUP BY product_id, DATE_FORMAT(snapshot_date, '%Y-%m')
+        ) ws
+        JOIN (
+        SELECT
+        product_id,
+        DATE(outbounded_at) AS outbounded_date,
+        SUM(quantity) AS total_outbound
+        FROM warehouse_outbound
+        WHERE outbounded_at &lt;= #{baseDate}
+        GROUP BY product_id, DATE_FORMAT(outbounded_at, '%Y-%m')
+        ) wo
+        ON ws.product_id = wo.product_id
+        AND DATE_FORMAT(ws.snapshot_date, '%Y-%m') = DATE_FORMAT(wo.outbounded_date, '%Y-%m')
+        GROUP BY DATE_FORMAT(ws.snapshot_date, '%Y-%m')
+        ORDER BY date ASC
+        LIMIT 6
     </select>
 
 </mapper>

@@ -15,11 +15,28 @@ public interface DisposalRateStatisticsQueryMapper {
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
             @Param("warehouseId") Long warehouseId,
-            @Param("franchiseId") Long franchiseId);
+            @Param("franchiseId") Long franchiseId
+    );
 
     List<DisposalRateProductStatisticsResponse> getProductLevelDisposalRate(
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
             @Param("warehouseId") Long warehouseId,
-            @Param("franchiseId") Long franchiseId);
+            @Param("franchiseId") Long franchiseId
+    );
+
+    List<DisposalRateStatisticsResponse> getTrendForTotal(
+            @Param("period") String period,
+            @Param("targetDate") LocalDate targetDate
+    );
+
+    List<DisposalRateStatisticsResponse> getTrendForHeadquarters(
+            @Param("period") String period,
+            @Param("targetDate") LocalDate targetDate
+            );
+
+    List<DisposalRateStatisticsResponse> getTrendForFranchises(
+            @Param("period") String period,
+            @Param("targetDate") LocalDate targetDate
+    );
 }

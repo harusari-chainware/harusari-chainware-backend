@@ -2,6 +2,7 @@ package com.harusari.chainware.statistics.query.controller;
 
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.statistics.query.dto.storeOrder.StoreOrderStatisticsResponseBase;
+import com.harusari.chainware.statistics.query.dto.storeOrder.StoreOrderTrendResponse;
 import com.harusari.chainware.statistics.query.service.storeOrder.StoreOrderStatisticsQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -56,4 +57,20 @@ public class StoreOrderStatisticsQueryController {
 
         return ResponseEntity.ok(ApiResponse.success(result));
     }
+
+    @GetMapping("/trend")
+    @Operation(summary = "가맹점 주문 추이 조회", description = "기간별 가맹점 주문량 추이를 일자별로 반환합니다. DAILY는 제외됩니다.")
+    public ResponseEntity<ApiResponse<List<StoreOrderTrendResponse>>> getOrderTrend(
+            @RequestParam String period,
+            @RequestParam(required = false) Long franchiseId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
+    ) {
+        if ("DAILY".equalsIgnoreCase(period)) {
+            return ResponseEntity.ok(ApiResponse.success(List.of()));
+        }
+        return ResponseEntity.ok(ApiResponse.success(
+                storeOrderStatisticsQueryService.getTrend(period.toUpperCase(), franchiseId, targetDate)
+        ));
+    }
+
 }
