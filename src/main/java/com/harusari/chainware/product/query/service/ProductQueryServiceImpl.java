@@ -51,9 +51,10 @@ public class ProductQueryServiceImpl implements ProductQueryService {
                 .orElseThrow(() -> new ProductNotFoundException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
         if (Set.of(GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER).contains(authorityType)) {
-            List<VendorProductContractDto> contracts = productQueryMapper.findVendorContractsByProductId(productId);
-
             VendorByProductRequest vendorRequest = new VendorByProductRequest(productId, page, size);
+
+            List<VendorProductContractDto> contracts = productQueryMapper.findVendorContractsByProductId(vendorRequest);
+
             List<VendorDetailDto> vendors = productQueryMapper.findVendorsByProductId(vendorRequest);
             long totalCount = productQueryMapper.countVendorsByProductId(vendorRequest);
             int totalPages = (int) Math.ceil((double) totalCount / size);

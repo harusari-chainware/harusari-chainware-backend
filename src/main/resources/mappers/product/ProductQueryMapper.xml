@@ -53,7 +53,7 @@
             </choose>
         </if>
         <if test="request.createdAt != null">
-            AND p.created_at &gt;= #{request.createdAt}
+            AND DATE(p.created_at) = #{request.createdAt}
         </if>
 
         ORDER BY p.product_id DESC
@@ -93,7 +93,7 @@
             </choose>
         </if>
         <if test="request.createdAt != null">
-            AND p.created_at LIKE CONCAT(LEFT(REPLACE(#{request.createdAt}, 'T', ' '), 10), '%')
+            AND DATE(p.created_at) = #{request.createdAt}
         </if>
     </select>
 
@@ -150,32 +150,31 @@
     </resultMap>
 
     <select id="findVendorContractsByProductId"
+            parameterType="com.harusari.chainware.contract.query.dto.request.VendorByProductRequest"
             resultMap="VendorProductContractMap">
         SELECT
         c.contract_id,
+        v.vendor_name,
+        p.product_name,
+        p.base_price,
         c.contract_price,
         c.min_order_qty,
         c.lead_time,
+        c.contract_status,
         c.contract_start_date,
         c.contract_end_date,
-        c.contract_status,
-        c.created_at,
-        c.modified_at,
-
-        p.product_id,
-        p.product_name,
-        p.base_price,
-        p.unit_quantity,
-        p.unit_spec,
-        p.category_id,
-        p.store_type,
 
         v.vendor_id,
-
+        p.product_id,
+        p.unit_quantity,
+        p.unit_spec,
+        p.store_type,
         tc.top_category_id,
         tc.top_category_name,
         c2.category_id AS category_id,
-        c2.category_name AS category_name
+        c2.category_name AS category_name,
+        c.created_at,
+        c.modified_at
 
         FROM contract c
         JOIN product p ON c.product_id = p.product_id
@@ -189,12 +188,11 @@
     </select>
 
     <select id="findVendorsByProductId"
-            resultType="com.harusari.chainware.vendor.query.dto.VendorDetailDto">
+            resultType="com.harusari.chainware.vendor.query.dto.VendorDto">
         SELECT
         v.vendor_id,
         v.vendor_name,
         v.vendor_type,
-        v.vendor_address_road,
         v.vendor_tax_id,
         v.vendor_memo,
         v.vendor_status,

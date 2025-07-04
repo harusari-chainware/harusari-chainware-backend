@@ -2,27 +2,22 @@ package com.harusari.chainware.contract.query.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.harusari.chainware.auth.model.CustomUserDetails;
-import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.common.dto.PagedResult;
 import com.harusari.chainware.contract.command.domain.aggregate.ContractStatus;
 import com.harusari.chainware.contract.query.dto.response.VendorProductContractDto;
 import com.harusari.chainware.contract.query.dto.response.VendorProductContractListDto;
 import com.harusari.chainware.contract.query.service.VendorProductContractService;
 import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
-import com.harusari.chainware.vendor.command.domain.aggregate.VendorType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.List;
 
-import static java.util.Collections.emptyList;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;

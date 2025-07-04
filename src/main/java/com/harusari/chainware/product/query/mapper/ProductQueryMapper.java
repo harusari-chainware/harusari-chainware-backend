@@ -16,7 +16,7 @@ public interface ProductQueryMapper {
 
     Optional<ProductDto> findProductById(Long productId);
 
-    List<VendorProductContractDto> findVendorContractsByProductId(Long productId);
+    List<VendorProductContractDto> findVendorContractsByProductId(VendorByProductRequest request);
 
     List<VendorDetailDto> findVendorsByProductId(VendorByProductRequest request);
 

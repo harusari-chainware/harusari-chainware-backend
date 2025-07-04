@@ -6,6 +6,8 @@ import com.harusari.chainware.exception.requisition.RequisitionErrorCode;
 import com.harusari.chainware.exception.requisition.RequisitionException;
 import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
 import com.harusari.chainware.purchase.command.application.dto.request.CancelPurchaseOrderRequest;
+import com.harusari.chainware.purchase.command.application.dto.request.PurchaseInboundRequest;
+import com.harusari.chainware.purchase.command.application.dto.request.PurchaseInboundItem;
 import com.harusari.chainware.purchase.command.application.dto.request.RejectPurchaseOrderRequest;
 import com.harusari.chainware.purchase.command.application.dto.request.UpdatePurchaseOrderRequest;
 import com.harusari.chainware.purchase.command.domain.aggregate.PurchaseOrder;
@@ -17,7 +19,7 @@ import com.harusari.chainware.purchase.command.infrastructure.PurchaseOrderCodeG
 import com.harusari.chainware.requisition.query.dto.response.RequisitionDetailResponse;
 import com.harusari.chainware.requisition.query.dto.response.RequisitionItemResponse;
 import com.harusari.chainware.requisition.query.mapper.RequisitionQueryMapper;
-import com.harusari.chainware.vendor.query.dto.VendorDetailDto;
+import com.harusari.chainware.vendor.query.dto.response.VendorDetailResponse;
 import com.harusari.chainware.vendor.query.service.VendorQueryService;
 import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInbound;
 import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInventory;
@@ -27,8 +29,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -62,8 +69,8 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
                 .mapToLong(item -> item.getUnitPrice() * item.getQuantity())
                 .sum();
 
-        VendorDetailDto vendorDetail = vendorQueryService.getVendorDetail(requisition.getVendorId()).getVendor();
-        Long vendorMemberId = vendorDetail.getMemberId();
+        VendorDetailResponse vendorDetailResponse = vendorQueryService.getVendorDetail(requisition.getVendorId());
+        Long vendorMemberId = vendorDetailResponse.memberId();
 
 
         // 4. 발주 생성
@@ -208,7 +215,7 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
 
     @Override
     @Transactional
-    public void inboundPurchaseOrder(Long purchaseOrderId, Long memberId) {
+    public void inboundPurchaseOrder(Long purchaseOrderId, Long memberId, PurchaseInboundRequest request) {
         // 1. 발주서 조회 및 상태 검증
         PurchaseOrder order = purchaseOrderRepository.findById(purchaseOrderId)
                 .orElseThrow(() -> new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_NOT_FOUND));
@@ -225,19 +232,39 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
             throw new PurchaseOrderException(PurchaseOrderErrorCode.NO_PURCHASE_ORDER_DETAILS);
         }
 
-        // 3. 입고 기록 저장 (warehouse_inbound)
-        List<WarehouseInbound> inboundList = details.stream().map(detail ->
-                WarehouseInbound.builder()
-                        .purchaseOrderId(order.getPurchaseOrderId())
-                        .warehouseId(warehouseId)
-                        .productId(detail.getProductId())
-                        .unitQuantity(detail.getQuantity())
-                        .inboundedAt(LocalDateTime.now())
-                        .build()
-        ).toList();
+        Set<Long> validDetailIds = details.stream()
+                .map(PurchaseOrderDetail::getPurchaseOrderDetailId)
+                .collect(Collectors.toSet());
+
+        // 3. 요청으로 받은 유통기한 매핑
+        Map<Long, LocalDate> expirationDateMap = new HashMap<>();
+        for (PurchaseInboundItem item : request.getProducts()) {
+            Long detailId = item.getPurchaseOrderDetailId();
+            if (!validDetailIds.contains(detailId)) {
+                throw new PurchaseOrderException(PurchaseOrderErrorCode.INVALID_PURCHASE_ORDER_DETAIL_ID);
+            }
+            expirationDateMap.put(detailId, item.getExpirationDate());
+        }
+
+
+        // 4. 입고 기록 저장 (warehouse_inbound)
+        List<WarehouseInbound> inboundList = details.stream().map(detail -> {
+            LocalDate expirationDate = expirationDateMap.get(detail.getPurchaseOrderDetailId());
+            if (expirationDate == null) {
+                throw new PurchaseOrderException(PurchaseOrderErrorCode.EXPIRATION_DATE_REQUIRED);
+            }
+            return WarehouseInbound.builder()
+                    .purchaseOrderId(order.getPurchaseOrderId())
+                    .warehouseId(warehouseId)
+                    .productId(detail.getProductId())
+                    .unitQuantity(detail.getQuantity())
+                    .expirationDate(expirationDate)
+                    .inboundedAt(LocalDateTime.now())
+                    .build();
+        }).toList();
         warehouseInboundRepository.saveAll(inboundList);
 
-        // 4. 재고 반영 (warehouse_inventory)
+        // 5. 재고 반영 (warehouse_inventory)
         for (PurchaseOrderDetail detail : details) {
             warehouseInventoryRepository.findByWarehouseIdAndProductId(warehouseId, detail.getProductId())
                     .ifPresentOrElse(
@@ -254,7 +281,7 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
                     );
         }
 
-        // 5. 상태 전이 → WAREHOUSED
+        // 6. 상태 전이 → WAREHOUSED
         order.warehoused(PurchaseOrderStatus.WAREHOUSED);
     }
 

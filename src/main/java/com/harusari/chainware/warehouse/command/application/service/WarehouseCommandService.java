@@ -10,9 +10,9 @@ public interface WarehouseCommandService {
 
     WarehouseCommandResponse updateWarehouse(Long warehouseId, WarehouseUpdateRequest request);
     WarehouseCommandResponse deleteWarehouse(Long warehouseId);
-    WarehouseCommandResponse registerInventory(Long warehouseId, WarehouseInventoryCreateRequest request);
-    WarehouseInventoryCommandResponse updateInventory(Long inventoryId, WarehouseInventoryUpdateRequest request);
-    WarehouseInventoryCommandResponse deleteInventory(Long inventoryId);
+    WarehouseCommandResponse registerInventory(Long warehouseId, WarehouseInventoryCreateRequest request, Long memberId);
+    WarehouseInventoryCommandResponse updateInventory(Long inventoryId, WarehouseInventoryUpdateRequest request, Long memberId);
+    WarehouseInventoryCommandResponse deleteInventory(Long inventoryId, Long memberId);
 
 
 }

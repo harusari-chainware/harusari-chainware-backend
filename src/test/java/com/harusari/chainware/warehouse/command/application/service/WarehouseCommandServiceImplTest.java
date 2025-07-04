@@ -3,6 +3,9 @@ package com.harusari.chainware.warehouse.command.application.service;
 import com.harusari.chainware.common.domain.vo.Address;
 import com.harusari.chainware.common.dto.AddressRequest;
 import com.harusari.chainware.common.mapstruct.AddressMapStruct;
+import com.harusari.chainware.product.command.domain.aggregate.Product;
+import com.harusari.chainware.product.command.domain.repository.ProductRepository;
+import com.harusari.chainware.product.command.infrastructure.JpaProductRepository;
 import com.harusari.chainware.warehouse.command.application.dto.WarehouseInventoryCommandResponse;
 import com.harusari.chainware.warehouse.command.application.dto.request.WarehouseInventoryCreateRequest;
 import com.harusari.chainware.warehouse.command.application.dto.request.WarehouseInventoryUpdateRequest;
@@ -40,6 +43,9 @@ class WarehouseCommandServiceImplTest {
     @Mock
     private WarehouseInventoryRepository warehouseInventoryRepository;
 
+    @Mock
+    private JpaProductRepository productRepository;
+
     @Spy
     private AddressMapStruct addressMapStruct = Mappers.getMapper(AddressMapStruct.class);;
 
@@ -61,6 +67,14 @@ class WarehouseCommandServiceImplTest {
                 .addressRoad("New Address")
                 .addressDetail("New Address Detail")
                 .build();
+
+        Warehouse warehouse = Warehouse.builder()
+                .warehouseAddress(address)
+                .build();
+        ReflectionTestUtils.setField(warehouse, "warehouseId", 1L);
+
+        given(warehouseRepository.findById(1L)).willReturn(Optional.of(warehouse));
+
     }
 
     @Test
@@ -154,8 +168,13 @@ class WarehouseCommandServiceImplTest {
     @DisplayName("[보유 재고 등록] 등록 성공 테스트")
     void testRegisterInventorySuccess() {
         // given
-        Warehouse warehouse = Warehouse.builder().build();
-        ReflectionTestUtils.setField(warehouse, "warehouseId", 1L);
+        Long warehouseId = 1L;
+        Long managerId = 100L;
+
+        Warehouse warehouse = Warehouse.builder()
+                .memberId(managerId)
+                .build();
+        ReflectionTestUtils.setField(warehouse, "warehouseId", warehouseId);
 
         WarehouseInventoryCreateRequest request = WarehouseInventoryCreateRequest.builder()
                 .items(List.of(
@@ -166,14 +185,23 @@ class WarehouseCommandServiceImplTest {
                 ))
                 .build();
 
-        given(warehouseRepository.findById(1L)).willReturn(Optional.of(warehouse));
+        Product product = Product.builder()
+                .productId(1L)
+                .safetyStock(50)
+                .build();
+
+        given(warehouseRepository.findById(warehouseId)).willReturn(Optional.of(warehouse));
+        given(productRepository.findAllById(any())).willReturn(List.of(product));
+        given(warehouseInventoryRepository.findByWarehouseIdAndProductIdIn(anyLong(), any()))
+                .willReturn(List.of());
 
         // when
-        WarehouseCommandResponse response = warehouseCommandService.registerInventory(1L, request);
+        WarehouseCommandResponse response = warehouseCommandService.registerInventory(warehouseId, request, managerId);
 
         // then
-        assertThat(response.getWarehouseId()).isEqualTo(1L);
+        assertThat(response.getWarehouseId()).isEqualTo(warehouseId);
     }
+
 
     @Test
     @DisplayName("[보유 재고 등록] 창고 없음 예외 테스트")
@@ -191,7 +219,7 @@ class WarehouseCommandServiceImplTest {
         given(warehouseRepository.findById(1L)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> warehouseCommandService.registerInventory(1L, request))
+        assertThatThrownBy(() -> warehouseCommandService.registerInventory(1L, request, 100L))
                 .isInstanceOf(WarehouseException.class)
                 .hasFieldOrPropertyWithValue("errorCode", WarehouseErrorCode.WAREHOUSE_NOT_FOUND);
     }
@@ -200,20 +228,32 @@ class WarehouseCommandServiceImplTest {
     @DisplayName("[재고 수정] 수정 성공 테스트")
     void testUpdateInventorySuccess() {
         // given
+        Long memberId = 100L;
+
+        Warehouse warehouse = Warehouse.builder()
+                .memberId(memberId)
+                .build();
+        ReflectionTestUtils.setField(warehouse, "warehouseId", 10L);
+
         WarehouseInventory inventory = WarehouseInventory.builder()
                 .quantity(50)
+                .reservedQuantity(10)
+                .safetyQuantity(5)
+                .warehouseId(10L)
                 .build();
         ReflectionTestUtils.setField(inventory, "warehouseInventoryId", 1L);
 
         given(warehouseInventoryRepository.findById(1L)).willReturn(Optional.of(inventory));
+        given(warehouseRepository.findById(10L)).willReturn(Optional.of(warehouse));
 
         // when
         WarehouseInventoryCommandResponse response = warehouseCommandService.updateInventory(
-                1L, WarehouseInventoryUpdateRequest.builder().quantity(150).build());
+                1L, WarehouseInventoryUpdateRequest.builder().quantity(150).build(), memberId);
 
         // then
         assertThat(response.getQuantity()).isEqualTo(150);
     }
+
 
     @Test
     @DisplayName("[재고 수정] 재고 없음 예외 테스트")
@@ -223,30 +263,40 @@ class WarehouseCommandServiceImplTest {
 
         // when & then
         assertThatThrownBy(() -> warehouseCommandService.updateInventory(
-                1L, WarehouseInventoryUpdateRequest.builder().quantity(100).build()))
+                1L, WarehouseInventoryUpdateRequest.builder().quantity(100).build(), 100L))
                 .isInstanceOf(WarehouseException.class)
                 .hasFieldOrPropertyWithValue("errorCode", WarehouseErrorCode.INVENTORY_NOT_FOUND);
     }
+
 
     @Test
     @DisplayName("[재고 삭제] 삭제 성공 테스트")
     void testDeleteInventorySuccess() {
         // given
+        Long memberId = 100L;
+
+        Warehouse warehouse = Warehouse.builder()
+                .memberId(memberId)
+                .build();
+        ReflectionTestUtils.setField(warehouse, "warehouseId", 10L);
+
         WarehouseInventory inventory = WarehouseInventory.builder()
-                .quantity(50)
+                .quantity(0)
+                .reservedQuantity(0)
+                .warehouseId(10L)
                 .build();
         ReflectionTestUtils.setField(inventory, "warehouseInventoryId", 1L);
 
         given(warehouseInventoryRepository.findById(1L)).willReturn(Optional.of(inventory));
+        given(warehouseRepository.findById(10L)).willReturn(Optional.of(warehouse));
 
         // when
-        WarehouseInventoryCommandResponse response = warehouseCommandService.deleteInventory(1L);
+        WarehouseInventoryCommandResponse response = warehouseCommandService.deleteInventory(1L, memberId);
 
         // then
         assertThat(response.getInventoryId()).isEqualTo(1L);
         verify(warehouseInventoryRepository).delete(inventory);
     }
-
     @Test
     @DisplayName("[재고 삭제] 재고 없음 예외 테스트")
     void testDeleteInventoryNotFound() {
@@ -254,9 +304,10 @@ class WarehouseCommandServiceImplTest {
         given(warehouseInventoryRepository.findById(1L)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> warehouseCommandService.deleteInventory(1L))
+        assertThatThrownBy(() -> warehouseCommandService.deleteInventory(1L, 100L))
                 .isInstanceOf(WarehouseException.class)
                 .hasFieldOrPropertyWithValue("errorCode", WarehouseErrorCode.INVENTORY_NOT_FOUND);
     }
+
 
 }

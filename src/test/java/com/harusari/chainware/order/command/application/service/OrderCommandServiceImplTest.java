@@ -2,6 +2,8 @@ package com.harusari.chainware.order.command.application.service;
 
 import com.harusari.chainware.delivery.command.domain.aggregate.Delivery;
 import com.harusari.chainware.delivery.command.domain.repository.DeliveryRepository;
+import com.harusari.chainware.franchise.command.domain.aggregate.Franchise;
+import com.harusari.chainware.franchise.command.domain.repository.FranchiseRepository;
 import com.harusari.chainware.order.command.application.dto.request.*;
 import com.harusari.chainware.order.command.application.dto.response.OrderCommandResponse;
 import com.harusari.chainware.order.command.domain.aggregate.Order;
@@ -54,6 +56,9 @@ class OrderCommandServiceImplTest {
     private ProductRepository productRepository;
 
     @Mock
+    private FranchiseRepository franchiseRepository;
+
+    @Mock
     private RedissonClient redissonClient;
 
     @Mock
@@ -67,7 +72,6 @@ class OrderCommandServiceImplTest {
         given(redissonClient.getLock(anyString())).willReturn(rLock);
 
         validRequest = OrderCreateRequest.builder()
-                .franchiseId(1L)
                 .deliveryDueDate(LocalDate.now().plusDays(3))
                 .orderDetails(List.of(
                         OrderDetailCreateRequest.builder()
@@ -95,6 +99,13 @@ class OrderCommandServiceImplTest {
 
         given(productRepository.findById(1L)).willReturn(Optional.of(product));
 
+        Franchise franchise = Franchise.builder()
+                .memberId(100L)
+                .build();
+        ReflectionTestUtils.setField(franchise, "franchiseId", 1L);
+
+        given(franchiseRepository.findFranchiseIdByMemberId(100L))
+                .willReturn(Optional.of(franchise));
 
         Order savedOrder = Order.builder()
                 .franchiseId(1L)
@@ -130,7 +141,6 @@ class OrderCommandServiceImplTest {
     void testCreateOrderEmptyDetails() throws Exception {
         // given
         OrderCreateRequest emptyRequest = OrderCreateRequest.builder()
-                .franchiseId(1L)
                 .deliveryDueDate(LocalDate.now())
                 .orderDetails(List.of())
                 .build();
