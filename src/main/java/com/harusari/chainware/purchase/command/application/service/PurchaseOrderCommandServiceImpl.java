@@ -19,7 +19,7 @@ import com.harusari.chainware.purchase.command.infrastructure.PurchaseOrderCodeG
 import com.harusari.chainware.requisition.query.dto.response.RequisitionDetailResponse;
 import com.harusari.chainware.requisition.query.dto.response.RequisitionItemResponse;
 import com.harusari.chainware.requisition.query.mapper.RequisitionQueryMapper;
-import com.harusari.chainware.vendor.query.dto.VendorDetailDto;
+import com.harusari.chainware.vendor.query.dto.response.VendorDetailResponse;
 import com.harusari.chainware.vendor.query.service.VendorQueryService;
 import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInbound;
 import com.harusari.chainware.warehouse.command.domain.aggregate.WarehouseInventory;
@@ -69,8 +69,8 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
                 .mapToLong(item -> item.getUnitPrice() * item.getQuantity())
                 .sum();
 
-        VendorDetailDto vendorDetail = vendorQueryService.getVendorDetail(requisition.getVendorId()).getVendor();
-        Long vendorMemberId = vendorDetail.getMemberId();
+        VendorDetailResponse vendorDetailResponse = vendorQueryService.getVendorDetail(requisition.getVendorId());
+        Long vendorMemberId = vendorDetailResponse.memberId();
 
 
         // 4. 발주 생성
