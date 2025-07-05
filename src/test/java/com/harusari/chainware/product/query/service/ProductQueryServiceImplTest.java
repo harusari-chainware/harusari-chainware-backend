@@ -88,7 +88,7 @@ class ProductQueryServiceImplTest {
             );
 
             given(productQueryMapper.findProductById(productId)).willReturn(Optional.of(product));
-            given(productQueryMapper.findVendorContractsByProductId(productId)).willReturn(contracts);
+            given(productQueryMapper.findVendorContractsByProductId(any(VendorByProductRequest.class))).willReturn(contracts);
             given(productQueryMapper.findVendorsByProductId(any(VendorByProductRequest.class))).willReturn(vendors);
             given(productQueryMapper.countVendorsByProductId(any(VendorByProductRequest.class))).willReturn(1L);
 

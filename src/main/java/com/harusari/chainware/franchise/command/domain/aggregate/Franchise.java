@@ -88,14 +88,17 @@ public class Franchise {
     }
 
     public void updateFranchise(
-            String franchiseName, String franchiseContact,
-            String franchiseTaxId, FranchiseStatus franchiseStatus, Address franchiseAddress
+            String franchiseName, String franchiseContact, String franchiseTaxId,
+            FranchiseStatus franchiseStatus, Address franchiseAddress,
+            LocalDate contractStartDate, LocalDate contractEndDate
     ) {
         this.franchiseName = franchiseName;
         this.franchiseContact = franchiseContact;
         this.franchiseTaxId = franchiseTaxId;
         this.franchiseStatus = franchiseStatus;
         this.franchiseAddress = franchiseAddress;
+        this.contractStartDate = contractStartDate;
+        this.contractEndDate = contractEndDate;
         this.modifiedAt = LocalDateTime.now().withNano(0);
     }
 

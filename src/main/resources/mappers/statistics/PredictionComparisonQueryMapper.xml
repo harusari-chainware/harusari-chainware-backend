@@ -3,90 +3,42 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
+
 <mapper namespace="com.harusari.chainware.statistics.query.mapper.PredictionComparisonQueryMapper">
 
-    <!-- 매출 (sales) -->
-    <select id="getActualSales" resultType="com.harusari.chainware.statistics.query.dto.predictionComparison.PredictionComparisonDto">
-        SELECT
-        DATE(s.sold_at) AS date,
-        SUM(s.total_amount) AS value,
-        'ACTUAL' AS type
+    <!-- sales -->
+    <select id="getActualSalesAllFranchises" resultType="com.harusari.chainware.statistics.query.dto.predictionComparison.PredictionComparisonDto">
+        SELECT DATE(s.sold_at) AS date, SUM(s.total_amount) AS value, 'ACTUAL' AS type
         FROM sales s
-        <where>
-            <if test="franchiseId != null">
-                s.franchise_id = #{franchiseId} AND
-            </if>
-            s.sold_at BETWEEN #{startDate} AND #{endDate}
-        </where>
+        WHERE s.sold_at BETWEEN #{startDate} AND #{endDate}
         GROUP BY DATE(s.sold_at)
     </select>
 
-    <select id="getPredictedSales" resultType="com.harusari.chainware.statistics.query.dto.predictionComparison.PredictionComparisonDto">
-        SELECT
-        target_date AS date,
-        predicted_value AS value,
-        'PREDICTED' AS type
+    <select id="getPredictedSalesAllFranchises" resultType="com.harusari.chainware.statistics.query.dto.predictionComparison.PredictionComparisonDto">
+        SELECT target_date AS date, SUM(predicted_value) AS value, 'PREDICTED' AS type
         FROM prediction_result
         WHERE prediction_type = 'sales'
         AND period_type = 'WEEKLY'
-        <if test="franchiseId != null">
-            AND franchise_id = #{franchiseId}
-        </if>
         AND target_date BETWEEN #{startDate} AND #{endDate}
+        GROUP BY target_date
     </select>
 
-    <!-- 주문량 (order_quantity) -->
-    <select id="getActualOrderQuantity" resultType="com.harusari.chainware.statistics.query.dto.predictionComparison.PredictionComparisonDto">
-        SELECT
-        DATE(so.delivery_due_date) AS date,
-        SUM(sod.quantity) AS value,
-        'ACTUAL' AS type
+    <!-- order_quantity -->
+    <select id="getActualOrderQuantityAllFranchises" resultType="com.harusari.chainware.statistics.query.dto.predictionComparison.PredictionComparisonDto">
+        SELECT DATE(so.delivery_due_date) AS date, SUM(sod.quantity) AS value, 'ACTUAL' AS type
         FROM store_order so
         JOIN store_order_detail sod ON so.store_order_id = sod.store_order_id
-        <where>
-            <if test="franchiseId != null">
-                so.franchise_id = #{franchiseId} AND
-            </if>
-            so.delivery_due_date BETWEEN #{startDate} AND #{endDate}
-        </where>
+        WHERE so.delivery_due_date BETWEEN #{startDate} AND #{endDate}
         GROUP BY DATE(so.delivery_due_date)
     </select>
 
-    <select id="getPredictedOrderQuantity" resultType="com.harusari.chainware.statistics.query.dto.predictionComparison.PredictionComparisonDto">
-        SELECT
-        target_date AS date,
-        predicted_value AS value,
-        'PREDICTED' AS type
+    <select id="getPredictedOrderQuantityAllFranchises" resultType="com.harusari.chainware.statistics.query.dto.predictionComparison.PredictionComparisonDto">
+        SELECT target_date AS date, SUM(predicted_value) AS value, 'PREDICTED' AS type
         FROM prediction_result
         WHERE prediction_type = 'order_quantity'
         AND period_type = 'WEEKLY'
-        <if test="franchiseId != null">
-            AND franchise_id = #{franchiseId}
-        </if>
         AND target_date BETWEEN #{startDate} AND #{endDate}
-    </select>
-
-    <!-- 발주량 (purchase_quantity) -->
-    <select id="getActualPurchaseQuantity" resultType="com.harusari.chainware.statistics.query.dto.predictionComparison.PredictionComparisonDto">
-        SELECT
-        DATE(po.created_at) AS date,
-        SUM(pod.quantity) AS value,
-        'ACTUAL' AS type
-        FROM purchase_order po
-        JOIN purchase_order_detail pod ON po.purchase_order_id = pod.po_id
-        WHERE po.created_at BETWEEN #{startDate} AND #{endDate}
-        GROUP BY DATE(po.created_at)
-    </select>
-
-    <select id="getPredictedPurchaseQuantity" resultType="com.harusari.chainware.statistics.query.dto.predictionComparison.PredictionComparisonDto">
-        SELECT
-        target_date AS date,
-        predicted_value AS value,
-        'PREDICTED' AS type
-        FROM prediction_result
-        WHERE prediction_type = 'purchase_quantity'
-        AND period_type = 'WEEKLY'
-        AND target_date BETWEEN #{startDate} AND #{endDate}
+        GROUP BY target_date
     </select>
 
 </mapper>

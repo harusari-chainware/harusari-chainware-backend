@@ -2,6 +2,7 @@ package com.harusari.chainware.statistics.query.controller;
 
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.statistics.query.dto.disposal.DisposalRateStatisticsResponseBase;
+import com.harusari.chainware.statistics.query.dto.disposal.DisposalRateTrendGroupedResponse;
 import com.harusari.chainware.statistics.query.service.disposal.DisposalRateStatisticsQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -52,5 +53,16 @@ public class DisposalRateStatisticsQueryController {
         List<? extends DisposalRateStatisticsResponseBase> result =
                 service.getDisposalStatistics(period.toUpperCase(), warehouseId, franchiseId, targetDate, includeProduct);
         return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+    @Operation(summary = "폐기율 추이 (전체/본사/가맹점) 그룹 조회")
+    @GetMapping("/trend-group")
+    public ResponseEntity<ApiResponse<DisposalRateTrendGroupedResponse>> getGroupedTrend(
+            @RequestParam String period,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(
+                service.getGroupedTrend(period.toUpperCase(), targetDate)
+        ));
     }
 }

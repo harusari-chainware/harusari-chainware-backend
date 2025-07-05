@@ -2,6 +2,7 @@ package com.harusari.chainware.statistics.query.mapper;
 
 import com.harusari.chainware.statistics.query.dto.purchaseOrder.PurchaseOrderProductStatisticsResponse;
 import com.harusari.chainware.statistics.query.dto.purchaseOrder.PurchaseOrderStatisticsResponse;
+import com.harusari.chainware.statistics.query.dto.purchaseOrder.PurchaseOrderTrendResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -19,4 +20,10 @@ public interface PurchaseOrderStatisticsQueryMapper {
             @Param("vendorId") Long vendorId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
+
+    List<PurchaseOrderTrendResponse> getPurchaseOrderTrend(
+            @Param("vendorId") Long vendorId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 }

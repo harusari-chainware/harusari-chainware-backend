@@ -2,6 +2,7 @@ package com.harusari.chainware.statistics.query.controller;
 
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.statistics.query.dto.purchaseOrder.PurchaseOrderStatisticsResponseBase;
+import com.harusari.chainware.statistics.query.dto.purchaseOrder.PurchaseOrderTrendResponse;
 import com.harusari.chainware.statistics.query.service.purchaseOrder.PurchaseOrderStatisticsQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -53,5 +54,22 @@ public class PurchaseOrderStatisticsQueryController {
                         period.toUpperCase(), vendorId, targetDate, includeProduct);
 
         return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+    @GetMapping("/trend")
+    @Operation(summary = "발주 추이 조회", description = "기간별(주간/월간) 발주량/금액 변화를 일자별로 반환합니다. DAILY는 지원하지 않습니다.")
+    public ResponseEntity<ApiResponse<List<PurchaseOrderTrendResponse>>> getTrend(
+            @RequestParam String period,
+            @RequestParam(required = false) Long vendorId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
+    ) {
+        if ("DAILY".equalsIgnoreCase(period)) {
+            return ResponseEntity.ok(ApiResponse.success(List.of()));
+        }
+
+        List<PurchaseOrderTrendResponse> trend =
+                purchaseOrderStatisticsQueryService.getTrend(period.toUpperCase(), vendorId, targetDate);
+
+        return ResponseEntity.ok(ApiResponse.success(trend));
     }
 }
