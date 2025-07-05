@@ -11,6 +11,7 @@
         SELECT
         c.category_id AS categoryId,
         c.category_name AS categoryName,
+        c.category_code AS categoryCode,
         tc.top_category_id AS topCategoryId,
         tc.top_category_name AS topCategoryName,
         COUNT(p.product_id) AS productCount,

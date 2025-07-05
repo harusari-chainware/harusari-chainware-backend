@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 public class CategoryWithProductCountResponse {
     private Long categoryId;
     private String categoryName;
+    private String categoryCode;
     private long productCount;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;

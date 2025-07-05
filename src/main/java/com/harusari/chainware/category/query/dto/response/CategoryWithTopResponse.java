@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 public class CategoryWithTopResponse {
     private Long categoryId;
     private String categoryName;
+    private String categoryCode;
     private Long topCategoryId;
     private String topCategoryName;
     private long productCount;

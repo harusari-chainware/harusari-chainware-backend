@@ -43,6 +43,7 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
                     CategoryWithProductCountResponse.builder()
                             .categoryId(row.getCategoryId())
                             .categoryName(row.getCategoryName())
+                            .categoryCode(row.getCategoryCode())
                             .productCount(row.getProductCount())
                             .createdAt(row.getCreatedAt())
                             .modifiedAt(row.getModifiedAt())
