@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -48,6 +49,9 @@ public class PurchaseOrder {
     @Column(name = "reject_reason", length = 255)
     private String rejectReason;
 
+    @Column(name = "due_date")
+    private LocalDate dueDate;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -57,7 +61,7 @@ public class PurchaseOrder {
     @Builder
     public PurchaseOrder(Long requisitionId, Long vendorId, Long warehouseId, Long createdMemberId, Long vendorMemberId,
                          String purchaseOrderCode, Long totalAmount, PurchaseOrderStatus purchaseOrderStatus,
-                         String rejectReason, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+                         String rejectReason, LocalDate dueDate, LocalDateTime createdAt, LocalDateTime modifiedAt) {
         this.requisitionId = requisitionId;
         this.vendorId = vendorId;
         this.warehouseId = warehouseId;
@@ -67,6 +71,7 @@ public class PurchaseOrder {
         this.totalAmount = totalAmount;
         this.purchaseOrderStatus = purchaseOrderStatus;
         this.rejectReason = rejectReason;
+        this.dueDate = dueDate;
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
     }

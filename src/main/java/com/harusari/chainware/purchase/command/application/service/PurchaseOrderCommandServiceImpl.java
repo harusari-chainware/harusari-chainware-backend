@@ -85,6 +85,7 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
                 .purchaseOrderCode(code)
                 .totalAmount(totalAmount)
                 .purchaseOrderStatus(PurchaseOrderStatus.REQUESTED)
+                .dueDate(requisition.getDueDate())
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
                 .build();

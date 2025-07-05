@@ -65,6 +65,7 @@ public class RequisitionCommandServiceImpl implements RequisitionCommandService 
                 .productCount(productCount)
                 .totalQuantity(totalQuantity)
                 .totalPrice(totalPrice)
+                .dueDate(request.getDueDate())
                 .build();
 
         // 저장 (먼저 저장해서 ID 생성)

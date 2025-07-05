@@ -16,6 +16,7 @@
         r.product_count,
         r.total_quantity,
         r.total_price,
+        r.due_date,
         r.created_at
         FROM requisition r
         WHERE
@@ -49,6 +50,7 @@
             r.total_quantity,
             r.total_price,
             r.reject_reason,
+            r.due_date,
             r.created_at,
             r.submitted_at,
             r.modified_at

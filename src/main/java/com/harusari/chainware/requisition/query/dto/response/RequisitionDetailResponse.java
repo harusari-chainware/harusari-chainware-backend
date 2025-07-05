@@ -4,6 +4,7 @@ import com.harusari.chainware.requisition.command.domain.aggregate.RequisitionSt
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class RequisitionDetailResponse {
     private int totalQuantity;
     private Long totalPrice;
     private String rejectReason;
+    private LocalDate dueDate;
     private LocalDateTime createdAt;
     private LocalDateTime submittedAt;
     private LocalDateTime modifiedAt;

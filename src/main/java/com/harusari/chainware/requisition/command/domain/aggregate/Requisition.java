@@ -3,6 +3,7 @@ package com.harusari.chainware.requisition.command.domain.aggregate;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -46,6 +47,9 @@ public class Requisition {
     @Column(name = "reject_reason", length = 255)
     private String rejectReason;
 
+    @Column(name = "due_date")
+    private LocalDate dueDate;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -57,7 +61,7 @@ public class Requisition {
 
     @Builder
     public Requisition(Long createdMemberId, Long approvedMemberId, Long vendorId, Long warehouseId, String code,
-                       int productCount, int totalQuantity, Long totalPrice) {
+                       int productCount, int totalQuantity, Long totalPrice, LocalDate dueDate) {
         this.createdMemberId = createdMemberId;
         this.approvedMemberId = approvedMemberId;
         this.vendorId = vendorId;
@@ -67,6 +71,7 @@ public class Requisition {
         this.totalQuantity = totalQuantity;
         this.totalPrice = totalPrice;
         this.requisitionStatus = RequisitionStatus.SAVED;
+        this.dueDate = dueDate;
         this.createdAt = LocalDateTime.now().withNano(0);
         this.modifiedAt = LocalDateTime.now().withNano(0);
     }
