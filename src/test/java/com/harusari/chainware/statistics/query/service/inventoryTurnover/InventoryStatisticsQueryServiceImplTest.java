@@ -2,7 +2,7 @@ package com.harusari.chainware.statistics.query.service.inventoryTurnover;
 
 import com.harusari.chainware.statistics.exception.StatisticsErrorCode;
 import com.harusari.chainware.statistics.exception.StatisticsException;
-import com.harusari.chainware.statistics.query.dto.invertoryTurnover.InventoryTurnoverResponse;
+import com.harusari.chainware.statistics.query.dto.inventoryTurnover.InventoryTurnoverResponse;
 import com.harusari.chainware.statistics.query.mapper.InventoryStatisticsMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

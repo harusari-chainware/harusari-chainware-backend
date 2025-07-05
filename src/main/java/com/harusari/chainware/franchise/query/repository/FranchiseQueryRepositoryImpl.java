@@ -32,8 +32,8 @@ public class FranchiseQueryRepositoryImpl implements FranchiseQueryRepositoryCus
     public Page<FranchiseSearchResponse> pageFranchises(FranchiseSearchRequest franchiseSearchRequest, Pageable pageable) {
         List<FranchiseSearchResponse> contents = queryFactory
                 .select(Projections.constructor(FranchiseSearchResponse.class,
-                        franchise.franchiseName, member.name, franchise.franchiseContact, franchise.franchiseAddress,
-                        franchise.franchiseStatus, franchise.contractStartDate, franchise.contractEndDate
+                        franchise.franchiseId, franchise.franchiseName, member.name, franchise.franchiseContact,
+                        franchise.franchiseAddress, franchise.franchiseStatus, franchise.contractStartDate, franchise.contractEndDate
                 ))
                 .from(franchise)
                 .leftJoin(member).on(franchise.memberId.eq(member.memberId))

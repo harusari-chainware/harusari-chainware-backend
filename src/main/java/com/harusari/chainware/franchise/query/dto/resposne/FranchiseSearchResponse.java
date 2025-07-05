@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 @Builder
 public record FranchiseSearchResponse(
-        String franchiseName, String franchiseManager, String franchiseContact, Address franchiseAddress,
+        Long franchiseId, String franchiseName, String franchiseManager, String franchiseContact, Address franchiseAddress,
         FranchiseStatus franchiseStatus, LocalDate contractStartDate, LocalDate contractEndDate
 ) {
 }

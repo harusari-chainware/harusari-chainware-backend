@@ -1,43 +1,58 @@
 package com.harusari.chainware.vendor.query.service;
 
-import com.harusari.chainware.common.dto.Pagination;
-import com.harusari.chainware.vendor.query.dto.*;
-import com.harusari.chainware.vendor.query.mapper.VendorQueryMapper;
+import com.harusari.chainware.common.infrastructure.storage.StorageDownloader;
+import com.harusari.chainware.exception.vendor.VendorAgreementNotFoundException;
+import com.harusari.chainware.exception.vendor.VendorNotFoundException;
+import com.harusari.chainware.vendor.command.domain.aggregate.Vendor;
+import com.harusari.chainware.vendor.query.dto.VendorPresignedUrlResponse;
+import com.harusari.chainware.vendor.query.dto.request.VendorSearchRequest;
+import com.harusari.chainware.vendor.query.dto.response.VendorDetailResponse;
+import com.harusari.chainware.vendor.query.dto.response.VendorSearchResponse;
+import com.harusari.chainware.vendor.query.repository.VendorQueryRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.time.Duration;
+
+import static com.harusari.chainware.exception.vendor.VendorErrorCode.VENDOR_AGREEMENT_NOT_FOUND;
+import static com.harusari.chainware.exception.vendor.VendorErrorCode.VENDOR_NOT_FOUND_EXCEPTION;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class VendorQueryServiceImpl implements VendorQueryService {
 
-    private final VendorQueryMapper vendorMapper;
+    private final StorageDownloader s3Downloader;
+    private final VendorQueryRepository vendorQueryRepository;
 
     @Override
-    @Transactional(readOnly = true)
-    public VendorListResponse getVendors(VendorSearchRequestDto request) {
-        List<VendorListDto> vendors = vendorMapper.findVendors(request);
-        long totalCount = vendorMapper.countVendors(request);
-        int totalPages = (int) Math.ceil((double) totalCount / request.getSize());
-
-        return VendorListResponse.builder()
-                .vendors(vendors)
-                .pagination(Pagination.builder()
-                        .currentPage(request.getPage())
-                        .totalPages(totalPages)
-                        .totalItems(totalCount)
-                        .build())
-                .build();
+    public Page<VendorSearchResponse> searchVendors(VendorSearchRequest vendorSearchRequest, Pageable pageable) {
+        return vendorQueryRepository.pageVendors(vendorSearchRequest, pageable);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public VendorDetailResponse getVendorDetail(Long vendorId) {
-        VendorDetailDto vendorDetail = vendorMapper.findVendorDetailById(vendorId);
-        return VendorDetailResponse.builder()
-                .vendor(vendorDetail)
+        return vendorQueryRepository.findVendorDetailByVendorId(vendorId)
+                .orElseThrow(() -> new VendorNotFoundException(VENDOR_NOT_FOUND_EXCEPTION));
+    }
+
+    @Override
+    public VendorPresignedUrlResponse generateDownloadUrl(Long vendorId) {
+        Vendor vendor = vendorQueryRepository.findVendorByVendorId(vendorId)
+                .orElseThrow(() -> new VendorNotFoundException(VENDOR_NOT_FOUND_EXCEPTION));
+
+        String s3Key = vendor.getAgreementFilePath();
+
+        if (s3Key == null || s3Key.isBlank()) {
+            throw new VendorAgreementNotFoundException(VENDOR_AGREEMENT_NOT_FOUND);
+        }
+
+        return VendorPresignedUrlResponse.builder()
+                .presignedUrl(s3Downloader.generatePresignedUrl(s3Key, Duration.ofMinutes(5)))
                 .build();
     }
+
 }
