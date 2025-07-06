@@ -23,7 +23,6 @@ spring:
     redis:
       host: ${REDIS_HOST_LOCAL}
       port: ${REDIS_PORT_LOCAL}
-      password: ${REDIS_PASSWORD_LOCAL}
       timeout: 6000ms
       lettuce:
         pool:
@@ -40,15 +39,6 @@ spring:
         dialect: org.hibernate.dialect.MariaDBDialect
         format_sql: true
         show_sql: true
-
-  mail:
-    host: ${MAIL_HOST_LOCAL}
-    port: ${MAIL_PORT_LOCAL}
-    username: ${MAIL_USERNAME_LOCAL}
-    password: ${MAIL_PASSWORD_LOCAL}
-    properties:
-      mail.smtp.auth: true
-      mail.smtp.starttls.enable: true
 
 mybatis:
   configuration:
