@@ -23,7 +23,8 @@ spring:
     redis:
       host: ${REDIS_HOST_PROD}
       port: ${REDIS_PORT_PROD}
-      password: ${REDIS_PASSWORD_PROD}
+      ssl:
+        enabled: true
       timeout: 6000ms
       lettuce:
         pool:
@@ -42,15 +43,6 @@ spring:
         format_sql: true
         show_sql: true
 
-  mail:
-    host: ${MAIL_POST_PROD}
-    port: ${MAIL_PORT_PROD}
-    username: ${MAIL_USERNAME_PROD}
-    password: ${MAIL_PASSWORD_PROD}
-    properties:
-      mail.smtp.auth: true
-      mail.smtp.starttls.enable: true
-
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
@@ -62,6 +54,16 @@ jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION}
   refresh-expiration: ${JWT_REFRESH_EXPIRATION}
+
+cloud:
+  aws:
+    s3:
+      bucket: ${AWS_S3_BUCKET_NAME}
+    region:
+      static: ${AWS_REGION}
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
 
 server:
   port: ${SERVER_PORT}

@@ -10,6 +10,7 @@ import com.harusari.chainware.member.command.domain.aggregate.LoginHistory;
 import com.harusari.chainware.member.command.domain.aggregate.Member;
 import com.harusari.chainware.member.command.domain.repository.AuthorityCommandRepository;
 import com.harusari.chainware.member.command.domain.repository.LoginHistoryCommandRepository;
+import com.harusari.chainware.member.common.utils.UserAgentUtils;
 import com.harusari.chainware.member.query.repository.MemberQueryRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -134,7 +135,8 @@ public class AuthServiceImpl implements AuthService {
 
     private void saveLoginHistory(Member member, HttpServletRequest request) {
         String ipAddress = extractClientIp(request);
-        String browser = request.getHeader(HEADER_USER_AGENT);
+        String userAgent = request.getHeader(HEADER_USER_AGENT);
+        String browser = UserAgentUtils.parseBrowser(userAgent);
 
         LoginHistory loginHistory = LoginHistory.builder()
                 .memberId(member.getMemberId())
