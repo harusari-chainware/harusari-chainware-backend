@@ -83,6 +83,9 @@ dependencies {
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 	testAnnotationProcessor "org.mapstruct:mapstruct-processor:1.6.3"
 
+	//uap
+	implementation 'com.github.ua-parser:uap-java:1.5.4'
+
 	// junit
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
