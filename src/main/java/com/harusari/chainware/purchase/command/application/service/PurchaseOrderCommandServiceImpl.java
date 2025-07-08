@@ -17,6 +17,8 @@ import com.harusari.chainware.purchase.command.domain.repository.PurchaseOrderDe
 import com.harusari.chainware.purchase.command.domain.repository.PurchaseOrderRepository;
 import com.harusari.chainware.purchase.command.infrastructure.PurchaseOrderCodeGenerator;
 import com.harusari.chainware.requisition.query.dto.response.RequisitionDetailResponse;
+import com.harusari.chainware.requisition.query.dto.response.RequisitionInfo;
+import com.harusari.chainware.requisition.query.dto.response.RequisitionItemInfo;
 import com.harusari.chainware.requisition.query.dto.response.RequisitionItemResponse;
 import com.harusari.chainware.requisition.query.mapper.RequisitionQueryMapper;
 import com.harusari.chainware.vendor.query.dto.response.VendorDetailResponse;
@@ -59,7 +61,7 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
         }
 
         // 2. 품의서 품목 리스트 조회
-        List<RequisitionItemResponse> items = requisitionQueryMapper.findItemsByRequisitionId(requisitionId);
+        List<RequisitionItemInfo> items = requisitionQueryMapper.findItemsByRequisitionId(requisitionId);
         if (items.isEmpty()) {
             throw new RequisitionException(RequisitionErrorCode.REQUISITION_ITEM_NOT_FOUND);
         }
@@ -69,7 +71,8 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
                 .mapToLong(item -> item.getUnitPrice() * item.getQuantity())
                 .sum();
 
-        VendorDetailResponse vendorDetailResponse = vendorQueryService.getVendorDetail(requisition.getVendorId());
+        Long vendorId = requisition.getVendor().getVendorId();
+        VendorDetailResponse vendorDetailResponse = vendorQueryService.getVendorDetail(vendorId);
         Long vendorMemberId = vendorDetailResponse.memberId();
 
 
@@ -78,13 +81,14 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
 
         PurchaseOrder order = PurchaseOrder.builder()
                 .requisitionId(requisitionId)
-                .vendorId(requisition.getVendorId())
-                .warehouseId(requisition.getWarehouseId())
-                .createdMemberId(requisition.getCreatedMemberId())
+                .vendorId(vendorId)
+                .warehouseId(requisition.getRequisitionInfo().getWarehouseId())
+                .createdMemberId(requisition.getCreatedMember().getMemberId())
                 .vendorMemberId(vendorMemberId)
                 .purchaseOrderCode(code)
                 .totalAmount(totalAmount)
                 .purchaseOrderStatus(PurchaseOrderStatus.REQUESTED)
+                .dueDate(requisition.getRequisitionInfo().getDueDate())
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
                 .build();
@@ -210,6 +214,14 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
             throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_UNAUTHORIZED_VENDOR);
         }
 
+        if(order.getPurchaseOrderStatus().equals(PurchaseOrderStatus.SHIPPED)){
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_STATUS_ALREADY_SHIPPED);
+        }
+
+        if (!order.getPurchaseOrderStatus().equals(PurchaseOrderStatus.APPROVED)){
+                throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_SHIP_INVALID_STATUS);
+        }
+
         order.shipped();
     }
 
@@ -221,7 +233,7 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
                 .orElseThrow(() -> new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_NOT_FOUND));
 
         if (!order.getPurchaseOrderStatus().equals(PurchaseOrderStatus.SHIPPED)) {
-            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_SHIP_INVALID_STATUS);
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_INBOUND_INVALID_STATUS);
         }
 
         Long warehouseId = order.getWarehouseId();
