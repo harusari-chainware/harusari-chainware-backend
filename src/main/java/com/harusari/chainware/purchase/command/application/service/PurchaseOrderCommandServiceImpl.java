@@ -214,6 +214,14 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
             throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_UNAUTHORIZED_VENDOR);
         }
 
+        if(order.getPurchaseOrderStatus().equals(PurchaseOrderStatus.SHIPPED)){
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_STATUS_ALREADY_SHIPPED);
+        }
+
+        if (!order.getPurchaseOrderStatus().equals(PurchaseOrderStatus.APPROVED)){
+                throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_SHIP_INVALID_STATUS);
+        }
+
         order.shipped();
     }
 
@@ -225,7 +233,7 @@ public class PurchaseOrderCommandServiceImpl implements PurchaseOrderCommandServ
                 .orElseThrow(() -> new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_NOT_FOUND));
 
         if (!order.getPurchaseOrderStatus().equals(PurchaseOrderStatus.SHIPPED)) {
-            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_SHIP_INVALID_STATUS);
+            throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_INBOUND_INVALID_STATUS);
         }
 
         Long warehouseId = order.getWarehouseId();

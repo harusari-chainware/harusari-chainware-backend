@@ -6,7 +6,11 @@ import com.harusari.chainware.warehouse.query.dto.response.WarehouseSearchRespon
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Optional;
+
 public interface WarehouseQueryRepositoryCustom {
     Page<WarehouseSearchResponse> searchWarehouses(WarehouseSearchRequest request, Pageable pageable);
     WarehouseDetailResponse findWarehouseDetailById(Long warehouseId);
+    Long findWarehouseIdByManagerId(Long memberId);
+
 }

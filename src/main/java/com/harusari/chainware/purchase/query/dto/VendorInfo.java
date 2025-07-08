@@ -1,4 +1,4 @@
-package com.harusari.chainware.requisition.query.dto.response;
+package com.harusari.chainware.purchase.query.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +9,6 @@ public class VendorInfo {
     private Long vendorId;
     private String name;
     private String managerName;
-    private String contact;
+    private String vendorContact;
     private String type;
 }

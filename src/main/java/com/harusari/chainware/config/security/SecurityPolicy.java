@@ -113,8 +113,8 @@ public enum SecurityPolicy {
     DELIVERY_DETAIL_GET("/api/v1/delivery/{deliveryId}", GET, ROLE_BASED, List.of(FRANCHISE_MANAGER, WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 배송 상세 조회
 
     /* Purchase Order */
-    PURCHASE_GET("/api/v1/purchases", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, VENDOR_MANAGER)), // 발주 목록 조회
-    PURCHASE_DETAIL_GET("/api/v1/purchases/{purchaseOrderId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, VENDOR_MANAGER)), // 발주 상세 조회
+    PURCHASE_GET("/api/v1/purchases", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, VENDOR_MANAGER, WAREHOUSE_MANAGER)), // 발주 목록 조회
+    PURCHASE_DETAIL_GET("/api/v1/purchases/{purchaseOrderId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, VENDOR_MANAGER, WAREHOUSE_MANAGER)), // 발주 상세 조회
     PURCHASE_CANCEL_PUT("/api/v1/purchases/{purchaseOrderId}/cancel", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 발주 취소
     PURCHASE_UPDATE_PUT("/api/v1/purchases/{purchaseOrderId}", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 발주 수정
     PURCHASE_APPROVE_PUT("/api/v1/purchases/{purchaseOrderId}/approve", PUT, ROLE_BASED, List.of(VENDOR_MANAGER)), // 발주 승인

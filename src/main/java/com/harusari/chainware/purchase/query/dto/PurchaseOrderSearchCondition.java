@@ -14,6 +14,7 @@ public class PurchaseOrderSearchCondition {
     private PurchaseOrderStatus status;
     private Long requesterId;
     private Long vendorMemberId;
+    private Long warehouseId;
     private LocalDate startDate;
     private LocalDate endDate;
     private int page = 0;

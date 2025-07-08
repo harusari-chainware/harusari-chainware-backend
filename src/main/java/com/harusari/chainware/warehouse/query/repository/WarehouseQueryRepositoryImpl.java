@@ -9,6 +9,8 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -179,6 +181,15 @@ public class WarehouseQueryRepositoryImpl implements WarehouseQueryRepositoryCus
         }
 
         return orders.toArray(new OrderSpecifier[0]);
+    }
+
+    @Override
+    public Long findWarehouseIdByManagerId(Long memberId) {
+        return queryFactory
+                .select(warehouse.warehouseId)
+                .from(warehouse)
+                .where(warehouse.memberId.eq(memberId))
+                .fetchFirst(); // 반환값이 Long 또는 null
     }
 
 }

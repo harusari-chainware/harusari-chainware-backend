@@ -1,4 +1,4 @@
-package com.harusari.chainware.requisition.query.dto.response;
+package com.harusari.chainware.purchase.query.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -10,4 +10,5 @@ public class MemberInfo {
     private String name;
     private String position;
     private String email;
+    private String contact;
 }

@@ -10,12 +10,26 @@
         po.purchase_order_id,
         po.purchase_order_code,
         po.purchase_order_status AS status,
-        po.vendor_id,
-        po.warehouse_id,
-        po.created_member_id AS requesterId,
+        v.vendor_name,
+
+        -- 품목 수: 해당 발주의 품목 개수
+        (SELECT COUNT(*)
+        FROM purchase_order_detail pod
+        WHERE pod.purchase_order_id = po.purchase_order_id) AS product_count,
+
+        -- 총 수량: 품목들의 quantity 합산
+        (SELECT COALESCE(SUM(pod.quantity), 0)
+        FROM purchase_order_detail pod
+        WHERE pod.purchase_order_id = po.purchase_order_id) AS total_quantity,
+
+        po.total_amount,
+        r.requisition_code,
         po.created_at,
-        po.total_amount
+        po.due_date,
+        po.shipped_at
         FROM purchase_order po
+        LEFT JOIN vendor v ON po.vendor_id = v.vendor_id
+        LEFT JOIN requisition r ON po.requisition_id = r.requisition_id
         WHERE 1 = 1
         <if test="condition.status != null">
             AND po.purchase_order_status = #{condition.status}
@@ -32,38 +46,99 @@
         <if test="condition.vendorMemberId != null">
             AND po.vendor_member_id = #{condition.vendorMemberId}
         </if>
+        <if test="condition.warehouseId != null">
+            AND po.warehouse_id = #{condition.warehouseId}
+        </if>
         ORDER BY po.created_at DESC
         LIMIT #{condition.size}
         OFFSET #{condition.offset}
     </select>
 
 
+
+    <!-- 상세 조회 resultMap -->
     <resultMap id="PurchaseOrderDetailMap" type="com.harusari.chainware.purchase.query.dto.PurchaseOrderDetailResponse">
-        <id property="purchaseOrderId" column="purchase_order_id"/>
-        <result property="purchaseOrderCode" column="purchase_order_code"/>
-        <result property="vendorName" column="vendor_name"/>
-        <result property="warehouseId" column="warehouse_id"/>
-        <result property="status" column="purchase_order_status"/>
-        <result property="totalAmount" column="total_amount"/>
-        <result property="createdAt" column="created_at"/>
+
+        <association property="purchaseOrderInfo" javaType="com.harusari.chainware.purchase.query.dto.PurchaseOrderInfo">
+            <id property="purchaseOrderId" column="purchase_order_id"/>
+            <result property="purchaseOrderCode" column="purchase_order_code"/>
+            <result property="requisitionCode" column="requisition_code"/>
+            <result property="status" column="purchase_order_status"/>
+            <result property="totalAmount" column="total_amount"/>
+            <result property="createdAt" column="created_at"/>
+            <result property="submittedAt" column="submitted_at"/>
+            <result property="dueDate" column="due_date"/>
+            <result property="shippedAt" column="shipped_at"/>
+        </association>
+
+        <association property="drafter" javaType="com.harusari.chainware.purchase.query.dto.MemberInfo">
+            <id property="memberId" column="drafter_id"/>
+            <result property="name" column="drafter_name"/>
+            <result property="position" column="drafter_position"/>
+            <result property="email" column="drafter_email"/>
+            <result property="contact" column="drafter_contact"/>
+        </association>
+
+        <association property="vendor" javaType="com.harusari.chainware.purchase.query.dto.VendorInfo">
+            <id property="vendorId" column="vendor_id"/>
+            <result property="name" column="vendor_name"/>
+            <result property="type" column="vendor_type"/>
+            <result property="managerName" column="vendor_manager_name"/>
+            <result property="vendorContact" column="vendor_contact"/>
+        </association>
+
+        <association property="warehouse" javaType="com.harusari.chainware.purchase.query.dto.PWarehouseInfo">
+            <id property="warehouseId" column="warehouse_id"/>
+            <result property="name" column="warehouse_name"/>
+            <result property="managerName" column="warehouse_manager_name"/>
+            <result property="warehouseContact" column="warehouse_manager_contact"/>
+        </association>
+
     </resultMap>
 
+    <!-- 발주 상세 조회 -->
     <select id="findPurchaseOrderById" resultMap="PurchaseOrderDetailMap">
         SELECT
             po.purchase_order_id,
             po.purchase_order_code,
-            v.vendor_name,
-            po.warehouse_id,
             po.purchase_order_status,
             po.total_amount,
-            po.created_at
-        FROM
-            purchase_order po
-                JOIN vendor v ON po.vendor_id = v.vendor_id
-        WHERE
-            po.purchase_order_id = #{purchaseOrderId}
+            po.created_at,
+            po.submitted_at,
+            po.due_date,
+            po.shipped_at,
+
+            r.requisition_code,
+
+            d.member_id AS drafter_id,
+            d.name AS drafter_name,
+            d.position AS drafter_position,
+            d.email AS drafter_email,
+            d.phone_number AS drafter_contact,
+
+            v.vendor_id,
+            v.vendor_name,
+            v.vendor_type,
+            vm.name AS vendor_manager_name,
+            vm.phone_number AS vendor_contact,
+
+            w.warehouse_id,
+            w.warehouse_name AS warehouse_name,
+            wm.name AS warehouse_manager_name,
+            wm.phone_number AS warehouse_manager_contact
+
+        FROM purchase_order po
+                 LEFT JOIN requisition r ON po.requisition_id = r.requisition_id
+                 LEFT JOIN member d ON po.created_member_id = d.member_id
+                 LEFT JOIN vendor v ON po.vendor_id = v.vendor_id
+                 LEFT JOIN member vm ON v.member_id = vm.member_id
+                 LEFT JOIN warehouse w ON po.warehouse_id = w.warehouse_id
+                 LEFT JOIN member wm ON w.member_id = wm.member_id
+
+        WHERE po.purchase_order_id = #{purchaseOrderId}
     </select>
 
+    <!-- 발주 상세 내역 조회 (상품 리스트) -->
     <select id="findProductsByPurchaseOrderId" resultType="com.harusari.chainware.purchase.query.dto.PurchaseOrderProductResponse">
         SELECT
             pod.product_id,
@@ -76,6 +151,5 @@
         WHERE
             pod.purchase_order_id = #{purchaseOrderId}
     </select>
-
 
 </mapper>

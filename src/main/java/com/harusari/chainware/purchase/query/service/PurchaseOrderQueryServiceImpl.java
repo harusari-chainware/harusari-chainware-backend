@@ -27,25 +27,17 @@ public class PurchaseOrderQueryServiceImpl implements PurchaseOrderQueryService 
     @Override
     @Transactional(readOnly = true)
     public PurchaseOrderDetailResponse getPurchaseOrderDetail(Long memberId, Long purchaseOrderId) {
-        var order = mapper.findPurchaseOrderById(memberId, purchaseOrderId);
-
-        if (order == null) {
+        // 1. 상세 정보 조회 (중첩 구조)
+        var detail = mapper.findPurchaseOrderById(memberId, purchaseOrderId);
+        if (detail == null) {
             throw new PurchaseOrderException(PurchaseOrderErrorCode.PURCHASE_NOT_FOUND);
         }
 
+        // 2. 상품 목록 조회 후 조립
         var products = mapper.findProductsByPurchaseOrderId(memberId, purchaseOrderId);
+        detail.setProducts(products);
 
-        PurchaseOrderDetailResponse response = new PurchaseOrderDetailResponse();
-        response.setPurchaseOrderId(order.getPurchaseOrderId());
-        response.setPurchaseOrderCode(order.getPurchaseOrderCode());
-        response.setVendorName(order.getVendorName());
-        response.setWarehouseId(order.getWarehouseId());
-        response.setStatus(order.getStatus());
-        response.setTotalAmount(order.getTotalAmount());
-        response.setCreatedAt(order.getCreatedAt());
-        response.setProducts(products);
-
-        return response;
+        return detail;
     }
 
 }
