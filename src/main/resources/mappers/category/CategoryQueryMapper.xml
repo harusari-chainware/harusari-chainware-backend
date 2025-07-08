@@ -11,13 +11,24 @@
         SELECT
         c.category_id AS categoryId,
         c.category_name AS categoryName,
+        c.category_code AS categoryCode,
         tc.top_category_id AS topCategoryId,
         tc.top_category_name AS topCategoryName,
-        COUNT(p.product_id) AS productCount
+        COUNT(p.product_id) AS productCount,
+        c.created_at AS createdAt,
+        c.modified_at AS modifiedAt
         FROM category c
         JOIN top_category tc ON c.top_category_id = tc.top_category_id
         LEFT JOIN product p ON p.category_id = c.category_id
         WHERE 1 = 1
+
+        <if test="request.topCategoryId != null">
+            AND tc.top_category_id = #{request.topCategoryId}
+        </if>
+        <if test="request.categoryId != null">
+            AND c.category_id = #{request.categoryId}
+        </if>
+
         <if test="request.topCategoryName != null and request.topCategoryName != ''">
             AND tc.top_category_name LIKE CONCAT('%', #{request.topCategoryName}, '%')
         </if>
@@ -36,6 +47,13 @@
         FROM category c
         JOIN top_category tc ON c.top_category_id = tc.top_category_id
         WHERE 1 = 1
+
+        <if test="request.topCategoryId != null">
+            AND tc.top_category_id = #{request.topCategoryId}
+        </if>
+        <if test="request.categoryId != null">
+            AND c.category_id = #{request.categoryId}
+        </if>
         <if test="request.topCategoryName != null and request.topCategoryName != ''">
             AND tc.top_category_name LIKE CONCAT('%', #{request.topCategoryName}, '%')
         </if>
