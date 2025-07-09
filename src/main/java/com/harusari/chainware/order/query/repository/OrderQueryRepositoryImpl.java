@@ -35,6 +35,7 @@ public class OrderQueryRepositoryImpl implements OrderQueryRepositoryCustom {
     public Page<OrderSearchResponse> searchOrders(OrderSearchRequest request, Pageable pageable) {
         List<OrderSearchResponse> contents = queryFactory
                 .select(Projections.constructor(OrderSearchResponse.class,
+                        order.orderId,
                         order.orderCode,
                         franchise.franchiseName,
                         order.productCount,
