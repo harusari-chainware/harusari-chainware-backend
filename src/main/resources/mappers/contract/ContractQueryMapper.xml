@@ -56,6 +56,10 @@
         <if test="request.contractStatus != null">
             AND c.contract_status = #{request.contractStatus}
         </if>
+        <if test="request.contractDate != null">
+            AND c.contract_start_date &lt;= #{request.contractDate}
+            AND c.contract_end_date &gt;= #{request.contractDate}
+        </if>
         <if test="request.contractStartDate != null">
             AND c.contract_start_date = #{request.contractStartDate}
         </if>
@@ -94,6 +98,10 @@
         </if>
         <if test="request.contractStatus != null">
             AND c.contract_status = #{request.contractStatus}
+        </if>
+        <if test="request.contractDate != null">
+            AND c.contract_start_date &lt;= #{request.contractDate}
+            AND c.contract_end_date &gt;= #{request.contractDate}
         </if>
         <if test="request.contractStartDate != null">
             AND c.contract_start_date = #{request.contractStartDate}

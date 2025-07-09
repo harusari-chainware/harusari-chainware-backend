@@ -17,6 +17,7 @@ public class VendorProductContractSearchRequest {
     private String vendorName;
     private VendorType vendorType;
     private ContractStatus contractStatus;
+    private LocalDate contractDate;
     private final LocalDate contractStartDate;
     private final LocalDate contractEndDate;
 

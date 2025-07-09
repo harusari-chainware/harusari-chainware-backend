@@ -41,6 +41,7 @@ public class VendorProductContractQueryController {
             @Parameter(description = "거래처 이름", example = "ABC유통") @RequestParam(required = false) String vendorName,
             @Parameter(description = "거래처 유형") @RequestParam(required = false) VendorType vendorType,
             @Parameter(description = "계약 상태") @RequestParam(required = false) ContractStatus contractStatus,
+            @Parameter(description = "계약 기준일(YYYY-MM-DD)", example = "2025-01-01") @RequestParam(required = false) String contractDate,
             @Parameter(description = "계약 시작일(YYYY-MM-DD)", example = "2025-01-01") @RequestParam(required = false) String contractStartDate,
             @Parameter(description = "계약 종료일(YYYY-MM-DD)", example = "2025-12-31") @RequestParam(required = false) String contractEndDate,
             @Parameter(description = "페이지 번호", example = "1") @RequestParam(defaultValue = "1") int page,
@@ -52,6 +53,8 @@ public class VendorProductContractQueryController {
         };
         Long memberId = userDetails.getMemberId();
 
+        LocalDate date = contractDate != null ? LocalDate.parse(contractDate) : null;
+
         LocalDate startDate = contractStartDate != null ? LocalDate.parse(contractStartDate) : null;
         LocalDate endDate = contractEndDate != null ? LocalDate.parse(contractEndDate) : null;
 
@@ -62,6 +65,7 @@ public class VendorProductContractQueryController {
                 .vendorName(vendorName)
                 .vendorType(vendorType)
                 .contractStatus(contractStatus)
+                .contractDate(date)
                 .contractStartDate(startDate)
                 .contractEndDate(endDate)
                 .page(page)
