@@ -194,10 +194,7 @@
         v.vendor_name,
         v.vendor_type,
         v.vendor_tax_id,
-        v.vendor_memo,
-        v.vendor_status,
-        v.vendor_start_date,
-        v.vendor_end_date
+        v.vendor_status
         FROM vendor v
         JOIN contract c ON v.vendor_id = c.vendor_id
         WHERE c.product_id = #{productId}
