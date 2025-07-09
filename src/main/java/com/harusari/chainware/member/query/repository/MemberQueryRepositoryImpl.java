@@ -68,6 +68,7 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepositoryCustom {
                 .where(
                         emailEq(memberSearchRequest.email()),
                         authorityEq(memberSearchRequest.authorityName()),
+                        positionEq(memberSearchRequest.position()),
                         joinDateBetween(memberSearchRequest.joinDateFrom(), memberSearchRequest.joinDateTo()),
                         isDeletedFalse(memberSearchRequest.isDeleted())
                 )
@@ -156,6 +157,10 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepositoryCustom {
         return authorityName != null ? authority.authorityName.eq(authorityName) : null;
     }
 
+    private BooleanExpression positionEq(String position) {
+        return position != null ? member.position.eq(position) : null;
+    }
+
     private BooleanExpression joinDateBetween(LocalDate from, LocalDate to) {
         if (from != null && to != null) {
             return member.joinAt.between(from.atStartOfDay(), to.atTime(LocalTime.MAX));
@@ -168,8 +173,11 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepositoryCustom {
         }
     }
 
-    private BooleanExpression isDeletedFalse(boolean isDeleted) {
-        return !isDeleted ? member.isDeleted.eq(false) : member.isDeleted.eq(true);
+    private BooleanExpression isDeletedFalse(Boolean isDeleted) {
+        if (isDeleted == null) {
+            return null;
+        }
+        return member.isDeleted.eq(isDeleted);
     }
 
 }

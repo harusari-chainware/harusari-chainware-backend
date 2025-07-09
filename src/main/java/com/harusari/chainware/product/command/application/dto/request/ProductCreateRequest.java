@@ -16,6 +16,10 @@ public class ProductCreateRequest {
     @NotBlank(message = "제품명은 필수입니다.")
     private final String productName;
 
+    @NotNull(message = "상위 카테고리 ID는 필수입니다.")
+    @Min(0)
+    private final Long topCategoryId;
+
     @NotNull(message = "카테고리 ID는 필수입니다.")
     @Min(0)
     private final Long categoryId;
