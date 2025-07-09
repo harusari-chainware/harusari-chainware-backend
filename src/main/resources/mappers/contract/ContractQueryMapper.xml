@@ -130,6 +130,8 @@
 
         <!-- 단일조회 전용 추가 필드 -->
         <result property="vendorId"           column="vendor_id"/>
+        <result property="vendorTaxId"           column="vendor_tax_id"/>
+        <result property="vendorStatus"           column="vendor_status"/>
         <result property="productId"          column="product_id"/>
         <result property="unitQuantity"       column="unit_quantity"/>
         <result property="unitSpec"           column="unit_spec"/>
@@ -158,6 +160,8 @@
         c.contract_start_date,
         c.contract_end_date,
         v.vendor_id,
+        v.vendor_tax_id,
+        v.vendor_status,
         p.product_id,
         p.unit_quantity,
         p.unit_spec,
