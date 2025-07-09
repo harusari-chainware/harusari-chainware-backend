@@ -36,13 +36,13 @@
         JOIN vendor v ON c.vendor_id = v.vendor_id
         JOIN product p ON c.product_id = p.product_id
         JOIN category sc ON p.category_id = sc.category_id
-        JOIN category tc ON sc.top_category_id = tc.category_id
+        JOIN top_category tc ON sc.top_category_id = tc.top_category_id
         WHERE c.is_deleted = 0
         <if test="request.productName != null">
             AND p.product_name LIKE CONCAT('%', #{request.productName}, '%')
         </if>
         <if test="request.topCategoryName != null">
-            AND tc.category_name LIKE CONCAT('%', #{request.topCategoryName}, '%')
+            AND tc.top_category_name LIKE CONCAT('%', #{request.topCategoryName}, '%')
         </if>
         <if test="request.categoryName != null">
             AND sc.category_name LIKE CONCAT('%', #{request.categoryName}, '%')
@@ -75,13 +75,13 @@
         JOIN vendor v ON c.vendor_id = v.vendor_id
         JOIN product p ON c.product_id = p.product_id
         JOIN category sc ON p.category_id = sc.category_id
-        JOIN category tc ON sc.top_category_id = tc.category_id
+        JOIN top_category tc ON sc.top_category_id = tc.top_category_id
         WHERE c.is_deleted = 0
         <if test="request.productName != null">
             AND p.product_name LIKE CONCAT('%', #{request.productName}, '%')
         </if>
         <if test="request.topCategoryName != null">
-            AND tc.category_name LIKE CONCAT('%', #{request.topCategoryName}, '%')
+            AND tc.top_category_name LIKE CONCAT('%', #{request.topCategoryName}, '%')
         </if>
         <if test="request.categoryName != null">
             AND sc.category_name LIKE CONCAT('%', #{request.categoryName}, '%')
@@ -176,7 +176,7 @@
         JOIN vendor v    ON c.vendor_id = v.vendor_id
         JOIN product p   ON c.product_id = p.product_id
         JOIN category cgy ON p.category_id = cgy.category_id
-        JOIN category tc  ON cgy.top_category_id = tc.category_id
+        JOIN top_category tc  ON cgy.top_category_id = tc.top_category_id
         WHERE c.is_deleted = 0
         AND c.contract_id = #{contractId}
         <if test="!isManager">
