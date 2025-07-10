@@ -173,8 +173,11 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepositoryCustom {
         }
     }
 
-    private BooleanExpression isDeletedFalse(boolean isDeleted) {
-        return !isDeleted ? member.isDeleted.eq(false) : member.isDeleted.eq(true);
+    private BooleanExpression isDeletedFalse(Boolean isDeleted) {
+        if (isDeleted == null) {
+            return null;
+        }
+        return member.isDeleted.eq(isDeleted);
     }
 
 }

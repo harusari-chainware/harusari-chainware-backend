@@ -1,8 +1,10 @@
 package com.harusari.chainware.vendor.query.repository;
 
 import com.harusari.chainware.vendor.query.dto.request.VendorSearchRequest;
+import com.harusari.chainware.vendor.query.dto.response.VendorContractInfoResponse;
 import com.harusari.chainware.vendor.query.dto.response.VendorDetailResponse;
 import com.harusari.chainware.vendor.query.dto.response.VendorSearchResponse;
+import com.harusari.chainware.vendor.query.dto.response.VendorSimpleResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -19,6 +21,7 @@ import java.util.Optional;
 import static com.harusari.chainware.franchise.command.domain.aggregate.QFranchise.franchise;
 import static com.harusari.chainware.member.command.domain.aggregate.QMember.member;
 import static com.harusari.chainware.vendor.command.domain.aggregate.QVendor.vendor;
+import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouse.warehouse;
 
 @Repository
 @RequiredArgsConstructor
@@ -90,6 +93,18 @@ public class VendorQueryRepositoryImpl implements VendorQueryRepositoryCustom {
         );
     }
 
+    @Override
+    public Optional<VendorContractInfoResponse> findVendorContractInfoByVendorName(String vendorName) {
+        return Optional.ofNullable(queryFactory
+                .select(Projections.constructor(VendorContractInfoResponse.class,
+                        vendor.vendorId, vendor.vendorType, vendor.vendorTaxId, vendor.vendorStatus
+                ))
+                .from(vendor)
+                .where(vendor.vendorName.eq(vendorName))
+                .fetchOne()
+        );
+    }
+
     private BooleanExpression vendorNameContains(String vendorName) {
         return (vendorName != null && !vendorName.isBlank()) ? vendor.vendorName.contains(vendorName) : null;
     }
@@ -132,6 +147,18 @@ public class VendorQueryRepositoryImpl implements VendorQueryRepositoryCustom {
             return vendor.vendorEndDate.loe(endDate);
         }
         return null;
+    }
+
+    @Override
+    public List<VendorSimpleResponse> findAllVendorsSimple() {
+        return queryFactory
+                .select(Projections.constructor(VendorSimpleResponse.class,
+                        vendor.vendorId,
+                        vendor.vendorName
+                ))
+                .from(vendor)
+                .orderBy(vendor.vendorName.asc())
+                .fetch();
     }
 
 }

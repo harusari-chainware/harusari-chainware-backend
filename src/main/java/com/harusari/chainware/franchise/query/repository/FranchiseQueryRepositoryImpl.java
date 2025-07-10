@@ -4,6 +4,7 @@ import com.harusari.chainware.franchise.command.domain.aggregate.FranchiseStatus
 import com.harusari.chainware.franchise.query.dto.request.FranchiseSearchRequest;
 import com.harusari.chainware.franchise.query.dto.resposne.FranchiseSearchDetailResponse;
 import com.harusari.chainware.franchise.query.dto.resposne.FranchiseSearchResponse;
+import com.harusari.chainware.franchise.query.dto.resposne.FranchiseSimpleResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -127,6 +128,18 @@ public class FranchiseQueryRepositoryImpl implements FranchiseQueryRepositoryCus
             return franchise.contractEndDate.loe(endDate);
         }
         return null;
+    }
+
+    @Override
+    public List<FranchiseSimpleResponse> findAllFranchiseSimple() {
+        return queryFactory
+                .select(Projections.constructor(FranchiseSimpleResponse.class,
+                        franchise.franchiseId,
+                        franchise.franchiseName
+                ))
+                .from(franchise)
+                .orderBy(franchise.franchiseName.asc())
+                .fetch();
     }
 
 }

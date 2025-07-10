@@ -49,18 +49,40 @@
     <select id="getStoreOrderTrend"
             resultType="com.harusari.chainware.statistics.query.dto.storeOrder.StoreOrderTrendResponse">
         SELECT
-        DATE(so.created_at) AS date,
+        <choose>
+            <when test="period == 'WEEKLY'">
+                STR_TO_DATE(CONCAT(YEAR(so.created_at), ' ', WEEK(so.created_at), ' 1'), '%X %V %w') AS date
+            </when>
+            <when test="period == 'MONTHLY'">
+                DATE_FORMAT(so.created_at, '%Y-%m-01') AS date
+            </when>
+            <otherwise>
+                DATE(so.created_at) AS date
+            </otherwise>
+        </choose>,
+        COUNT(DISTINCT so.store_order_id) AS totalOrders,
         SUM(sod.quantity) AS totalQuantity,
         SUM(sod.total_price) AS totalAmount
         FROM store_order so
         JOIN store_order_detail sod ON so.store_order_id = sod.store_order_id
-        WHERE DATE(so.created_at) BETWEEN #{startDate} AND #{endDate}
+        WHERE so.created_at BETWEEN #{startDate} AND #{endDate}
+        AND so.store_order_status = 'APPROVED'
         <if test="franchiseId != null">
             AND so.franchise_id = #{franchiseId}
         </if>
-        AND so.store_order_status = 'APPROVED'
-        GROUP BY DATE(so.created_at)
+        <choose>
+            <when test="period == 'WEEKLY'">
+                GROUP BY YEAR(so.created_at), WEEK(so.created_at)
+            </when>
+            <when test="period == 'MONTHLY'">
+                GROUP BY DATE_FORMAT(so.created_at, '%Y-%m')
+            </when>
+            <otherwise>
+                GROUP BY DATE(so.created_at)
+            </otherwise>
+        </choose>
         ORDER BY date ASC
+        LIMIT 7
     </select>
 
 </mapper>

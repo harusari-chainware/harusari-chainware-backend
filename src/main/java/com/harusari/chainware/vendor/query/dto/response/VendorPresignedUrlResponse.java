@@ -1,4 +1,4 @@
-package com.harusari.chainware.vendor.query.dto;
+package com.harusari.chainware.vendor.query.dto.response;
 
 import lombok.Builder;
 
