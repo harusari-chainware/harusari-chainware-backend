@@ -44,7 +44,7 @@
             AND po.created_at &lt;= #{condition.endDate}
         </if>
         <if test="condition.vendorMemberId != null">
-            AND po.vendor_member_id = #{condition.vendorMemberId}
+            AND v.vendor_name = #{condition.vendorName}
         </if>
         <if test="condition.warehouseId != null">
             AND po.warehouse_id = #{condition.warehouseId}
