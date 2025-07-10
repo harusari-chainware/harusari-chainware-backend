@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -45,5 +47,11 @@ public class WarehouseQueryServiceImpl implements WarehouseQueryService{
     public WarehouseInventoryDetailResponse getWarehouseInventoryDetail(Long warehouseInventoryId) {
         return warehouseInventoryQueryRepository.findWarehouseInventoryDetail(warehouseInventoryId);
     }
+
+    @Override
+    public Long getWarehouseIdByManagerId(Long memberId) {
+        return warehouseQueryRepository.findWarehouseIdByManagerId(memberId);
+    }
+
 
 }

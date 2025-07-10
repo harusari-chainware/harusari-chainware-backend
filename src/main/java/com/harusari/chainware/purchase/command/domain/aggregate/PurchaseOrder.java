@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -48,16 +49,26 @@ public class PurchaseOrder {
     @Column(name = "reject_reason", length = 255)
     private String rejectReason;
 
+    @Column(name = "due_date")
+    private LocalDate dueDate;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "modified_at")
     private LocalDateTime modifiedAt;
 
+    @Column(name = "submitted_at")
+    private LocalDateTime submittedAt;
+
+    @Column(name = "shipped_at")
+    private LocalDateTime shippedAt;
+
     @Builder
     public PurchaseOrder(Long requisitionId, Long vendorId, Long warehouseId, Long createdMemberId, Long vendorMemberId,
                          String purchaseOrderCode, Long totalAmount, PurchaseOrderStatus purchaseOrderStatus,
-                         String rejectReason, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+                         String rejectReason, LocalDate dueDate, LocalDateTime createdAt,
+                         LocalDateTime modifiedAt, LocalDateTime submittedAt, LocalDateTime shippedAt) {
         this.requisitionId = requisitionId;
         this.vendorId = vendorId;
         this.warehouseId = warehouseId;
@@ -67,22 +78,26 @@ public class PurchaseOrder {
         this.totalAmount = totalAmount;
         this.purchaseOrderStatus = purchaseOrderStatus;
         this.rejectReason = rejectReason;
+        this.dueDate = dueDate;
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
+        this.submittedAt = submittedAt;
+        this.shippedAt = shippedAt;
+
     }
 
 
     // 발주 승인
     public void approve() {
         this.purchaseOrderStatus = PurchaseOrderStatus.APPROVED;
-        this.modifiedAt = LocalDateTime.now();
+        this.submittedAt = LocalDateTime.now();
     }
 
     // 발주 거절
     public void reject(String rejectReason) {
         this.purchaseOrderStatus = PurchaseOrderStatus.REJECTED;
         this.rejectReason = rejectReason;
-        this.modifiedAt = LocalDateTime.now();
+        this.submittedAt = LocalDateTime.now();
     }
 
     // 발주 요청 취소
@@ -100,7 +115,7 @@ public class PurchaseOrder {
     // 발주 출고
     public void shipped() {
         this.purchaseOrderStatus = PurchaseOrderStatus.SHIPPED;
-        this.modifiedAt = LocalDateTime.now();
+        this.shippedAt = LocalDateTime.now();
     }
 
     public void warehoused(PurchaseOrderStatus status) {

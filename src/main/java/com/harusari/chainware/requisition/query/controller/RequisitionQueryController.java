@@ -6,6 +6,7 @@ import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityTyp
 import com.harusari.chainware.requisition.query.dto.request.RequisitionSearchCondition;
 import com.harusari.chainware.requisition.query.dto.response.RequisitionDetailResponse;
 import com.harusari.chainware.requisition.query.dto.response.RequisitionSummaryResponse;
+import com.harusari.chainware.requisition.query.dto.response.RequisitionSummaryView;
 import com.harusari.chainware.requisition.query.service.RequisitionQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -30,7 +31,7 @@ public class RequisitionQueryController {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "품의 목록 조회 성공")
     })
-    public ResponseEntity<ApiResponse<List<RequisitionSummaryResponse>>> getMyRequisitions(
+    public ResponseEntity<ApiResponse<List<RequisitionSummaryView>>> getMyRequisitions(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @ModelAttribute RequisitionSearchCondition condition
     ) {
@@ -39,7 +40,7 @@ public class RequisitionQueryController {
         boolean isApprove = userDetails.getMemberAuthorityType() == MemberAuthorityType.SENIOR_MANAGER;
         condition.setApproverView(isApprove);
 
-        List<RequisitionSummaryResponse> result = requisitionQueryService.getMyRequisitions(memberId, condition);
+        List<RequisitionSummaryView> result = requisitionQueryService.getMyRequisitions(memberId, condition);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(result));

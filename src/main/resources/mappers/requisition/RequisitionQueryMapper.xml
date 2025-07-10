@@ -6,18 +6,29 @@
 <mapper namespace="com.harusari.chainware.requisition.query.mapper.RequisitionQueryMapper">
 
 
-    <select id="findMyRequisitions" resultType="com.harusari.chainware.requisition.query.dto.response.RequisitionSummaryResponse">
+    <select id="findMyRequisitions" resultType="com.harusari.chainware.requisition.query.dto.response.RequisitionSummaryView">
         SELECT
         r.requisition_id,
         r.requisition_code,
-        r.requisition_status,
-        r.vendor_id,
-        r.warehouse_id,
+        v.vendor_name,
+
+        cm.name AS drafter_name,
+        am.name AS approver_name,
         r.product_count,
         r.total_quantity,
         r.total_price,
-        r.created_at
+
+        r.requisition_status,
+
+
+        r.submitted_at,
+        r.modified_at
+
         FROM requisition r
+        LEFT JOIN vendor v ON r.vendor_id = v.vendor_id
+        LEFT JOIN member cm ON r.created_member_id = cm.member_id
+        LEFT JOIN member am ON r.approved_member_id = am.member_id
+
         WHERE
         <choose>
             <when test="condition.approverView">
@@ -27,46 +38,140 @@
                 r.created_member_id = #{memberId}
             </otherwise>
         </choose>
+
         <if test="condition.status != null">
             AND r.requisition_status = #{condition.status}
         </if>
+
         ORDER BY r.created_at DESC
         LIMIT #{condition.size}
         OFFSET #{condition.offset}
     </select>
 
-    <!-- 품의서 단건 조회 -->
-    <select id="findRequisitionById" resultType="com.harusari.chainware.requisition.query.dto.response.RequisitionDetailResponse">
+    <!-- 품의서 상세 조회 -->
+    <resultMap id="RequisitionDetailResultMap" type="com.harusari.chainware.requisition.query.dto.response.RequisitionDetailResponse">
+        <association property="requisitionInfo" javaType="com.harusari.chainware.requisition.query.dto.response.RequisitionInfo">
+            <id property="requisitionId" column="requisition_id"/>
+            <result property="requisitionCode" column="requisition_code"/>
+            <result property="requisitionStatus" column="requisition_status"/>
+            <result property="productCount" column="product_count"/>
+            <result property="totalQuantity" column="total_quantity"/>
+            <result property="totalPrice" column="total_price"/>
+            <result property="warehouseId" column="warehouse_id"/>
+            <result property="rejectReason" column="reject_reason"/>
+            <result property="dueDate" column="due_date"/>
+            <result property="createdAt" column="created_at"/>
+            <result property="submittedAt" column="submitted_at"/>
+            <result property="modifiedAt" column="modified_at"/>
+        </association>
+
+        <association property="createdMember" javaType="com.harusari.chainware.purchase.query.dto.MemberInfo">
+            <id property="memberId" column="created_member_id"/>
+            <result property="name" column="created_member_name"/>
+            <result property="position" column="created_member_position"/>
+            <result property="email" column="created_member_email"/>
+            <result property="contact" column="created_member_contact"/>
+        </association>
+
+        <association property="approvedMember" javaType="com.harusari.chainware.purchase.query.dto.MemberInfo">
+            <id property="memberId" column="approved_member_id"/>
+            <result property="name" column="approved_member_name"/>
+            <result property="position" column="approved_member_position"/>
+            <result property="email" column="approved_member_email"/>
+            <result property="contact" column="approved_member_contact"/>
+        </association>
+
+        <association property="vendor" javaType="com.harusari.chainware.purchase.query.dto.VendorInfo">
+            <id property="vendorId" column="vendor_id"/>
+            <result property="name" column="vendor_name"/>
+            <result property="type" column="vendor_type"/>
+            <result property="managerName" column="vendor_manager_name"/>
+            <result property="vendorContact" column="vendor_manager_contact"/>
+        </association>
+
+        <association property="warehouse" javaType="com.harusari.chainware.purchase.query.dto.PWarehouseInfo">
+            <id property="warehouseId" column="warehouse_id"/>
+            <result property="name" column="warehouse_name"/>
+            <result property="managerName" column="warehouse_manager_name"/>
+            <result property="warehouseContact" column="warehouse_manager_contact"/>
+        </association>
+    </resultMap>
+
+    <select id="findRequisitionById" resultMap="RequisitionDetailResultMap">
         SELECT
             r.requisition_id,
             r.requisition_code,
             r.requisition_status,
-            r.created_member_id,
-            r.approved_member_id,
-            r.vendor_id,
-            r.warehouse_id,
             r.product_count,
             r.total_quantity,
             r.total_price,
             r.reject_reason,
+            r.due_date,
             r.created_at,
             r.submitted_at,
-            r.modified_at
+            r.modified_at,
+
+            cm.member_id       AS created_member_id,
+            cm.name            AS created_member_name,
+            cm.position        AS created_member_position,
+            cm.email           AS created_member_email,
+            cm.phone_number    AS created_member_contact,
+
+            am.member_id       AS approved_member_id,
+            am.name            AS approved_member_name,
+            am.position        AS approved_member_position,
+            am.email           AS approved_member_email,
+            am.phone_number    AS approved_member_contact,
+
+            v.vendor_id,
+            v.vendor_name      AS vendor_name,
+            v.vendor_type             AS vendor_type,
+            vm.name AS vendor_manager_name,
+            vm.phone_number AS vendor_manager_contact,
+
+            w.warehouse_id,
+            w.warehouse_name AS warehouse_name,
+            wm.name AS warehouse_manager_name,
+            wm.phone_number AS warehouse_manager_contact
+
+
         FROM requisition r
+                 LEFT JOIN member cm ON r.created_member_id = cm.member_id
+                 LEFT JOIN member am ON r.approved_member_id = am.member_id
+                 LEFT JOIN vendor v ON r.vendor_id = v.vendor_id
+                 LEFT JOIN member vm ON v.member_id = vm.member_id
+                 LEFT JOIN warehouse w ON r.warehouse_id = w.warehouse_id
+                 LEFT JOIN member wm ON w.member_id = wm.member_id
+
         WHERE r.requisition_id = #{requisitionId}
           AND (r.created_member_id = #{memberId} OR r.approved_member_id = #{memberId})
     </select>
 
-    <!-- 품의서 상세 아이템 목록 -->
-    <select id="findItemsByRequisitionId" resultType="com.harusari.chainware.requisition.query.dto.response.RequisitionItemResponse">
+    <!-- 품의서 상세 품목 목록 -->
+    <resultMap id="RequisitionItemResultMap" type="com.harusari.chainware.requisition.query.dto.response.RequisitionItemInfo">
+        <id property="requisitionDetailId" column="requisition_detail_id"/>
+        <result property="productId" column="product_id"/>
+        <result property="productName" column="product_name"/>
+        <result property="productCode" column="product_code"/>
+        <result property="moq" column="moq"/>
+        <result property="quantity" column="quantity"/>
+        <result property="unitPrice" column="unit_price"/>
+        <result property="totalPrice" column="total_price"/>
+    </resultMap>
+
+    <select id="findItemsByRequisitionId" resultMap="RequisitionItemResultMap">
         SELECT
             rd.requisition_detail_id,
-            rd.product_id,
-            rd.contract_id,
+            p.product_id,
+            p.product_name         AS product_name,
+            p.product_code,
+            c.min_order_qty        AS moq,
             rd.quantity,
             rd.unit_price,
             rd.total_price
         FROM requisition_detail rd
+                 JOIN product p ON rd.product_id = p.product_id
+                 JOIN contract c ON rd.product_id = c.product_id
         WHERE rd.requisition_id = #{requisitionId}
     </select>
 
