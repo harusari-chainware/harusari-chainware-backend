@@ -131,6 +131,7 @@ public class OrderQueryRepositoryImpl implements OrderQueryRepositoryCustom {
 
         List<DeliveryHistoryInfo> deliveryHistory = queryFactory
                 .select(Projections.constructor(DeliveryHistoryInfo.class,
+                        delivery.startedAt,
                         delivery.deliveredAt,
                         delivery.carrier,
                         delivery.deliveryStatus
