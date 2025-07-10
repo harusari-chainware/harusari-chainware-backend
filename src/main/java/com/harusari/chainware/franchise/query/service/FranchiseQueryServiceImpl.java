@@ -8,6 +8,7 @@ import com.harusari.chainware.franchise.query.dto.request.FranchiseSearchRequest
 import com.harusari.chainware.franchise.query.dto.resposne.FranchisePresignedUrlResponse;
 import com.harusari.chainware.franchise.query.dto.resposne.FranchiseSearchDetailResponse;
 import com.harusari.chainware.franchise.query.dto.resposne.FranchiseSearchResponse;
+import com.harusari.chainware.franchise.query.dto.resposne.FranchiseSimpleResponse;
 import com.harusari.chainware.franchise.query.repository.FranchiseQueryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.util.List;
 
 import static com.harusari.chainware.exception.common.storage.StorageErrorCode.FRANCHISE_AGREEMENT_NOT_FOUND;
 import static com.harusari.chainware.exception.franchise.FranchiseErrorCode.FRANCHISE_NOT_FOUND_EXCEPTION;
@@ -53,6 +55,11 @@ public class FranchiseQueryServiceImpl implements FranchiseQueryService {
         return FranchisePresignedUrlResponse.builder()
                 .presignedUrl(s3Downloader.generatePresignedUrl(s3Key, Duration.ofMinutes(5)))
                 .build();
+    }
+
+    @Override
+    public List<FranchiseSimpleResponse> getAllFranchises() {
+        return franchiseQueryRepository.findAllFranchiseSimple();
     }
 
 }

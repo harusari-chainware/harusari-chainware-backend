@@ -21,7 +21,19 @@ public interface PurchaseOrderStatisticsQueryMapper {
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
 
-    List<PurchaseOrderTrendResponse> getPurchaseOrderTrend(
+    List<PurchaseOrderTrendResponse> getPurchaseOrderTrendDaily(
+            @Param("vendorId") Long vendorId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
+    List<PurchaseOrderTrendResponse> getPurchaseOrderTrendWeekly(
+            @Param("vendorId") Long vendorId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
+    List<PurchaseOrderTrendResponse> getPurchaseOrderTrendMonthly(
             @Param("vendorId") Long vendorId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate

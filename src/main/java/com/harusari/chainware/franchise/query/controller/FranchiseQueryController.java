@@ -6,6 +6,7 @@ import com.harusari.chainware.franchise.query.dto.request.FranchiseSearchRequest
 import com.harusari.chainware.franchise.query.dto.resposne.FranchisePresignedUrlResponse;
 import com.harusari.chainware.franchise.query.dto.resposne.FranchiseSearchDetailResponse;
 import com.harusari.chainware.franchise.query.dto.resposne.FranchiseSearchResponse;
+import com.harusari.chainware.franchise.query.dto.resposne.FranchiseSimpleResponse;
 import com.harusari.chainware.franchise.query.service.FranchiseQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +19,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -77,6 +80,13 @@ public class FranchiseQueryController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(presignedUrlResponse));
+    }
+
+    @GetMapping("/franchises/all")
+    @Operation(summary = "전체 가맹점 목록 조회", description = "가맹점 전체 목록을 반환합니다.")
+    public ResponseEntity<ApiResponse<List<FranchiseSimpleResponse>>> getAllFranchises() {
+        List<FranchiseSimpleResponse> list = franchiseQueryService.getAllFranchises();
+        return ResponseEntity.ok(ApiResponse.success(list));
     }
 
 }
