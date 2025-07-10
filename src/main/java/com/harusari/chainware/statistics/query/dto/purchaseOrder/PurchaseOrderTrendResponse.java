@@ -11,4 +11,5 @@ public class PurchaseOrderTrendResponse {
     private LocalDate date;
     private long totalQuantity;
     private long totalAmount;
+    private long totalCount;
 }

@@ -181,4 +181,16 @@ public class WarehouseQueryRepositoryImpl implements WarehouseQueryRepositoryCus
         return orders.toArray(new OrderSpecifier[0]);
     }
 
+    @Override
+    public List<WarehouseSimpleResponse> findAllWarehouseSimple() {
+        return queryFactory
+                .select(Projections.constructor(WarehouseSimpleResponse.class,
+                        warehouse.warehouseId,
+                        warehouse.warehouseName
+                ))
+                .from(warehouse)
+                .orderBy(warehouse.warehouseName.asc())
+                .fetch();
+    }
+
 }

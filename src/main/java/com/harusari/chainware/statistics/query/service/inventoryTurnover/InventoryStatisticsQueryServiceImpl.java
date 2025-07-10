@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -21,9 +20,8 @@ public class InventoryStatisticsQueryServiceImpl implements InventoryStatisticsQ
 
     @Override
     @Transactional
-    public List<InventoryTurnoverResponse> getTurnover(String period, Long franchiseId, LocalDate targetDate) {
-        // 기본 날짜는 저번달 1일
-        LocalDate baseDate = (targetDate != null) ? targetDate : LocalDate.now().minusMonths(1).withDayOfMonth(1);
+    public List<InventoryTurnoverResponse> getTurnover(String period, Long franchiseId, Long warehouseId, LocalDate targetDate) {
+        LocalDate baseDate = (targetDate != null) ? targetDate : LocalDate.now().minusDays(1);
 
         if (franchiseId != null) {
             if (!period.equalsIgnoreCase("MONTHLY")) {
@@ -32,9 +30,35 @@ public class InventoryStatisticsQueryServiceImpl implements InventoryStatisticsQ
             return getFranchiseMonthlyTurnover(franchiseId, baseDate);
         }
 
+        LocalDate startDate, endDate = baseDate;
+        if (warehouseId != null) {
+            return switch (period.toUpperCase()) {
+                case "DAILY" -> inventoryStatisticsMapper.getDailyTurnoverByWarehouse(baseDate, endDate, warehouseId);
+                case "WEEKLY" -> {
+                    startDate = baseDate.minusDays(6);
+                    yield inventoryStatisticsMapper.getWeeklyTurnoverByWarehouse(startDate, endDate, warehouseId);
+                }
+                case "MONTHLY" -> {
+                    startDate = baseDate.minusDays(29);
+                    yield inventoryStatisticsMapper.getMonthlyTurnoverByWarehouse(startDate, endDate, warehouseId);
+                }
+                default -> throw new StatisticsException(StatisticsErrorCode.UNSUPPORTED_PERIOD);
+            };
+        }
+
         return switch (period.toUpperCase()) {
-            case "WEEKLY" -> getWeeklyTurnover(baseDate);
-            case "MONTHLY" -> getMonthlyTurnover(baseDate);
+            case "DAILY" -> {
+                startDate = baseDate;
+                yield inventoryStatisticsMapper.getDailyTurnover(startDate, endDate);
+            }
+            case "WEEKLY" -> {
+                startDate = baseDate.minusDays(6);
+                yield inventoryStatisticsMapper.getWeeklyTurnover(startDate, endDate);
+            }
+            case "MONTHLY" -> {
+                startDate = baseDate.minusDays(29);
+                yield inventoryStatisticsMapper.getMonthlyTurnover(startDate, endDate);
+            }
             default -> throw new StatisticsException(StatisticsErrorCode.UNSUPPORTED_PERIOD);
         };
     }
@@ -45,30 +69,55 @@ public class InventoryStatisticsQueryServiceImpl implements InventoryStatisticsQ
         return inventoryStatisticsMapper.getFranchiseMonthlyTurnover(franchiseId, startDate, endDate);
     }
 
-    private List<InventoryTurnoverResponse> getWeeklyTurnover(LocalDate baseDate) {
-        LocalDate startDate = baseDate.with(DayOfWeek.MONDAY);
-        LocalDate endDate = baseDate.with(DayOfWeek.SUNDAY);
-        return inventoryStatisticsMapper.getWeeklyTurnover(startDate, endDate);
-    }
-
-    private List<InventoryTurnoverResponse> getMonthlyTurnover(LocalDate baseDate) {
-        LocalDate startDate = baseDate.withDayOfMonth(1);
-        LocalDate endDate = baseDate.withDayOfMonth(baseDate.lengthOfMonth());
-        return inventoryStatisticsMapper.getMonthlyTurnover(startDate, endDate);
-    }
-
     @Override
     @Transactional
-    public List<InventoryTurnoverTrendResponse> getTrend(String period, Long franchiseId, LocalDate targetDate) {
-        LocalDate baseDate = (targetDate != null) ? targetDate : LocalDate.now().minusMonths(1).withDayOfMonth(1);
+    public List<InventoryTurnoverTrendResponse> getTrend(String period, Long franchiseId, Long warehouseId, LocalDate targetDate) {
+        LocalDate baseDate = (targetDate != null) ? targetDate : LocalDate.now().minusDays(1);
 
-        switch (period.toUpperCase()) {
-            case "MONTHLY":
-                return inventoryStatisticsMapper.getMonthlyTurnoverTrend(baseDate, franchiseId);
-            case "WEEKLY":
-                return inventoryStatisticsMapper.getWeeklyTurnoverTrend(baseDate, franchiseId);
-            default:
-                throw new StatisticsException(StatisticsErrorCode.UNSUPPORTED_PERIOD_TYPE); // 커스텀 예외 추천
+        LocalDate startDate, endDate = baseDate;
+        if (franchiseId != null) {
+            if (!period.equalsIgnoreCase("MONTHLY")) {
+                throw new StatisticsException(StatisticsErrorCode.INVALID_PERIOD_FOR_FRANCHISE);
+            }
+            startDate = baseDate.withDayOfMonth(1).minusMonths(6);
+            endDate = baseDate.withDayOfMonth(baseDate.lengthOfMonth());
+            return inventoryStatisticsMapper.getFranchiseMonthlyTurnoverTrend(startDate, endDate, franchiseId);
         }
+
+        if (warehouseId != null) {
+            return switch (period.toUpperCase()) {
+                case "DAILY" -> {
+                    startDate = baseDate.minusDays(6);
+                    yield inventoryStatisticsMapper.getDailyTurnoverTrend(startDate, endDate, warehouseId);
+                }
+                case "WEEKLY" -> {
+                    startDate = baseDate.minusWeeks(6);
+                    yield inventoryStatisticsMapper.getWeeklyTurnoverTrendByWarehouse(startDate, endDate, warehouseId);
+                }
+                case "MONTHLY" -> {
+                    startDate = baseDate.minusMonths(6).withDayOfMonth(1);
+                    endDate = baseDate.withDayOfMonth(baseDate.lengthOfMonth());
+                    yield inventoryStatisticsMapper.getMonthlyTurnoverTrendByWarehouse(startDate, endDate, warehouseId);
+                }
+                default -> throw new StatisticsException(StatisticsErrorCode.UNSUPPORTED_PERIOD_TYPE);
+            };
+        }
+
+        return switch (period.toUpperCase()) {
+            case "DAILY" -> {
+                startDate = baseDate.minusDays(6);
+                yield inventoryStatisticsMapper.getDailyTurnoverTrend(startDate, endDate, null);
+            }
+            case "WEEKLY" -> {
+                startDate = baseDate.minusWeeks(6);
+                yield inventoryStatisticsMapper.getWeeklyTurnoverTrend(startDate, endDate, null);
+            }
+            case "MONTHLY" -> {
+                startDate = baseDate.minusMonths(6).withDayOfMonth(1);
+                endDate = baseDate.withDayOfMonth(baseDate.lengthOfMonth());
+                yield inventoryStatisticsMapper.getMonthlyTurnoverTrend(startDate, endDate, null);
+            }
+            default -> throw new StatisticsException(StatisticsErrorCode.UNSUPPORTED_PERIOD_TYPE);
+        };
     }
 }

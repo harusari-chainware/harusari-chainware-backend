@@ -66,12 +66,14 @@ public enum SecurityPolicy {
     /* Franchise */
     FRANCHISE_PUT("/api/v1/franchises/{franchiseId}", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 가맹점 정보 수정
     FRANCHISES_GET("/api/v1/franchises", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 가맹점 목록 조회
+    FRANCHISES_GET_ALL("/api/v1/franchises/all", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 가맹점 목록 조회
     FRANCHISE_GET("/api/v1/franchises/{franchiseId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 가맹점 상세 조회
     FRANCHISE_AGREEMENT_DOWNLOAD_URL("/api/v1/franchises/{franchiseId}/agreement/download", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 가맹점 계약서 다운로드
 
     /* Vendor */
     VENDORS_PUT("/api/v1/vendors/{vendorId}", PUT, ROLE_BASED, List.of(MASTER)), // 거래처 정보 수정
     VENDORS_GET("/api/v1/vendors", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 거래처 목록 조회
+    VENDORS_GET_ALL("/api/v1/vendors/all", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 거래처 목록 조회
     VENDOR_DETAIL_GET("/api/v1/vendors/{vendorId}", GET, ROLE_BASED, List.of(VENDOR_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 거래처 상세 조회
 
     /* Warehouse */
@@ -82,6 +84,7 @@ public enum SecurityPolicy {
     WAREHOUSE_INVENTORY_DELETE("/api/v1/warehouse/inventory/{inventoryId}", DELETE, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 보유 재고 삭제
 
     WAREHOUSE_LIST_GET("/api/v1/warehouse", GET, ROLE_BASED, List.of(WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 창고 마스터 목록 조회
+    WAREHOUSE_LIST_GET_ALL("/api/v1/warehouse/all", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 창고 마스터 목록 조회
     WAREHOUSE_DETAIL_GET("/api/v1/warehouse/{warehouseId}", GET, ROLE_BASED, List.of(WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 창고 마스터 상세 조회
     WAREHOUSE_INVENTORY_LIST_GET("/api/v1/warehouse/inventory", GET, ROLE_BASED, List.of(WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 보유 재고 목록 조회
     WAREHOUSE_INVENTORY_DETAIL_GET("/api/v1/warehouse/inventory/{inventoryId}", GET, ROLE_BASED, List.of(WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 보유 재고 상세 조회
@@ -136,19 +139,19 @@ public enum SecurityPolicy {
     DISPOSAL_GET("/api/v1/disposal", GET, ROLE_BASED, List.of(FRANCHISE_MANAGER, WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 폐기 조회
 
     /* Statistics */
-    STATISTICS_DISPOSAL_RATE("/api/v1/statistics/disposal-rate", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 폐기율 조회
-    STATISTICS_DISPOSAL_RATE_TREND_GROUP("/api/v1/statistics/disposal-rate/trend-group", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 폐기율 조회
-    STATISTICS_INVENTORY_TURNOVER_RATE("/api/v1/statistics/inventory-turnover", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 재고 회전율 조회
-    STATISTICS_INVENTORY_TURNOVER_RATE_TREND("/api/v1/statistics/inventory-turnover/trend", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 재고 회전율 조회
-    STATISTICS_MENU_SALES("/api/v1/statistics/menu-sales", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 메뉴별 매출 통계 조회
-    STATISTICS_PURCHASE_ORDER("/api/v1/statistics/purchase-order", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 발주량 통계 조회
-    STATISTICS_PURCHASE_ORDER_TREND("/api/v1/statistics/purchase-order/trend", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 발주량 통계 조회
-    STATISTICS_SALES_PATTERNS("/api/v1/statistics/patterns", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 매출 패턴 통계 조회
-    STATISTICS_STORE_ORDER("/api/v1/statistics/store-order", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 가맹점 주문량 조회
-    STATISTICS_STORE_ORDER_TREND("/api/v1/statistics/store-order/trend", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 가맹점 주문량 조회
-    STATISTICS_TOTAL_SALES("/api/v1/statistics/total-sales", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 총 매출 통계 조회
-    STATISTICS_PREDICTION_COMPARISON("/api/v1/statistics/prediction-comparison", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 예측 조회
-    PREDICTION_ACCURACY("/api/v1/accuracy/summary", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 예측 결과값 조회
+//    STATISTICS_DISPOSAL_RATE("/api/v1/statistics/disposal-rate", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 폐기율 조회
+//    STATISTICS_DISPOSAL_RATE_TREND_GROUP("/api/v1/statistics/disposal-rate/trend", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 폐기율 조회
+//    STATISTICS_INVENTORY_TURNOVER_RATE("/api/v1/statistics/inventory-turnover", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 재고 회전율 조회
+//    STATISTICS_INVENTORY_TURNOVER_RATE_TREND("/api/v1/statistics/inventory-turnover/trend", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 재고 회전율 조회
+//    STATISTICS_MENU_SALES("/api/v1/statistics/menu-sales", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 메뉴별 매출 통계 조회
+//    STATISTICS_PURCHASE_ORDER("/api/v1/statistics/purchase-order", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 발주량 통계 조회
+//    STATISTICS_PURCHASE_ORDER_TREND("/api/v1/statistics/purchase-order/trend", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 발주량 통계 조회
+//    STATISTICS_SALES_PATTERNS("/api/v1/statistics/patterns", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 매출 패턴 통계 조회
+//    STATISTICS_STORE_ORDER("/api/v1/statistics/store-order", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 가맹점 주문량 조회
+//    STATISTICS_STORE_ORDER_TREND("/api/v1/statistics/store-order/trend", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 가맹점 주문량 조회
+//    STATISTICS_TOTAL_SALES("/api/v1/statistics/total-sales", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 총 매출 통계 조회
+//    STATISTICS_PREDICTION_COMPARISON("/api/v1/statistics/prediction-comparison", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 예측 조회
+//    PREDICTION_ACCURACY("/api/v1/accuracy/summary", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 예측 결과값 조회
 
     /* Swagger */
     SWAGGER_UI("/swagger-ui/**", GET, PERMIT_ALL, List.of()),

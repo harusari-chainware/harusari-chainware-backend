@@ -11,19 +11,21 @@ import java.util.List;
 @Mapper
 public interface InventoryStatisticsMapper {
 
-    // 본사 주간 회전율
+    List<InventoryTurnoverResponse> getDailyTurnover(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
     List<InventoryTurnoverResponse> getWeeklyTurnover(
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
 
-    // 본사 월간 회전율
     List<InventoryTurnoverResponse> getMonthlyTurnover(
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
 
-    // 가맹점 월간 회전율
     List<InventoryTurnoverResponse> getFranchiseMonthlyTurnover(
             @Param("franchiseId") Long franchiseId,
             @Param("startDate") LocalDate startDate,
@@ -31,11 +33,55 @@ public interface InventoryStatisticsMapper {
     );
 
     List<InventoryTurnoverTrendResponse> getMonthlyTurnoverTrend(
-            @Param("baseDate") LocalDate baseDate,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
             @Param("franchiseId") Long franchiseId
     );
     List<InventoryTurnoverTrendResponse> getWeeklyTurnoverTrend(
-            @Param("baseDate") LocalDate baseDate,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
             @Param("franchiseId") Long franchiseId
     );
+    List<InventoryTurnoverTrendResponse> getDailyTurnoverTrend(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("franchiseId") Long franchiseId
+    );
+
+    List<InventoryTurnoverTrendResponse> getFranchiseMonthlyTurnoverTrend(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("franchiseId") Long franchiseId
+    );
+
+    List<InventoryTurnoverResponse> getDailyTurnoverByWarehouse(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("warehouseId") Long warehouseId
+    );
+
+    List<InventoryTurnoverTrendResponse> getWeeklyTurnoverTrendByWarehouse(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("warehouseId") Long warehouseId
+    );
+
+    List<InventoryTurnoverTrendResponse> getMonthlyTurnoverTrendByWarehouse(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("warehouseId") Long warehouseId
+    );
+
+    List<InventoryTurnoverResponse> getWeeklyTurnoverByWarehouse(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("warehouseId") Long warehouseId
+    );
+
+    List<InventoryTurnoverResponse> getMonthlyTurnoverByWarehouse(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("warehouseId") Long warehouseId
+    );
+
 }

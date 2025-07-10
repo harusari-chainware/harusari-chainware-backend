@@ -1,5 +1,6 @@
 package com.harusari.chainware.statistics.query.service.disposal;
 
+import com.harusari.chainware.statistics.query.dto.disposal.DisposalRateStatisticsResponse;
 import com.harusari.chainware.statistics.query.dto.disposal.DisposalRateStatisticsResponseBase;
 import com.harusari.chainware.statistics.query.dto.disposal.DisposalRateTrendGroupedResponse;
 
@@ -13,4 +14,10 @@ public interface DisposalRateStatisticsQueryService {
 
     DisposalRateTrendGroupedResponse getGroupedTrend(String period, LocalDate targetDate);
 
+    List<DisposalRateStatisticsResponse> getSingleTrend(
+            String period,
+            Long warehouseId,
+            Long franchiseId,
+            LocalDate targetDate
+    );
 }

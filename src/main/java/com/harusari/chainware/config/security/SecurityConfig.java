@@ -57,7 +57,7 @@ public class SecurityConfig {
                                     );
                         }
                     }
-                    auth.anyRequest().denyAll();
+                    auth.anyRequest().permitAll();
                 })
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(restAuthenticationEntryPoint)
