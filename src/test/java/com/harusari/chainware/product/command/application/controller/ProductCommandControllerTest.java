@@ -58,6 +58,7 @@ class ProductCommandControllerTest {
         // given
         ProductCreateRequest createReq = ProductCreateRequest.builder()
                 .productName("테스트 제품")
+                .topCategoryId(2L)
                 .categoryId(10L)
                 .unitQuantity("1개")
                 .unitSpec("10kg")

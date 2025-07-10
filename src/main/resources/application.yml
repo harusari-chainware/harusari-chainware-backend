@@ -68,6 +68,8 @@ server:
       charset: UTF-8
       enabled: true
       force: true
+  error:
+    include-stacktrace: never
 
 springdoc:
   default-consumes-media-type: application/json;charset=UTF-8

@@ -2,6 +2,7 @@ package com.harusari.chainware.category.query.controller;
 
 import com.harusari.chainware.category.query.dto.request.CategorySearchRequest;
 import com.harusari.chainware.category.query.dto.response.CategoryDetailWithProductsResponse;
+import com.harusari.chainware.category.query.dto.response.TopCategoryDto;
 import com.harusari.chainware.category.query.dto.response.TopCategoryListResponse;
 import com.harusari.chainware.category.query.dto.response.TopCategoryProductPageResponse;
 import com.harusari.chainware.category.query.service.CategoryQueryService;
@@ -13,6 +14,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/categories")
@@ -77,5 +80,15 @@ public class CategoryQueryController {
         return ResponseEntity.ok(ApiResponse.success(
                 categoryQueryService.getCategoryDetailWithProducts(categoryId, page, size)
         ));
+    }
+
+    @Operation(summary = "전체 상위 카테고리 조회", description = "등록된 모든 상위 카테고리를 조회합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "상위 카테고리 목록 조회 성공")
+    })
+    @GetMapping("/top")
+    public ApiResponse<List<TopCategoryDto>> getAllTopCategories() {
+        List<TopCategoryDto> result = categoryQueryService.getAllTopCategories();
+        return ApiResponse.success(result);
     }
 }

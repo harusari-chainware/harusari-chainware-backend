@@ -2,7 +2,8 @@ package com.harusari.chainware.vendor.query.controller;
 
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.common.dto.PageResponse;
-import com.harusari.chainware.vendor.query.dto.VendorPresignedUrlResponse;
+import com.harusari.chainware.vendor.query.dto.response.VendorContractInfoResponse;
+import com.harusari.chainware.vendor.query.dto.response.VendorPresignedUrlResponse;
 import com.harusari.chainware.vendor.query.dto.response.VendorDetailResponse;
 import com.harusari.chainware.vendor.query.dto.request.VendorSearchRequest;
 import com.harusari.chainware.vendor.query.dto.response.VendorSearchResponse;
@@ -89,4 +90,16 @@ public class VendorQueryController {
         List<VendorSimpleResponse> list = vendorQueryService.getAllVendors();
         return ResponseEntity.ok(ApiResponse.success(list));
     }
+
+    @GetMapping("/vendors/{vendorName}/contract-info")
+    public ResponseEntity<ApiResponse<VendorContractInfoResponse>> getVendorContractInfo(
+            @PathVariable(name = "vendorName") String vendorName
+    ) {
+        VendorContractInfoResponse vendorContractInfoResponse = vendorQueryService.getVendorContractInfo(vendorName);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(vendorContractInfoResponse));
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.harusari.chainware.vendor.query.repository;
 
 import com.harusari.chainware.vendor.query.dto.request.VendorSearchRequest;
+import com.harusari.chainware.vendor.query.dto.response.VendorContractInfoResponse;
 import com.harusari.chainware.vendor.query.dto.response.VendorDetailResponse;
 import com.harusari.chainware.vendor.query.dto.response.VendorSearchResponse;
 import com.harusari.chainware.vendor.query.dto.response.VendorSimpleResponse;
@@ -18,5 +19,7 @@ public interface VendorQueryRepositoryCustom {
     Optional<VendorDetailResponse> findVendorDetailByVendorId(Long vendorId);
 
     List<VendorSimpleResponse> findAllVendorsSimple();
+
+    Optional<VendorContractInfoResponse> findVendorContractInfoByVendorName(String vendorName);
 
 }

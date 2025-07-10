@@ -1,6 +1,7 @@
 package com.harusari.chainware.vendor.query.repository;
 
 import com.harusari.chainware.vendor.query.dto.request.VendorSearchRequest;
+import com.harusari.chainware.vendor.query.dto.response.VendorContractInfoResponse;
 import com.harusari.chainware.vendor.query.dto.response.VendorDetailResponse;
 import com.harusari.chainware.vendor.query.dto.response.VendorSearchResponse;
 import com.harusari.chainware.vendor.query.dto.response.VendorSimpleResponse;
@@ -88,6 +89,18 @@ public class VendorQueryRepositoryImpl implements VendorQueryRepositoryCustom {
                 .from(vendor)
                 .leftJoin(member).on(vendor.memberId.eq(member.memberId))
                 .where(vendor.vendorId.eq(vendorId))
+                .fetchOne()
+        );
+    }
+
+    @Override
+    public Optional<VendorContractInfoResponse> findVendorContractInfoByVendorName(String vendorName) {
+        return Optional.ofNullable(queryFactory
+                .select(Projections.constructor(VendorContractInfoResponse.class,
+                        vendor.vendorId, vendor.vendorType, vendor.vendorTaxId, vendor.vendorStatus
+                ))
+                .from(vendor)
+                .where(vendor.vendorName.eq(vendorName))
                 .fetchOne()
         );
     }

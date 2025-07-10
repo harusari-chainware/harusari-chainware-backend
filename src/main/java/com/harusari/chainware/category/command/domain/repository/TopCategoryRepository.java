@@ -2,6 +2,7 @@ package com.harusari.chainware.category.command.domain.repository;
 
 import com.harusari.chainware.category.command.domain.aggregate.TopCategory;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface TopCategoryRepository {
@@ -16,4 +17,6 @@ public interface TopCategoryRepository {
     void delete(TopCategory topCategory);
 
     boolean existsById(Long topCategoryId);
+
+    List<TopCategory> findAll();
 }

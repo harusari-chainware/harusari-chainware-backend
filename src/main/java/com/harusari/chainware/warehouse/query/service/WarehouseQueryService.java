@@ -6,6 +6,8 @@ import com.harusari.chainware.warehouse.query.dto.request.WarehouseSearchRequest
 import com.harusari.chainware.warehouse.query.dto.response.*;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Optional;
+
 import java.util.List;
 
 public interface WarehouseQueryService {
@@ -14,4 +16,5 @@ public interface WarehouseQueryService {
     PageResponse<WarehouseInventoryInfo> getWarehouseInventories(WarehouseInventorySearchRequest request, Pageable pageable);
     WarehouseInventoryDetailResponse getWarehouseInventoryDetail(Long warehouseInventoryId);
     List<WarehouseSimpleResponse> getAllWarehouses();
+    Long getWarehouseIdByManagerId(Long memberId);
 }

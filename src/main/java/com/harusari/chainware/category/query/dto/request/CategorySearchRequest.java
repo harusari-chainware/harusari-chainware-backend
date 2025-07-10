@@ -6,7 +6,9 @@ import lombok.Getter;
 @Getter
 @Builder
 public class CategorySearchRequest {
+    private Long topCategoryId;
     private String topCategoryName;
+    private Long categoryId;
     private String categoryName;
 
     @Builder.Default

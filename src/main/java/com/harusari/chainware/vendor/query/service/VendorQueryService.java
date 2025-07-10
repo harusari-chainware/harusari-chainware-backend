@@ -1,6 +1,7 @@
 package com.harusari.chainware.vendor.query.service;
 
-import com.harusari.chainware.vendor.query.dto.VendorPresignedUrlResponse;
+import com.harusari.chainware.vendor.query.dto.response.VendorContractInfoResponse;
+import com.harusari.chainware.vendor.query.dto.response.VendorPresignedUrlResponse;
 import com.harusari.chainware.vendor.query.dto.response.VendorDetailResponse;
 import com.harusari.chainware.vendor.query.dto.request.VendorSearchRequest;
 import com.harusari.chainware.vendor.query.dto.response.VendorSearchResponse;
@@ -20,5 +21,7 @@ public interface VendorQueryService {
     VendorPresignedUrlResponse generateDownloadUrl(Long vendorId);
 
     List<VendorSimpleResponse> getAllVendors();
+
+    VendorContractInfoResponse getVendorContractInfo(String vendorName);
 
 }
