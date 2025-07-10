@@ -4,7 +4,8 @@ import com.harusari.chainware.common.infrastructure.storage.StorageDownloader;
 import com.harusari.chainware.exception.vendor.VendorAgreementNotFoundException;
 import com.harusari.chainware.exception.vendor.VendorNotFoundException;
 import com.harusari.chainware.vendor.command.domain.aggregate.Vendor;
-import com.harusari.chainware.vendor.query.dto.VendorPresignedUrlResponse;
+import com.harusari.chainware.vendor.query.dto.response.VendorContractInfoResponse;
+import com.harusari.chainware.vendor.query.dto.response.VendorPresignedUrlResponse;
 import com.harusari.chainware.vendor.query.dto.request.VendorSearchRequest;
 import com.harusari.chainware.vendor.query.dto.response.VendorDetailResponse;
 import com.harusari.chainware.vendor.query.dto.response.VendorSearchResponse;
@@ -53,6 +54,12 @@ public class VendorQueryServiceImpl implements VendorQueryService {
         return VendorPresignedUrlResponse.builder()
                 .presignedUrl(s3Downloader.generatePresignedUrl(s3Key, Duration.ofMinutes(5)))
                 .build();
+    }
+
+    @Override
+    public VendorContractInfoResponse getVendorContractInfo(String vendorName) {
+        return vendorQueryRepository.findVendorContractInfoByVendorName(vendorName)
+                .orElseThrow(() -> new VendorNotFoundException(VENDOR_NOT_FOUND_EXCEPTION));
     }
 
 }
