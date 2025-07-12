@@ -45,4 +45,5 @@ public interface CategoryQueryMapper {
             @Param("topCategoryId") Long topCategoryId
     );
 
+    List<CategoryMetaInfoResponse> selectAllCategoriesByTopCategoryId(Long topCategoryId);
 }
