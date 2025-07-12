@@ -48,12 +48,13 @@
     </select>
 
 <!-- 발주량 추이 -->
-    <select id="getPurchaseOrderTrend"
+    <select id="getPurchaseOrderTrendDaily"
             resultType="com.harusari.chainware.statistics.query.dto.purchaseOrder.PurchaseOrderTrendResponse">
         SELECT
         DATE(po.created_at) AS date,
         SUM(pod.quantity) AS totalQuantity,
-        SUM(pod.total_price) AS totalAmount
+        SUM(pod.total_price) AS totalAmount,
+        COUNT(DISTINCT po.purchase_order_id) AS totalCount
         FROM purchase_order po
         JOIN purchase_order_detail pod ON po.purchase_order_id = pod.purchase_order_id
         WHERE po.purchase_order_status IN ('APPROVED', 'SHIPPED', 'WAREHOUSED')
@@ -64,4 +65,41 @@
         GROUP BY DATE(po.created_at)
         ORDER BY date ASC
     </select>
+
+    <select id="getPurchaseOrderTrendWeekly"
+            resultType="com.harusari.chainware.statistics.query.dto.purchaseOrder.PurchaseOrderTrendResponse">
+        SELECT
+        STR_TO_DATE(CONCAT(YEARWEEK(po.created_at, 1), ' Monday'), '%X%V %W') AS date,
+        SUM(pod.quantity) AS totalQuantity,
+        SUM(pod.total_price) AS totalAmount,
+        COUNT(DISTINCT po.purchase_order_id) AS totalCount
+        FROM purchase_order po
+        JOIN purchase_order_detail pod ON po.purchase_order_id = pod.purchase_order_id
+        WHERE po.purchase_order_status IN ('APPROVED', 'SHIPPED', 'WAREHOUSED')
+        AND DATE(po.created_at) BETWEEN #{startDate} AND #{endDate}
+        <if test="vendorId != null">
+            AND po.vendor_id = #{vendorId}
+        </if>
+        GROUP BY YEARWEEK(po.created_at, 1)
+        ORDER BY date ASC
+    </select>
+
+    <select id="getPurchaseOrderTrendMonthly"
+            resultType="com.harusari.chainware.statistics.query.dto.purchaseOrder.PurchaseOrderTrendResponse">
+        SELECT
+        DATE_FORMAT(po.created_at, '%Y-%m-01') AS date,
+        SUM(pod.quantity) AS totalQuantity,
+        SUM(pod.total_price) AS totalAmount,
+        COUNT(DISTINCT po.purchase_order_id) AS totalCount
+        FROM purchase_order po
+        JOIN purchase_order_detail pod ON po.purchase_order_id = pod.purchase_order_id
+        WHERE po.purchase_order_status IN ('APPROVED', 'SHIPPED', 'WAREHOUSED')
+        AND DATE(po.created_at) BETWEEN #{startDate} AND #{endDate}
+        <if test="vendorId != null">
+            AND po.vendor_id = #{vendorId}
+        </if>
+        GROUP BY YEAR(po.created_at), MONTH(po.created_at)
+        ORDER BY date ASC
+    </select>
+
 </mapper>

@@ -57,16 +57,21 @@ public class PurchaseOrderStatisticsQueryController {
     }
 
     @GetMapping("/trend")
-    @Operation(summary = "발주 추이 조회", description = "기간별(주간/월간) 발주량/금액 변화를 일자별로 반환합니다. DAILY는 지원하지 않습니다.")
+    @Operation(
+            summary = "발주 추이 조회",
+            description = """
+        기간별(일/주/월) 발주량/금액 변화를 조회합니다.  
+        - DAILY: 최근 7일  
+        - WEEKLY: 최근 7주 (월~일 기준)  
+        - MONTHLY: 최근 7개월  
+        - vendorId 지정 시 특정 거래처 기준 추이
+    """
+    )
     public ResponseEntity<ApiResponse<List<PurchaseOrderTrendResponse>>> getTrend(
             @RequestParam String period,
             @RequestParam(required = false) Long vendorId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
     ) {
-        if ("DAILY".equalsIgnoreCase(period)) {
-            return ResponseEntity.ok(ApiResponse.success(List.of()));
-        }
-
         List<PurchaseOrderTrendResponse> trend =
                 purchaseOrderStatisticsQueryService.getTrend(period.toUpperCase(), vendorId, targetDate);
 

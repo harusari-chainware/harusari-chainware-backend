@@ -35,18 +35,13 @@ public class InventoryStatisticsQueryController {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "재고 회전율 통계 조회 성공")
     @GetMapping
     public ResponseEntity<ApiResponse<List<InventoryTurnoverResponse>>> getInventoryTurnover(
-            @Parameter(description = "조회 주기 (WEEKLY 또는 MONTHLY)", example = "MONTHLY")
             @RequestParam(defaultValue = "MONTHLY") String period,
-
-            @Parameter(description = "가맹점 ID (해당 값이 있을 경우 해당 가맹점 회전율만 조회됨)", example = "3")
             @RequestParam(required = false) Long franchiseId,
-
-            @Parameter(description = "기준 날짜 (기본값: 전달 1일)", example = "2025-06-01")
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
+            @RequestParam(required = false) Long warehouseId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
     ) {
         return ResponseEntity.ok(ApiResponse.success(
-                inventoryStatisticsQueryService.getTurnover(period, franchiseId, targetDate)
+                inventoryStatisticsQueryService.getTurnover(period, franchiseId, warehouseId, targetDate)
         ));
     }
 
@@ -55,10 +50,11 @@ public class InventoryStatisticsQueryController {
     public ResponseEntity<ApiResponse<List<InventoryTurnoverTrendResponse>>> getInventoryTurnoverTrend(
             @RequestParam(defaultValue = "MONTHLY") String period,
             @RequestParam(required = false) Long franchiseId,
+            @RequestParam(required = false) Long warehouseId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
     ) {
-        List<InventoryTurnoverTrendResponse> result =
-                inventoryStatisticsQueryService.getTrend(period.toUpperCase(), franchiseId, targetDate);
-        return ResponseEntity.ok(ApiResponse.success(result));
+        return ResponseEntity.ok(ApiResponse.success(
+                inventoryStatisticsQueryService.getTrend(period, franchiseId, warehouseId, targetDate)
+        ));
     }
 }

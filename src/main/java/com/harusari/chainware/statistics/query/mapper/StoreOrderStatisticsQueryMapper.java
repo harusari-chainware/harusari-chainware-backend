@@ -25,6 +25,7 @@ public interface StoreOrderStatisticsQueryMapper {
     );
 
     List<StoreOrderTrendResponse> getStoreOrderTrend(
+            @Param("period") String period,
             @Param("franchiseId") Long franchiseId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate

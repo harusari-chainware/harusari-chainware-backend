@@ -7,7 +7,9 @@ import com.harusari.chainware.vendor.query.dto.response.VendorPresignedUrlRespon
 import com.harusari.chainware.vendor.query.dto.response.VendorDetailResponse;
 import com.harusari.chainware.vendor.query.dto.request.VendorSearchRequest;
 import com.harusari.chainware.vendor.query.dto.response.VendorSearchResponse;
+import com.harusari.chainware.vendor.query.dto.response.VendorSimpleResponse;
 import com.harusari.chainware.vendor.query.service.VendorQueryService;
+import com.harusari.chainware.warehouse.query.dto.response.WarehouseSimpleResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -19,6 +21,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -78,6 +82,13 @@ public class VendorQueryController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(presignedUrlResponse));
+    }
+
+    @Operation(summary = "전체 거래처 목록 조회")
+    @GetMapping("/vendors/all")
+    public ResponseEntity<ApiResponse<List<VendorSimpleResponse>>> getAllVendors() {
+        List<VendorSimpleResponse> list = vendorQueryService.getAllVendors();
+        return ResponseEntity.ok(ApiResponse.success(list));
     }
 
     @GetMapping("/vendors/{vendorName}/contract-info")

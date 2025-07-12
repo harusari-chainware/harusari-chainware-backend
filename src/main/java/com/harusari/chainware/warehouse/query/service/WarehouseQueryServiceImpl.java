@@ -3,10 +3,7 @@ package com.harusari.chainware.warehouse.query.service;
 import com.harusari.chainware.common.dto.PageResponse;
 import com.harusari.chainware.warehouse.query.dto.request.WarehouseInventorySearchRequest;
 import com.harusari.chainware.warehouse.query.dto.request.WarehouseSearchRequest;
-import com.harusari.chainware.warehouse.query.dto.response.WarehouseDetailResponse;
-import com.harusari.chainware.warehouse.query.dto.response.WarehouseInventoryDetailResponse;
-import com.harusari.chainware.warehouse.query.dto.response.WarehouseInventoryInfo;
-import com.harusari.chainware.warehouse.query.dto.response.WarehouseSearchResponse;
+import com.harusari.chainware.warehouse.query.dto.response.*;
 import com.harusari.chainware.warehouse.query.repository.WarehouseInventoryQueryRepository;
 import com.harusari.chainware.warehouse.query.repository.WarehouseQueryRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +45,11 @@ public class WarehouseQueryServiceImpl implements WarehouseQueryService{
     @Override
     public WarehouseInventoryDetailResponse getWarehouseInventoryDetail(Long warehouseInventoryId) {
         return warehouseInventoryQueryRepository.findWarehouseInventoryDetail(warehouseInventoryId);
+    }
+
+    @Override
+    public List<WarehouseSimpleResponse> getAllWarehouses() {
+        return warehouseQueryRepository.findAllWarehouseSimple();
     }
 
     @Override

@@ -192,4 +192,16 @@ public class WarehouseQueryRepositoryImpl implements WarehouseQueryRepositoryCus
                 .fetchFirst(); // 반환값이 Long 또는 null
     }
 
+    @Override
+    public List<WarehouseSimpleResponse> findAllWarehouseSimple() {
+        return queryFactory
+                .select(Projections.constructor(WarehouseSimpleResponse.class,
+                        warehouse.warehouseId,
+                        warehouse.warehouseName
+                ))
+                .from(warehouse)
+                .orderBy(warehouse.warehouseName.asc())
+                .fetch();
+    }
+
 }
