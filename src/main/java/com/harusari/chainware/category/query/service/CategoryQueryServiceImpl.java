@@ -81,9 +81,11 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
         int offset = (page - 1) * size;
         long total = categoryQueryMapper.countProductsByTopCategoryId(topCategoryId);
 
-        List<ProductDto> pagedProducts = categoryQueryMapper.selectProductsByTopCategoryId(topCategoryId, offset, size);
+        // ① 모든 하위 카테고리 먼저 조회 (products 없어도 무조건 포함!)
+        List<CategoryMetaInfoResponse> allCategories =
+                categoryQueryMapper.selectAllCategoriesByTopCategoryId(topCategoryId);
 
-        // 하위 카테고리별 제품 수 조회
+        // ② 카테고리별 제품수 맵 조회
         Map<Long, Long> categoryProductCountMap = categoryQueryMapper
                 .selectCategoryProductCountsByTopCategoryId(topCategoryId)
                 .stream()
@@ -92,19 +94,29 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
                         CategoryProductCountResponse::getProductCount
                 ));
 
+        // ③ 페이징에 해당하는 모든 제품 조회
+        List<ProductDto> pagedProducts = categoryQueryMapper.selectProductsByTopCategoryId(topCategoryId, offset, size);
+
+        // ④ 하위 카테고리별 응답 DTO 미리 만듦 (products 없는 경우도 포함)
         Map<Long, CategoryWithProductsResponse> grouped = new LinkedHashMap<>();
+        for (CategoryMetaInfoResponse meta : allCategories) {
+            grouped.put(meta.getCategoryId(),
+                    CategoryWithProductsResponse.builder()
+                            .categoryId(meta.getCategoryId())
+                            .categoryName(meta.getCategoryName())
+                            .categoryCreatedAt(meta.getCreatedAt())
+                            .categoryModifiedAt(meta.getModifiedAt())
+                            .productCount(categoryProductCountMap.getOrDefault(meta.getCategoryId(), 0L))
+                            .products(new ArrayList<>())
+                            .build());
+        }
+
+        // ⑤ 실제 제품이 있으면 해당 카테고리에 추가
         for (ProductDto product : pagedProducts) {
-            grouped.computeIfAbsent(product.getCategoryId(), id -> {
-                CategoryMetaInfoResponse meta = categoryQueryMapper.selectCategoryBasic(id);
-                return CategoryWithProductsResponse.builder()
-                        .categoryId(meta.getCategoryId())
-                        .categoryName(meta.getCategoryName())
-                        .categoryCreatedAt(meta.getCreatedAt())
-                        .categoryModifiedAt(meta.getModifiedAt())
-                        .productCount(categoryProductCountMap.getOrDefault(id, 0L))
-                        .products(new ArrayList<>())
-                        .build();
-            }).getProducts().add(product);
+            CategoryWithProductsResponse cat = grouped.get(product.getCategoryId());
+            if (cat != null) {
+                cat.getProducts().add(product);
+            }
         }
 
         return TopCategoryProductPageResponse.builder()
@@ -168,4 +180,5 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
                 .map(TopCategoryDto::fromEntity)
                 .collect(Collectors.toList());
     }
+
 }

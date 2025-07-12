@@ -36,13 +36,13 @@
         JOIN vendor v ON c.vendor_id = v.vendor_id
         JOIN product p ON c.product_id = p.product_id
         JOIN category sc ON p.category_id = sc.category_id
-        JOIN category tc ON sc.top_category_id = tc.category_id
+        JOIN top_category tc ON sc.top_category_id = tc.top_category_id
         WHERE c.is_deleted = 0
         <if test="request.productName != null">
             AND p.product_name LIKE CONCAT('%', #{request.productName}, '%')
         </if>
         <if test="request.topCategoryName != null">
-            AND tc.category_name LIKE CONCAT('%', #{request.topCategoryName}, '%')
+            AND tc.top_category_name LIKE CONCAT('%', #{request.topCategoryName}, '%')
         </if>
         <if test="request.categoryName != null">
             AND sc.category_name LIKE CONCAT('%', #{request.categoryName}, '%')
@@ -55,6 +55,10 @@
         </if>
         <if test="request.contractStatus != null">
             AND c.contract_status = #{request.contractStatus}
+        </if>
+        <if test="request.contractDate != null">
+            AND c.contract_start_date &lt;= #{request.contractDate}
+            AND c.contract_end_date &gt;= #{request.contractDate}
         </if>
         <if test="request.contractStartDate != null">
             AND c.contract_start_date = #{request.contractStartDate}
@@ -75,13 +79,13 @@
         JOIN vendor v ON c.vendor_id = v.vendor_id
         JOIN product p ON c.product_id = p.product_id
         JOIN category sc ON p.category_id = sc.category_id
-        JOIN category tc ON sc.top_category_id = tc.category_id
+        JOIN top_category tc ON sc.top_category_id = tc.top_category_id
         WHERE c.is_deleted = 0
         <if test="request.productName != null">
             AND p.product_name LIKE CONCAT('%', #{request.productName}, '%')
         </if>
         <if test="request.topCategoryName != null">
-            AND tc.category_name LIKE CONCAT('%', #{request.topCategoryName}, '%')
+            AND tc.top_category_name LIKE CONCAT('%', #{request.topCategoryName}, '%')
         </if>
         <if test="request.categoryName != null">
             AND sc.category_name LIKE CONCAT('%', #{request.categoryName}, '%')
@@ -94,6 +98,10 @@
         </if>
         <if test="request.contractStatus != null">
             AND c.contract_status = #{request.contractStatus}
+        </if>
+        <if test="request.contractDate != null">
+            AND c.contract_start_date &lt;= #{request.contractDate}
+            AND c.contract_end_date &gt;= #{request.contractDate}
         </if>
         <if test="request.contractStartDate != null">
             AND c.contract_start_date = #{request.contractStartDate}
@@ -130,6 +138,8 @@
 
         <!-- 단일조회 전용 추가 필드 -->
         <result property="vendorId"           column="vendor_id"/>
+        <result property="vendorTaxId"           column="vendor_tax_id"/>
+        <result property="vendorStatus"           column="vendor_status"/>
         <result property="productId"          column="product_id"/>
         <result property="unitQuantity"       column="unit_quantity"/>
         <result property="unitSpec"           column="unit_spec"/>
@@ -158,12 +168,14 @@
         c.contract_start_date,
         c.contract_end_date,
         v.vendor_id,
+        v.vendor_tax_id,
+        v.vendor_status,
         p.product_id,
         p.unit_quantity,
         p.unit_spec,
         p.store_type,
-        tc.category_id   AS top_category_id,
-        tc.category_name AS top_category_name,
+        tc.top_category_id   AS top_category_id,
+        tc.top_category_name AS top_category_name,
         cgy.category_id  AS category_id,
         cgy.category_name AS category_name,
         c.created_at,
@@ -172,7 +184,7 @@
         JOIN vendor v    ON c.vendor_id = v.vendor_id
         JOIN product p   ON c.product_id = p.product_id
         JOIN category cgy ON p.category_id = cgy.category_id
-        JOIN category tc  ON cgy.top_category_id = tc.category_id
+        JOIN top_category tc  ON cgy.top_category_id = tc.top_category_id
         WHERE c.is_deleted = 0
         AND c.contract_id = #{contractId}
         <if test="!isManager">

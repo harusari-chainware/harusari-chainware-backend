@@ -1,7 +1,7 @@
 package com.harusari.chainware.contract.query.dto.request;
 
-import com.harusari.chainware.contract.command.domain.aggregate.Contract;
 import com.harusari.chainware.contract.command.domain.aggregate.ContractStatus;
+import com.harusari.chainware.vendor.command.domain.aggregate.VendorStatus;
 import com.harusari.chainware.vendor.command.domain.aggregate.VendorType;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +16,9 @@ public class VendorProductContractSearchRequest {
     private String categoryName;
     private String vendorName;
     private VendorType vendorType;
+    private VendorStatus vendorStatus;
     private ContractStatus contractStatus;
+    private LocalDate contractDate;
     private final LocalDate contractStartDate;
     private final LocalDate contractEndDate;
 
