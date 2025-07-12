@@ -91,13 +91,13 @@ class CategoryQueryServiceImplTest {
                         .productCount(2L)
                         .build()));
 
-        given(categoryQueryMapper.selectCategoryBasic(10L)).willReturn(
-                CategoryMetaInfoResponse.builder()
+        given(categoryQueryMapper.selectAllCategoriesByTopCategoryId(topCategoryId))
+                .willReturn(List.of(CategoryMetaInfoResponse.builder()
                         .categoryId(10L)
                         .categoryName("스낵")
                         .createdAt(LocalDateTime.now())
                         .modifiedAt(LocalDateTime.now())
-                        .build());
+                        .build()));
 
         // when
         TopCategoryProductPageResponse result =
