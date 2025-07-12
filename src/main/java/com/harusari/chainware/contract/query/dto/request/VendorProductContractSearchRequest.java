@@ -1,6 +1,5 @@
 package com.harusari.chainware.contract.query.dto.request;
 
-import com.harusari.chainware.contract.command.domain.aggregate.Contract;
 import com.harusari.chainware.contract.command.domain.aggregate.ContractStatus;
 import com.harusari.chainware.vendor.command.domain.aggregate.VendorStatus;
 import com.harusari.chainware.vendor.command.domain.aggregate.VendorType;
