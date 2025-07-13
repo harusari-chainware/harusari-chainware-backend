@@ -149,6 +149,20 @@ public class OrderQueryRepositoryImpl implements OrderQueryRepositoryCustom {
                 .build();
     }
 
+    @Override
+    public MyFranchiseResponse findMyFranchiseInfo(Long memberId) {
+        return queryFactory
+                .select(Projections.constructor(MyFranchiseResponse.class,
+                        franchise.franchiseName,
+                        franchise.franchiseContact,
+                        member.name,
+                        member.phoneNumber
+                ))
+                .from(franchise)
+                .join(member).on(franchise.memberId.eq(member.memberId))
+                .where(member.memberId.eq(memberId))
+                .fetchOne();
+    }
 
     private BooleanExpression franchiseNameContains(String name) {
         return (name != null && !name.isBlank()) ? franchise.franchiseName.containsIgnoreCase(name) : null;
