@@ -195,4 +195,15 @@
         WHERE c.top_category_id = #{topCategoryId}
         GROUP BY c.category_id
     </select>
+
+    <select id="selectAllCategoriesByTopCategoryId"
+            resultType="com.harusari.chainware.category.query.dto.response.CategoryMetaInfoResponse">
+        SELECT
+        category_id AS categoryId,
+        category_name AS categoryName,
+        created_at AS createdAt,
+        modified_at AS modifiedAt
+        FROM category
+        WHERE top_category_id = #{topCategoryId}
+    </select>
 </mapper>
