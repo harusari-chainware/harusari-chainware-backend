@@ -71,11 +71,12 @@ public enum SecurityPolicy {
     FRANCHISE_AGREEMENT_DOWNLOAD_URL("/api/v1/franchises/{franchiseId}/agreement/download", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 가맹점 계약서 다운로드
 
     /* Vendor */
-    VENDORS_PUT("/api/v1/vendors/{vendorId}", PUT, ROLE_BASED, List.of(MASTER)), // 거래처 정보 수정
+    VENDORS_PUT("/api/v1/vendors/{vendorId}", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 거래처 정보 수정
     VENDORS_GET("/api/v1/vendors", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 거래처 목록 조회
     VENDORS_GET_ALL("/api/v1/vendors/all", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 거래처 목록 조회
     VENDOR_DETAIL_GET("/api/v1/vendors/{vendorId}", GET, ROLE_BASED, List.of(VENDOR_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 거래처 상세 조회
     VENDOR_CONTRACT_INFO_GET("/api/v1/vendors/{vendorName}/contract-info", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 거래처 계약 정보 조회
+    VENDOR_AGREEMENT_DOWNLOAD_URL("/api/v1/vendors/{vendorId}/agreement/download", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)),
 
     /* Warehouse */
     WAREHOUSE_UPDATE("/api/v1/warehouse/{warehouseId}", PUT, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 창고 마스터 수정
