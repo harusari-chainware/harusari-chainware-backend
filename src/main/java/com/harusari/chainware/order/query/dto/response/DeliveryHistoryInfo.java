@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class DeliveryHistoryInfo {
+    private LocalDateTime startedAt;
     private LocalDateTime deliveredAt;
     private String handlerName;
     private DeliveryStatus deliveryStatus;
