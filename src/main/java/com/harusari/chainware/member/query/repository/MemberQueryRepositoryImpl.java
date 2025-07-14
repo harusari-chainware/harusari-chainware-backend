@@ -84,7 +84,9 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepositoryCustom {
                 .where(
                         emailEq(memberSearchRequest.email()),
                         authorityEq(memberSearchRequest.authorityName()),
-                        joinDateBetween(memberSearchRequest.joinDateFrom(), memberSearchRequest.joinDateTo())
+                        positionEq(memberSearchRequest.position()),
+                        joinDateBetween(memberSearchRequest.joinDateFrom(), memberSearchRequest.joinDateTo()),
+                        isDeletedFalse(memberSearchRequest.isDeleted())
                 )
                 .fetchOne();
 
