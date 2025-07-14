@@ -100,6 +100,7 @@ public enum SecurityPolicy {
     ORDER_AVAILABLE_WAREHOUSE("/api/v1/orders/{orderId}/available-warehouses", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 주문 가능 창고 조회
     ORDER_LIST_GET("/api/v1/orders", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, FRANCHISE_MANAGER)), // 주문 목록 조회
     ORDER_DETAIL_GET("/api/v1/orders/{orderId}", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER, FRANCHISE_MANAGER)), // 주문 상세 조회
+    ORDER_OWNER_GET("/api/v1/orders/my-franchise", GET, ROLE_BASED, List.of(FRANCHISE_MANAGER)), // 담당자의 가맹점 정보 조회
 
     /* Requisition */
     REQUISITION_CREATE_POST("/api/v1/requisitions", POST, ROLE_BASED, List.of(GENERAL_MANAGER)), // 품의서 작성
@@ -140,6 +141,9 @@ public enum SecurityPolicy {
     /* Disposal */
     DISPOSAL_CREATE("/api/v1/disposal", POST, ROLE_BASED, List.of(FRANCHISE_MANAGER, WAREHOUSE_MANAGER)), // 폐기 등록
     DISPOSAL_GET("/api/v1/disposal", GET, ROLE_BASED, List.of(FRANCHISE_MANAGER, WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 폐기 조회
+    DISPOSAL_GET_SEARCH("/api/v1/disposal/search", GET, ROLE_BASED, List.of(FRANCHISE_MANAGER, WAREHOUSE_MANAGER, GENERAL_MANAGER, SENIOR_MANAGER)), // 폐기 상품 조회
+    DISPOSAL_GET_TAKE_BACK_SEARCH("/api/v1/disposal/takebacks/search", GET, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 반품 조회
+    DISPOSAL_GET_TAKEBACK("/api/v1/disposal/products/takeback/{takeBackId}", GET, ROLE_BASED, List.of(WAREHOUSE_MANAGER)), // 반품 상품 조회
 
     /* Statistics */
     STATISTICS_DISPOSAL_RATE("/api/v1/statistics/disposal-rate", GET, ROLE_BASED, List.of(GENERAL_MANAGER, SENIOR_MANAGER)), // 폐기율 조회

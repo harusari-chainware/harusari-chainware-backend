@@ -41,4 +41,76 @@
         GROUP BY target_date
     </select>
 
+    <select id="getActualSales"
+            resultType="com.harusari.chainware.statistics.query.dto.predictionComparison.PredictionComparisonDto">
+        SELECT DATE(s.sold_at) AS date,
+        SUM(s.total_amount) AS value,
+        'ACTUAL' AS type
+        FROM sales s
+        WHERE s.franchise_id = #{franchiseId}
+        AND s.sold_at BETWEEN #{startDate} AND #{endDate}
+        GROUP BY DATE(s.sold_at)
+    </select>
+
+    <select id="getPredictedSales"
+            resultType="com.harusari.chainware.statistics.query.dto.predictionComparison.PredictionComparisonDto">
+        SELECT target_date AS date,
+        SUM(predicted_value) AS value,
+        'PREDICTED' AS type
+        FROM prediction_result
+        WHERE prediction_type = 'sales'
+        AND period_type = 'WEEKLY'
+        AND franchise_id = #{franchiseId}
+        AND target_date BETWEEN #{startDate} AND #{endDate}
+        GROUP BY target_date
+    </select>
+
+    <select id="getActualOrderQuantity"
+            resultType="com.harusari.chainware.statistics.query.dto.predictionComparison.PredictionComparisonDto">
+        SELECT DATE(so.delivery_due_date) AS date,
+        SUM(sod.quantity) AS value,
+        'ACTUAL' AS type
+        FROM store_order so
+        JOIN store_order_detail sod ON so.store_order_id = sod.store_order_id
+        WHERE so.franchise_id = #{franchiseId}
+        AND so.delivery_due_date BETWEEN #{startDate} AND #{endDate}
+        GROUP BY DATE(so.delivery_due_date)
+    </select>
+
+    <select id="getPredictedOrderQuantity"
+            resultType="com.harusari.chainware.statistics.query.dto.predictionComparison.PredictionComparisonDto">
+        SELECT target_date AS date,
+        SUM(predicted_value) AS value,
+        'PREDICTED' AS type
+        FROM prediction_result
+        WHERE prediction_type = 'order_quantity'
+        AND period_type = 'WEEKLY'
+        AND franchise_id = #{franchiseId}
+        AND target_date BETWEEN #{startDate} AND #{endDate}
+        GROUP BY target_date
+    </select>
+
+    <select id="getActualPurchaseQuantity"
+            resultType="com.harusari.chainware.statistics.query.dto.predictionComparison.PredictionComparisonDto">
+        SELECT DATE(po.created_at) AS date,
+        SUM(pod.quantity) AS value,
+        'ACTUAL' AS type
+        FROM purchase_order po
+        JOIN purchase_order_detail pod ON po.purchase_order_id = pod.purchase_order_id
+        WHERE po.created_at BETWEEN #{startDate} AND #{endDate}
+        GROUP BY DATE(po.created_at)
+    </select>
+
+    <select id="getPredictedPurchaseQuantity"
+            resultType="com.harusari.chainware.statistics.query.dto.predictionComparison.PredictionComparisonDto">
+        SELECT target_date AS date,
+        SUM(predicted_value) AS value,
+        'PREDICTED' AS type
+        FROM prediction_result
+        WHERE prediction_type = 'purchase_quantity'
+        AND period_type = 'WEEKLY'
+        AND target_date BETWEEN #{startDate} AND #{endDate}
+        GROUP BY target_date
+    </select>
+
 </mapper>
