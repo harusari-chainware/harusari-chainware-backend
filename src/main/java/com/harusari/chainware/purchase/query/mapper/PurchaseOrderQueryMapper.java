@@ -12,7 +12,7 @@ import java.util.List;
 @Mapper
 public interface PurchaseOrderQueryMapper {
 
-    PurchaseOrderDetailResponse findPurchaseOrderById(@Param("purchaseOrderId") Long memberId, Long purchaseOrderId);
+    PurchaseOrderDetailResponse findPurchaseOrderById(Long memberId, @Param("purchaseOrderId") Long purchaseOrderId);
 
     List<PurchaseOrderProductResponse> findProductsByPurchaseOrderId(@Param("purchaseOrderId") Long memberId, Long purchaseOrderId);
 
