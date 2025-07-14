@@ -32,7 +32,7 @@ public enum SecurityPolicy {
     MEMBER_FRANCHISE_POST("/api/v1/members/franchise", POST, ROLE_BASED, List.of(MASTER)), // 가맹점 회원가입
     MEMBER_VENDOR_POST("/api/v1/members/vendor", POST, ROLE_BASED, List.of(MASTER)), // 거래처 회원가입
     MEMBER_WAREHOUSE_POST("/api/v1/members/warehouse", POST, ROLE_BASED, List.of(MASTER)),
-    MEMBERS_GET("/api/v1/members", GET, ROLE_BASED, List.of(MASTER)), // 회원 정보 조회
+    MEMBERS_GET("/api/v1/members", GET, ROLE_BASED, List.of(MASTER, GENERAL_MANAGER)), // 회원 정보 조회
     MEMBERS_DETAIL_GET("/api/v1/members/{memberId}", GET, ROLE_BASED, List.of(MASTER)), // 회원 정보 상세 조회
     MEMBERS_PUT("/api/v1/members/{memberId}", PUT, ROLE_BASED, List.of(MASTER)), // 회원 정보 수정
     MEMBERS_DELETE("/api/v1/members/{memberId}", DELETE, ROLE_BASED, List.of(MASTER)), // 회원 탈퇴
