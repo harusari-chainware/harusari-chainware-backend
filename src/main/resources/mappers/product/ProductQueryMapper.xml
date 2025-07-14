@@ -124,6 +124,9 @@
     <resultMap id="VendorProductContractMap" type="com.harusari.chainware.contract.query.dto.response.VendorProductContractDto">
         <!-- Vendor -->
         <result column="vendor_id" property="vendorId" />
+        <result column="vendor_tax_id" property="vendorTaxId" />
+        <result column="vendor_status" property="vendorStatus" />
+
 
         <!-- Product -->
         <result column="product_id" property="productId" />
@@ -165,6 +168,8 @@
         c.contract_end_date,
 
         v.vendor_id,
+        v.vendor_tax_id,
+        v.vendor_status,
         p.product_id,
         p.unit_quantity,
         p.unit_spec,

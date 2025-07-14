@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class OrderSearchResponse {
+    private Long orderId;
     private String orderCode;
     private String franchiseName;
     private int productCount;

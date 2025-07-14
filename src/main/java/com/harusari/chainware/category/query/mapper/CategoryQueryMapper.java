@@ -10,7 +10,6 @@ import java.util.List;
 
 @Mapper
 public interface CategoryQueryMapper {
-
     List<CategoryWithTopResponse> searchCategoriesWithTopAndProductCount(
             @Param("request") CategorySearchRequest request,
             @Param("offset") int offset,
@@ -45,4 +44,5 @@ public interface CategoryQueryMapper {
             @Param("topCategoryId") Long topCategoryId
     );
 
+    List<CategoryMetaInfoResponse> selectAllCategoriesByTopCategoryId(Long topCategoryId);
 }
