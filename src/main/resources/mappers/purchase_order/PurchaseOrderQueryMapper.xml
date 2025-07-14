@@ -44,7 +44,7 @@
             AND po.created_at &lt;= #{condition.endDate}
         </if>
         <if test="condition.vendorMemberId != null">
-            AND po.vendor_member_id = #{condition.vendorMemberId}
+            AND v.vendor_name = #{condition.vendorName}
         </if>
         <if test="condition.warehouseId != null">
             AND po.warehouse_id = #{condition.warehouseId}
@@ -142,12 +142,15 @@
     <select id="findProductsByPurchaseOrderId" resultType="com.harusari.chainware.purchase.query.dto.PurchaseOrderProductResponse">
         SELECT
             pod.product_id,
+            p.product_code,
             p.product_name,
             pod.quantity,
-            pod.unit_price
+            pod.unit_price,
+            c.min_order_qty AS moq
         FROM
             purchase_order_detail pod
                 JOIN product p ON pod.product_id = p.product_id
+                JOIN contract c ON pod.product_id = c.product_id
         WHERE
             pod.purchase_order_id = #{purchaseOrderId}
     </select>

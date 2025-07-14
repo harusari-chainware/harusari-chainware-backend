@@ -11,16 +11,12 @@
         r.requisition_id,
         r.requisition_code,
         v.vendor_name,
-
         cm.name AS drafter_name,
         am.name AS approver_name,
         r.product_count,
         r.total_quantity,
         r.total_price,
-
         r.requisition_status,
-
-
         r.submitted_at,
         r.modified_at
 
@@ -43,10 +39,31 @@
             AND r.requisition_status = #{condition.status}
         </if>
 
+        <if test="condition.drafterName != null and condition.drafterName != ''">
+            AND cm.name LIKE CONCAT('%', #{condition.drafterName}, '%')
+        </if>
+
+        <if test="condition.approverName != null and condition.approverName != ''">
+            AND am.name LIKE CONCAT('%', #{condition.approverName}, '%')
+        </if>
+
+        <if test="condition.vendorName != null and condition.vendorName != ''">
+            AND v.vendor_name LIKE CONCAT('%', #{condition.vendorName}, '%')
+        </if>
+
+        <if test="condition.createdFrom != null">
+            AND r.created_at &gt;= #{condition.createdFrom}
+        </if>
+
+        <if test="condition.createdTo != null">
+            AND r.created_at &lt;= #{condition.createdTo}
+        </if>
+
         ORDER BY r.created_at DESC
         LIMIT #{condition.size}
         OFFSET #{condition.offset}
     </select>
+
 
     <!-- 품의서 상세 조회 -->
     <resultMap id="RequisitionDetailResultMap" type="com.harusari.chainware.requisition.query.dto.response.RequisitionDetailResponse">
