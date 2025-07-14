@@ -16,5 +16,6 @@ public class DisposalListDto {
     private String disposalReason;
     private LocalDateTime createdAt;
     private Long takeBackId;
+    private String takeBackCode;
 
 }

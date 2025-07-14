@@ -15,13 +15,15 @@
         d.quantity,
         d.disposal_reason,
         d.created_at,
-        d.take_back_id
+        d.take_back_id,
+        tb.take_back_code
         FROM disposal d
         LEFT JOIN franchise f ON d.franchise_id = f.franchise_id
         LEFT JOIN warehouse w ON d.warehouse_id = w.warehouse_id
         JOIN product p ON d.product_id = p.product_id
         LEFT JOIN category c ON p.category_id = c.category_id
         LEFT JOIN top_category tc ON c.top_category_id = tc.top_category_id
+        LEFT JOIN take_back tb ON d.take_back_id = tb.take_back_id
         WHERE 1 = 1
 
         <if test="franchiseId != null">
@@ -50,6 +52,12 @@
         </if>
         <if test="request.disposalType == 'NORMAL'">
             AND d.take_back_id IS NULL
+        </if>
+        <if test="request.startDate != null">
+            AND DATE(d.created_at) &gt;= #{request.startDate}
+        </if>
+        <if test="request.endDate != null">
+            AND DATE(d.created_at) &lt;= #{request.endDate}
         </if>
 
         ORDER BY d.created_at DESC
@@ -93,6 +101,89 @@
         <if test="request.disposalType == 'NORMAL'">
             AND d.take_back_id IS NULL
         </if>
+        <if test="request.startDate != null">
+            AND DATE(d.created_at) &gt;= #{request.startDate}
+        </if>
+        <if test="request.endDate != null">
+            AND DATE(d.created_at) &lt;= #{request.endDate}
+        </if>
+    </select>
+
+    <select id="searchWarehouseProductWithStock" resultType="com.harusari.chainware.disposal.query.dto.DisposalProductSearchResponseDto">
+        SELECT p.product_id,
+        p.product_name,
+        p.product_code,
+        wi.quantity AS stock
+        FROM product p
+        JOIN warehouse_inventory wi ON p.product_id = wi.product_id
+        JOIN warehouse w ON wi.warehouse_id = w.warehouse_id
+        WHERE w.member_id = #{memberId}
+        AND (p.product_name LIKE CONCAT('%', #{keyword}, '%') OR p.product_code LIKE CONCAT('%', #{keyword}, '%'))
+    </select>
+
+    <select id="searchFranchiseProductWithStock" resultType="com.harusari.chainware.disposal.query.dto.DisposalProductSearchResponseDto">
+        SELECT p.product_id,
+        p.product_name,
+        p.product_code,
+        fi.unit_quantity AS stock
+        FROM product p
+        JOIN franchise_inventory fi ON p.product_id = fi.product_id
+        JOIN franchise f ON fi.franchise_id = f.franchise_id
+        WHERE f.member_id = #{memberId}
+        AND (p.product_name LIKE CONCAT('%', #{keyword}, '%') OR p.product_code LIKE CONCAT('%', #{keyword}, '%'))
+    </select>
+
+    <select id="findTakeBackProducts" resultType="com.harusari.chainware.disposal.query.dto.DisposalProductSearchResponseDto">
+        SELECT p.product_id,
+        p.product_name,
+        p.product_code,
+        tbd.quantity AS stock
+        FROM take_back_detail tbd
+        JOIN product p ON tbd.product_id = p.product_id
+        WHERE tbd.take_back_id = #{takeBackId}
+    </select>
+
+    <select id="searchTakeBacks" resultType="com.harusari.chainware.disposal.query.dto.TakeBackSimpleResponseDto">
+        SELECT tb.take_back_id AS takeBackId,
+        tb.take_back_code AS takeBackCode,
+        DATE_FORMAT(tb.created_at, '%Y-%m-%d') AS createdDate,
+        f.franchise_name AS franchiseName
+        FROM take_back tb
+        JOIN store_order so ON tb.store_order_id = so.store_order_id
+        JOIN franchise f ON so.franchise_id = f.franchise_id
+        WHERE f.member_id = #{memberId}
+        AND tb.take_back_code LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY tb.created_at DESC
+        LIMIT 10
+    </select>
+
+    <select id="searchTakeBacksByWarehouse" resultType="com.harusari.chainware.disposal.query.dto.TakeBackSimpleResponseDto">
+        SELECT
+        tb.take_back_id AS takeBackId,
+        tb.take_back_code AS takeBackCode,
+        DATE_FORMAT(tb.created_at, '%Y-%m-%d') AS createdDate,
+        f.franchise_name AS franchiseName
+        FROM take_back tb
+        JOIN delivery d ON tb.take_back_id = d.take_back_id
+        JOIN store_order so ON tb.store_order_id = so.store_order_id
+        JOIN franchise f ON so.franchise_id = f.franchise_id
+        WHERE d.warehouse_id = #{warehouseId}
+        AND tb.take_back_code LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY tb.created_at DESC
+        LIMIT 10
+    </select>
+
+    <select id="searchAllProductsWithStock" resultType="com.harusari.chainware.disposal.query.dto.DisposalProductSearchResponseDto">
+        SELECT
+        p.product_id,
+        p.product_name,
+        p.product_code,
+        COALESCE(SUM(wi.quantity), 0) AS stock
+        FROM product p
+        LEFT JOIN warehouse_inventory wi ON p.product_id = wi.product_id
+        WHERE p.product_name LIKE CONCAT('%', #{keyword}, '%')
+        OR p.product_code LIKE CONCAT('%', #{keyword}, '%')
+        GROUP BY p.product_id, p.product_name, p.product_code
     </select>
 
 </mapper>
