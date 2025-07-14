@@ -26,34 +26,31 @@ public class DisposalRateStatisticsQueryServiceImpl implements DisposalRateStati
             String period, Long warehouseId, Long franchiseId, LocalDate targetDate, boolean includeProduct) {
 
         LocalDate baseDate = targetDate != null ? targetDate : LocalDate.now().minusDays(1);
-        LocalDate today = LocalDate.now();
         LocalDate startDate;
         LocalDate endDate;
 
         switch (period) {
-            case "DAILY" -> startDate = endDate = baseDate;
-
+            case "DAILY" -> {
+                startDate = baseDate.minusDays(6); // 최근 7일치
+                endDate = baseDate;
+            }
             case "WEEKLY" -> {
                 startDate = baseDate.minusDays(6);
                 endDate = baseDate;
-                if (today.isBefore(endDate)) {
-                    throw new StatisticsException(StatisticsErrorCode.PERIOD_NOT_COMPLETED);
-                }
             }
 
             case "MONTHLY" -> {
                 startDate = baseDate.withDayOfMonth(1);
-                endDate = baseDate.withDayOfMonth(baseDate.lengthOfMonth());
-                if (today.isBefore(endDate)) {
-                    throw new StatisticsException(StatisticsErrorCode.PERIOD_NOT_COMPLETED);
-                }
+                endDate = baseDate;
             }
 
             default -> throw new StatisticsException(StatisticsErrorCode.UNSUPPORTED_PERIOD);
         }
 
         if (includeProduct) {
-            return mapper.getProductLevelDisposalRate(startDate, endDate, warehouseId, franchiseId);
+            return mapper.getProductLevelDisposalRate(
+                    period, startDate, endDate, warehouseId, franchiseId
+            );
         } else {
             return mapper.getDisposalRate(startDate, endDate, warehouseId, franchiseId);
         }
@@ -73,5 +70,36 @@ public class DisposalRateStatisticsQueryServiceImpl implements DisposalRateStati
                 .headquarters(headquarters)
                 .franchises(franchises)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public List<DisposalRateStatisticsResponse> getSingleTrend(
+            String period,
+            Long warehouseId,
+            Long franchiseId,
+            LocalDate targetDate) {
+
+        LocalDate baseDate = targetDate != null ? targetDate : LocalDate.now().minusDays(1);
+        LocalDate startDate;
+        LocalDate endDate;
+
+        switch (period) {
+            case "DAILY" -> {
+                startDate = baseDate.minusDays(6);
+                endDate = baseDate;
+            }
+            case "WEEKLY" -> {
+                endDate = baseDate;
+                startDate = endDate.minusWeeks(6); // 총 7주
+            }
+            case "MONTHLY" -> {
+                endDate = baseDate.withDayOfMonth(1);
+                startDate = endDate.minusMonths(6); // 총 7개월
+            }
+            default -> throw new StatisticsException(StatisticsErrorCode.UNSUPPORTED_PERIOD);
+        }
+
+        return mapper.getTrendForSingleTarget(period, startDate, endDate, warehouseId, franchiseId);
     }
 }

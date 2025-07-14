@@ -9,7 +9,9 @@ import com.harusari.chainware.vendor.query.dto.response.VendorPresignedUrlRespon
 import com.harusari.chainware.vendor.query.dto.request.VendorSearchRequest;
 import com.harusari.chainware.vendor.query.dto.response.VendorDetailResponse;
 import com.harusari.chainware.vendor.query.dto.response.VendorSearchResponse;
+import com.harusari.chainware.vendor.query.dto.response.VendorSimpleResponse;
 import com.harusari.chainware.vendor.query.repository.VendorQueryRepository;
+import com.harusari.chainware.warehouse.query.dto.response.WarehouseSimpleResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.util.List;
 
 import static com.harusari.chainware.exception.vendor.VendorErrorCode.VENDOR_AGREEMENT_NOT_FOUND;
 import static com.harusari.chainware.exception.vendor.VendorErrorCode.VENDOR_NOT_FOUND_EXCEPTION;
@@ -60,6 +63,11 @@ public class VendorQueryServiceImpl implements VendorQueryService {
     public VendorContractInfoResponse getVendorContractInfo(String vendorName) {
         return vendorQueryRepository.findVendorContractInfoByVendorName(vendorName)
                 .orElseThrow(() -> new VendorNotFoundException(VENDOR_NOT_FOUND_EXCEPTION));
+    }
+
+    @Override
+    public List<VendorSimpleResponse> getAllVendors() {
+        return vendorQueryRepository.findAllVendorsSimple();
     }
 
 }

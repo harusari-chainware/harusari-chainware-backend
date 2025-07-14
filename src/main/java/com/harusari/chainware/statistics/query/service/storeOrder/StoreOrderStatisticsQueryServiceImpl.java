@@ -56,18 +56,22 @@ public class StoreOrderStatisticsQueryServiceImpl implements StoreOrderStatistic
         LocalDate startDate, endDate;
 
         switch (period.toUpperCase()) {
+            case "DAILY" -> {
+                endDate = baseDate;
+                startDate = baseDate.minusDays(6); // 최근 7일
+            }
             case "WEEKLY" -> {
                 endDate = baseDate;
-                startDate = baseDate.minusDays(6);
+                startDate = baseDate.minusWeeks(6); // 최근 7주
             }
             case "MONTHLY" -> {
                 endDate = baseDate;
-                startDate = baseDate.minusDays(29);
+                startDate = baseDate.minusMonths(6); // 최근 7달
             }
             default -> throw new StatisticsException(StatisticsErrorCode.UNSUPPORTED_PERIOD);
         }
 
-        return mapper.getStoreOrderTrend(franchiseId, startDate, endDate);
+        return mapper.getStoreOrderTrend(period.toUpperCase(), franchiseId, startDate, endDate);
     }
 
 }

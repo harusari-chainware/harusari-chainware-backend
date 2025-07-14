@@ -2,6 +2,7 @@ package com.harusari.chainware.order.query.service;
 
 import com.harusari.chainware.common.dto.PageResponse;
 import com.harusari.chainware.order.query.dto.request.OrderSearchRequest;
+import com.harusari.chainware.order.query.dto.response.MyFranchiseResponse;
 import com.harusari.chainware.order.query.dto.response.OrderSearchDetailResponse;
 import com.harusari.chainware.order.query.dto.response.OrderSearchResponse;
 import com.harusari.chainware.order.query.repository.OrderQueryRepository;
@@ -26,4 +27,10 @@ public class OrderQueryServiceImpl implements OrderQueryService {
     public OrderSearchDetailResponse getOrderDetail(Long orderId) {
         return orderQueryRepository.findOrderDetailById(orderId);
     }
+
+    @Override
+    public MyFranchiseResponse getMyFranchiseInfo(Long memberId) {
+        return orderQueryRepository.findMyFranchiseInfo(memberId);
+    }
+
 }

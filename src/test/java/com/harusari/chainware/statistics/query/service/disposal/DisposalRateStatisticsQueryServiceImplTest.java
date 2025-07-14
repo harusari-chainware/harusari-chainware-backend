@@ -40,14 +40,18 @@ class DisposalRateStatisticsQueryServiceImplTest {
         @DisplayName("1. DAILY + includeProduct=false → getDisposalRate 호출")
         void testDailyWithoutProduct() {
             LocalDate date = LocalDate.of(2025, 6, 20);
-            when(mapper.getDisposalRate(date, date, null, null)).thenReturn(List.of());
+            LocalDate expectedStart = date.minusDays(6);
+            LocalDate expectedEnd = date;
+
+            when(mapper.getDisposalRate(expectedStart, expectedEnd, null, null)).thenReturn(List.of());
 
             List<? extends DisposalRateStatisticsResponseBase> result =
                     service.getDisposalStatistics("DAILY", null, null, date, false);
 
             assertThat(result).isEmpty();
-            verify(mapper).getDisposalRate(date, date, null, null);
+            verify(mapper).getDisposalRate(expectedStart, expectedEnd, null, null);
         }
+
 
         @Test
         @DisplayName("2. WEEKLY + includeProduct=false → getDisposalRate 호출")
@@ -65,55 +69,60 @@ class DisposalRateStatisticsQueryServiceImplTest {
         @DisplayName("3. MONTHLY + includeProduct=true → getProductLevelDisposalRate 호출")
         void testMonthlyWithProduct() {
             LocalDate date = LocalDate.of(2024, 5, 15);
-            when(mapper.getProductLevelDisposalRate(any(), any(), any(), any())).thenReturn(List.of());
+
+            when(mapper.getProductLevelDisposalRate(any(), any(), any(), any(), any()))
+                    .thenReturn(List.of());
 
             List<? extends DisposalRateStatisticsResponseBase> result =
                     service.getDisposalStatistics("MONTHLY", null, 2L, date, true);
 
-            verify(mapper).getProductLevelDisposalRate(any(), any(), isNull(), eq(2L));
-        }
-    }
-
-    @Nested
-    @DisplayName("예외 케이스")
-    class ExceptionCases {
-
-        @Test
-        @DisplayName("4. WEEKLY 기간이 아직 완료되지 않았을 때 예외")
-        void testWeeklyPeriodNotCompleted() {
-            LocalDate futureWeek = LocalDate.now().plusWeeks(1).with(DayOfWeek.TUESDAY);
-
-            assertThatThrownBy(() ->
-                    service.getDisposalStatistics("WEEKLY", null, null, futureWeek, false))
-                    .isInstanceOf(StatisticsException.class)
-                    .hasMessageContaining(StatisticsErrorCode.PERIOD_NOT_COMPLETED.getMessage());
+            verify(mapper).getProductLevelDisposalRate(eq("MONTHLY"), any(), any(), isNull(), eq(2L));
         }
 
-        @Test
-        @DisplayName("5. MONTHLY 기간이 아직 완료되지 않았을 때 예외")
-        void testMonthlyPeriodNotCompleted() {
-            // given
-            LocalDate thisMonth = LocalDate.of(2025, 6, 15);
-            LocalDate fakeToday = LocalDate.of(2025, 6, 20);
+        @Nested
+        @DisplayName("예외 케이스")
+        class ExceptionCases {
 
-            try (MockedStatic<LocalDate> mocked = mockStatic(LocalDate.class, CALLS_REAL_METHODS)) {
-                mocked.when(LocalDate::now).thenReturn(fakeToday);
+            @Test
+            @DisplayName("4. WEEKLY 기간이 아직 완료되지 않았을 때 → 더 이상 예외 없이 정상 통계 조회")
+            void testWeeklyPeriodAllowPartialData() {
+                LocalDate futureDate = LocalDate.of(2025, 7, 15); // baseDate
+                LocalDate today = LocalDate.of(2025, 7, 10); // today is before baseDate
 
-                // when & then
-                assertThatThrownBy(() ->
-                        service.getDisposalStatistics("MONTHLY", null, null, thisMonth, false))
-                        .isInstanceOf(StatisticsException.class)
-                        .hasMessageContaining(StatisticsErrorCode.PERIOD_NOT_COMPLETED.getMessage());
+                try (MockedStatic<LocalDate> mocked = mockStatic(LocalDate.class, CALLS_REAL_METHODS)) {
+                    mocked.when(LocalDate::now).thenReturn(today);
+
+                    List<? extends DisposalRateStatisticsResponseBase> result =
+                            service.getDisposalStatistics("WEEKLY", null, null, futureDate, false);
+
+                    assertThat(result).isNotNull(); // 또는 .isEmpty() 검증도 가능
+                }
             }
-        }
 
-        @Test
-        @DisplayName("6. 지원하지 않는 period 전달 시 예외")
-        void testInvalidPeriod() {
-            assertThatThrownBy(() ->
-                    service.getDisposalStatistics("YEARLY", null, null, null, false))
-                    .isInstanceOf(StatisticsException.class)
-                    .hasMessageContaining(StatisticsErrorCode.UNSUPPORTED_PERIOD.getMessage());
+
+            @Test
+            @DisplayName("5. MONTHLY 현재까지의 데이터로 정상 조회")
+            void testMonthlyNowAllowed() {
+                LocalDate thisMonth = LocalDate.of(2025, 6, 15);
+                LocalDate fakeToday = LocalDate.of(2025, 6, 20);
+
+                try (MockedStatic<LocalDate> mocked = mockStatic(LocalDate.class, CALLS_REAL_METHODS)) {
+                    mocked.when(LocalDate::now).thenReturn(fakeToday);
+
+                    assertThatCode(() ->
+                            service.getDisposalStatistics("MONTHLY", null, null, thisMonth, false)
+                    ).doesNotThrowAnyException();
+                }
+            }
+
+            @Test
+            @DisplayName("6. 지원하지 않는 period 전달 시 예외")
+            void testInvalidPeriod() {
+                assertThatThrownBy(() ->
+                        service.getDisposalStatistics("YEARLY", null, null, null, false))
+                        .isInstanceOf(StatisticsException.class)
+                        .hasMessageContaining(StatisticsErrorCode.UNSUPPORTED_PERIOD.getMessage());
+            }
         }
     }
 }

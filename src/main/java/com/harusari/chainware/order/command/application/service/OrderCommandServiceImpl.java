@@ -53,6 +53,9 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     @Override
     public OrderCommandResponse createOrder(OrderCreateRequest request, Long memberId) {
         // 0. 주문 상세가 비어있는 경우 예외 처리
+        if (request.getDeliveryDueDate()== null) {
+            throw new OrderException(OrderErrorCode.EMPTY_DELIVERY_DUE_DATE);
+        }
         if (request.getOrderDetails() == null || request.getOrderDetails().isEmpty()) {
             throw new OrderException(OrderErrorCode.EMPTY_ORDER_DETAIL);
         }

@@ -11,4 +11,5 @@ public class StoreOrderTrendResponse {
     private LocalDate date;
     private int totalQuantity;
     private long totalAmount;
+    private int totalOrders;
 }

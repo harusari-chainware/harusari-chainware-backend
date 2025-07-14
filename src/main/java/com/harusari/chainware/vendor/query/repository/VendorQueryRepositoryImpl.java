@@ -4,6 +4,7 @@ import com.harusari.chainware.vendor.query.dto.request.VendorSearchRequest;
 import com.harusari.chainware.vendor.query.dto.response.VendorContractInfoResponse;
 import com.harusari.chainware.vendor.query.dto.response.VendorDetailResponse;
 import com.harusari.chainware.vendor.query.dto.response.VendorSearchResponse;
+import com.harusari.chainware.vendor.query.dto.response.VendorSimpleResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -20,6 +21,7 @@ import java.util.Optional;
 import static com.harusari.chainware.franchise.command.domain.aggregate.QFranchise.franchise;
 import static com.harusari.chainware.member.command.domain.aggregate.QMember.member;
 import static com.harusari.chainware.vendor.command.domain.aggregate.QVendor.vendor;
+import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouse.warehouse;
 
 @Repository
 @RequiredArgsConstructor
@@ -145,6 +147,18 @@ public class VendorQueryRepositoryImpl implements VendorQueryRepositoryCustom {
             return vendor.vendorEndDate.loe(endDate);
         }
         return null;
+    }
+
+    @Override
+    public List<VendorSimpleResponse> findAllVendorsSimple() {
+        return queryFactory
+                .select(Projections.constructor(VendorSimpleResponse.class,
+                        vendor.vendorId,
+                        vendor.vendorName
+                ))
+                .from(vendor)
+                .orderBy(vendor.vendorName.asc())
+                .fetch();
     }
 
 }

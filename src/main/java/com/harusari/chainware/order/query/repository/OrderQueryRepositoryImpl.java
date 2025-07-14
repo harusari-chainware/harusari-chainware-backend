@@ -35,6 +35,7 @@ public class OrderQueryRepositoryImpl implements OrderQueryRepositoryCustom {
     public Page<OrderSearchResponse> searchOrders(OrderSearchRequest request, Pageable pageable) {
         List<OrderSearchResponse> contents = queryFactory
                 .select(Projections.constructor(OrderSearchResponse.class,
+                        order.orderId,
                         order.orderCode,
                         franchise.franchiseName,
                         order.productCount,
@@ -130,6 +131,7 @@ public class OrderQueryRepositoryImpl implements OrderQueryRepositoryCustom {
 
         List<DeliveryHistoryInfo> deliveryHistory = queryFactory
                 .select(Projections.constructor(DeliveryHistoryInfo.class,
+                        delivery.startedAt,
                         delivery.deliveredAt,
                         delivery.carrier,
                         delivery.deliveryStatus
@@ -147,6 +149,20 @@ public class OrderQueryRepositoryImpl implements OrderQueryRepositoryCustom {
                 .build();
     }
 
+    @Override
+    public MyFranchiseResponse findMyFranchiseInfo(Long memberId) {
+        return queryFactory
+                .select(Projections.constructor(MyFranchiseResponse.class,
+                        franchise.franchiseName,
+                        franchise.franchiseContact,
+                        member.name,
+                        member.phoneNumber
+                ))
+                .from(franchise)
+                .join(member).on(franchise.memberId.eq(member.memberId))
+                .where(member.memberId.eq(memberId))
+                .fetchOne();
+    }
 
     private BooleanExpression franchiseNameContains(String name) {
         return (name != null && !name.isBlank()) ? franchise.franchiseName.containsIgnoreCase(name) : null;

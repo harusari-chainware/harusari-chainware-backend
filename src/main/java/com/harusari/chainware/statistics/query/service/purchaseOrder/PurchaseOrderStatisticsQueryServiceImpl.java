@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -54,21 +55,24 @@ public class PurchaseOrderStatisticsQueryServiceImpl implements PurchaseOrderSta
     @Transactional
     public List<PurchaseOrderTrendResponse> getTrend(String period, Long vendorId, LocalDate targetDate) {
         LocalDate baseDate = (targetDate != null) ? targetDate : LocalDate.now().minusDays(1);
-        LocalDate startDate, endDate;
 
-        switch (period.toUpperCase()) {
+        return switch (period.toUpperCase()) {
+            case "DAILY" -> {
+                LocalDate end = baseDate;
+                LocalDate start = end.minusDays(6);
+                yield mapper.getPurchaseOrderTrendDaily(vendorId, start, end);
+            }
             case "WEEKLY" -> {
-                endDate = baseDate;
-                startDate = baseDate.minusDays(6);
+                LocalDate end = baseDate.with(DayOfWeek.SUNDAY);
+                LocalDate start = end.minusWeeks(6).with(DayOfWeek.MONDAY);
+                yield mapper.getPurchaseOrderTrendWeekly(vendorId, start, end);
             }
             case "MONTHLY" -> {
-                endDate = baseDate;
-                startDate = baseDate.minusDays(29);
+                LocalDate end = baseDate.withDayOfMonth(1).plusMonths(1).minusDays(1); // 해당월 말일
+                LocalDate start = baseDate.minusMonths(6).withDayOfMonth(1);
+                yield mapper.getPurchaseOrderTrendMonthly(vendorId, start, end);
             }
             default -> throw new StatisticsException(StatisticsErrorCode.UNSUPPORTED_PERIOD);
-        }
-
-        return mapper.getPurchaseOrderTrend(vendorId, startDate, endDate);
+        };
     }
-
 }

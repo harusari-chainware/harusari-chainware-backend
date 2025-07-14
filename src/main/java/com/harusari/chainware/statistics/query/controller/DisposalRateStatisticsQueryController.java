@@ -1,6 +1,7 @@
 package com.harusari.chainware.statistics.query.controller;
 
 import com.harusari.chainware.common.dto.ApiResponse;
+import com.harusari.chainware.statistics.query.dto.disposal.DisposalRateStatisticsResponse;
 import com.harusari.chainware.statistics.query.dto.disposal.DisposalRateStatisticsResponseBase;
 import com.harusari.chainware.statistics.query.dto.disposal.DisposalRateTrendGroupedResponse;
 import com.harusari.chainware.statistics.query.service.disposal.DisposalRateStatisticsQueryService;
@@ -27,7 +28,7 @@ public class DisposalRateStatisticsQueryController {
             summary = "폐기율 통계 조회",
             description = """
             폐기율 통계를 조회합니다. 일간/주간/월간 단위로 전체, 본사 창고, 가맹점 단위의 폐기율 변화량을 조회할 수 있습니다.  
-            - period는 `WEEKLY` 또는 `MONTHLY` 중 하나  
+            - period는 `WEEKLY` 또는 `MONTHLY`, `DAILY` 중 하나  
             - warehouseId 또는 franchiseId를 지정해 특정 단위로 조회 가능  
             - includeProduct=true 설정 시 상품별 폐기율 포함
             """
@@ -55,14 +56,24 @@ public class DisposalRateStatisticsQueryController {
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 
-    @Operation(summary = "폐기율 추이 (전체/본사/가맹점) 그룹 조회")
-    @GetMapping("/trend-group")
-    public ResponseEntity<ApiResponse<DisposalRateTrendGroupedResponse>> getGroupedTrend(
+    @Operation(summary = "폐기율 추이 조회 (전체/단일 가맹점 또는 창고)")
+    @GetMapping("/trend")
+    public ResponseEntity<ApiResponse<?>> getTrend(
             @RequestParam String period,
+            @RequestParam(required = false) Long warehouseId,
+            @RequestParam(required = false) Long franchiseId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
     ) {
-        return ResponseEntity.ok(ApiResponse.success(
-                service.getGroupedTrend(period.toUpperCase(), targetDate)
-        ));
+        if (warehouseId == null && franchiseId == null) {
+            // 전체, 본사, 가맹점 세트 조회
+            return ResponseEntity.ok(ApiResponse.success(
+                    service.getGroupedTrend(period.toUpperCase(), targetDate)
+            ));
+        } else {
+            // 단일 대상 조회 (7일, 7주, 7개월)
+            return ResponseEntity.ok(ApiResponse.success(
+                    service.getSingleTrend(period.toUpperCase(), warehouseId, franchiseId, targetDate)
+            ));
+        }
     }
 }

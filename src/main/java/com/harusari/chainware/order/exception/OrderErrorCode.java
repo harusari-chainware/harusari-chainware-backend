@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 public enum OrderErrorCode {
 
     INVENTORY_LOCK_TIMEOUT("10001", "재고 확인 중 락 획득에 실패했습니다.", HttpStatus.CONFLICT),
+    EMPTY_DELIVERY_DUE_DATE("10002", "주문 납기일이 비어 있습니다.", HttpStatus.BAD_REQUEST),
     EMPTY_ORDER_DETAIL("10002", "주문 상세 항목이 비어 있습니다.", HttpStatus.BAD_REQUEST),
     PRODUCT_INVENTORY_NOT_FOUND("10003", "해당 제품의 창고 재고를 찾을 수 없습니.다.", HttpStatus.BAD_REQUEST),
     INVALID_ORDER_QUANTITY("10004", "주문 수량은 1 이상이어야 합니다.", HttpStatus.BAD_REQUEST),

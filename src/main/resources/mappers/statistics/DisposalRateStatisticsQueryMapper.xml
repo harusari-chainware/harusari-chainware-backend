@@ -80,9 +80,20 @@
     </select>
 
     <!-- 상품별 폐기율 (입고 기준) -->
+    <!-- 상품별 폐기율 (입고 기준, period 단위 지원) -->
     <select id="getProductLevelDisposalRate" resultType="com.harusari.chainware.statistics.query.dto.disposal.DisposalRateProductStatisticsResponse">
         SELECT
-        DATE(d.created_at) AS date,
+        <choose>
+            <when test="period == 'WEEKLY'">
+                STR_TO_DATE(CONCAT(YEAR(d.created_at), ' ', WEEK(d.created_at), ' 1'), '%X %V %w') AS date,
+            </when>
+            <when test="period == 'MONTHLY'">
+                DATE_FORMAT(d.created_at, '%Y-%m-01') AS date,
+            </when>
+            <otherwise>
+                DATE(d.created_at) AS date,
+            </otherwise>
+        </choose>
         p.product_name,
         SUM(d.quantity) AS disposalQty,
         (
@@ -108,7 +119,17 @@
         <if test="franchiseId != null">
             AND d.franchise_id = #{franchiseId}
         </if>
-        GROUP BY DATE(d.created_at), p.product_name, d.product_id
+        <choose>
+            <when test="period == 'WEEKLY'">
+                GROUP BY YEAR(d.created_at), WEEK(d.created_at), d.product_id, p.product_name
+            </when>
+            <when test="period == 'MONTHLY'">
+                GROUP BY DATE_FORMAT(d.created_at, '%Y-%m'), d.product_id, p.product_name
+            </when>
+            <otherwise>
+                GROUP BY DATE(d.created_at), d.product_id, p.product_name
+            </otherwise>
+        </choose>
         ORDER BY date ASC
     </select>
 
@@ -122,23 +143,36 @@
             <when test='"MONTHLY".equals(period)'>
                 DATE_FORMAT(d.created_at, '%Y-%m-01') AS date
             </when>
+            <otherwise>
+                DATE(d.created_at) AS date
+            </otherwise>
         </choose>,
         '전체' AS targetName,
         SUM(d.quantity) AS disposalQty,
         (
         SUM(d.quantity) +
-        (SELECT COALESCE(SUM(i.unit_quantity), 0) FROM warehouse_inbound i WHERE i.inbounded_at &lt;= #{targetDate}) +
-        (SELECT COALESCE(SUM(sd.quantity), 0) FROM sales s JOIN sales_detail sd ON s.sales_id = sd.sales_id WHERE s.sold_at &lt;= #{targetDate})
+        (SELECT COALESCE(SUM(i.unit_quantity), 0)
+        FROM warehouse_inbound i
+        WHERE DATE(i.inbounded_at) = DATE(d.created_at)) +
+        (SELECT COALESCE(SUM(sd.quantity), 0)
+        FROM sales s
+        JOIN sales_detail sd ON s.sales_id = sd.sales_id
+        WHERE DATE(s.sold_at) = DATE(d.created_at))
         ) AS totalQty,
         ROUND(
         SUM(d.quantity) / NULLIF((
         SUM(d.quantity) +
-        (SELECT COALESCE(SUM(i.unit_quantity), 0) FROM warehouse_inbound i WHERE i.inbounded_at &lt;= #{targetDate}) +
-        (SELECT COALESCE(SUM(sd.quantity), 0) FROM sales s JOIN sales_detail sd ON s.sales_id = sd.sales_id WHERE s.sold_at &lt;= #{targetDate})
+        (SELECT COALESCE(SUM(i.unit_quantity), 0)
+        FROM warehouse_inbound i
+        WHERE DATE(i.inbounded_at) = DATE(d.created_at)) +
+        (SELECT COALESCE(SUM(sd.quantity), 0)
+        FROM sales s
+        JOIN sales_detail sd ON s.sales_id = sd.sales_id
+        WHERE DATE(s.sold_at) = DATE(d.created_at))
         ), 0) * 100, 2
         ) AS disposalRate
         FROM disposal d
-        WHERE d.created_at &lt;= #{targetDate}
+        WHERE d.created_at BETWEEN DATE_SUB(#{targetDate}, INTERVAL 6 DAY) AND #{targetDate}
         <choose>
             <when test='"WEEKLY".equals(period)'>
                 GROUP BY YEAR(d.created_at), WEEK(d.created_at)
@@ -146,10 +180,14 @@
             <when test='"MONTHLY".equals(period)'>
                 GROUP BY DATE_FORMAT(d.created_at, '%Y-%m')
             </when>
+            <otherwise>
+                GROUP BY DATE(d.created_at)
+            </otherwise>
         </choose>
         ORDER BY date ASC
         LIMIT 7
     </select>
+
 
     <!-- 본사 창고 폐기율 추이 -->
     <select id="getTrendForHeadquarters" resultType="com.harusari.chainware.statistics.query.dto.disposal.DisposalRateStatisticsResponse">
@@ -161,20 +199,25 @@
             <when test='"MONTHLY".equals(period)'>
                 DATE_FORMAT(d.created_at, '%Y-%m-01') AS date
             </when>
+            <otherwise>
+                DATE(d.created_at) AS date
+            </otherwise>
         </choose>,
         '본사 창고' AS targetName,
         SUM(d.quantity) AS disposalQty,
         (SELECT SUM(i.unit_quantity)
         FROM warehouse_inbound i
-        WHERE i.inbounded_at &lt;= #{targetDate}) AS totalQty,
-        ROUND(SUM(d.quantity) / NULLIF((
-        (SELECT SUM(i.unit_quantity)
+        WHERE DATE(i.inbounded_at) = DATE(d.created_at)) AS totalQty,
+        ROUND(
+        SUM(d.quantity) / NULLIF((
+        SELECT SUM(i.unit_quantity)
         FROM warehouse_inbound i
-        WHERE i.inbounded_at &lt;= #{targetDate})
-        ), 0) * 100, 2) AS disposalRate
+        WHERE DATE(i.inbounded_at) = DATE(d.created_at)
+        ), 0) * 100, 2
+        ) AS disposalRate
         FROM disposal d
         WHERE d.warehouse_id IS NOT NULL
-        AND d.created_at &lt;= #{targetDate}
+        AND d.created_at BETWEEN DATE_SUB(#{targetDate}, INTERVAL 6 DAY) AND #{targetDate}
         <choose>
             <when test='"WEEKLY".equals(period)'>
                 GROUP BY YEAR(d.created_at), WEEK(d.created_at)
@@ -182,10 +225,14 @@
             <when test='"MONTHLY".equals(period)'>
                 GROUP BY DATE_FORMAT(d.created_at, '%Y-%m')
             </when>
+            <otherwise>
+                GROUP BY DATE(d.created_at)
+            </otherwise>
         </choose>
         ORDER BY date ASC
         LIMIT 7
     </select>
+
 
     <!-- 가맹점 폐기율 추이 -->
     <select id="getTrendForFranchises" resultType="com.harusari.chainware.statistics.query.dto.disposal.DisposalRateStatisticsResponse">
@@ -197,6 +244,9 @@
             <when test='"MONTHLY".equals(period)'>
                 DATE_FORMAT(d.created_at, '%Y-%m-01') AS date
             </when>
+            <otherwise>
+                DATE(d.created_at) AS date
+            </otherwise>
         </choose>,
         '가맹점' AS targetName,
         SUM(d.quantity) AS disposalQty,
@@ -204,23 +254,20 @@
         (SELECT COALESCE(SUM(sd.quantity), 0)
         FROM sales s
         JOIN sales_detail sd ON s.sales_id = sd.sales_id
-        WHERE s.sold_at &lt;= #{targetDate})) AS totalQty,
+        WHERE DATE(s.sold_at) = DATE(d.created_at))) AS totalQty,
         ROUND(
         SUM(d.quantity) / NULLIF(
         SUM(d.quantity) + (
         SELECT COALESCE(SUM(sd.quantity), 0)
         FROM sales s
         JOIN sales_detail sd ON s.sales_id = sd.sales_id
-        WHERE s.sold_at &lt;= #{targetDate}
-        ),
-        0
-        ) * 100,
-        2
+        WHERE DATE(s.sold_at) = DATE(d.created_at)
+        ), 0
+        ) * 100, 2
         ) AS disposalRate
-
         FROM disposal d
         WHERE d.franchise_id IS NOT NULL
-        AND d.created_at &lt;= #{targetDate}
+        AND d.created_at BETWEEN DATE_SUB(#{targetDate}, INTERVAL 6 DAY) AND #{targetDate}
         <choose>
             <when test='"WEEKLY".equals(period)'>
                 GROUP BY YEAR(d.created_at), WEEK(d.created_at)
@@ -228,9 +275,116 @@
             <when test='"MONTHLY".equals(period)'>
                 GROUP BY DATE_FORMAT(d.created_at, '%Y-%m')
             </when>
+            <otherwise>
+                GROUP BY DATE(d.created_at)
+            </otherwise>
         </choose>
         ORDER BY date ASC
         LIMIT 7
     </select>
+
+    <select id="getTrendForSingleTarget" resultType="com.harusari.chainware.statistics.query.dto.disposal.DisposalRateStatisticsResponse">
+        SELECT
+        <choose>
+            <when test="period == 'WEEKLY'">
+                STR_TO_DATE(CONCAT(YEAR(d.created_at), ' ', WEEK(d.created_at), ' 1'), '%X %V %w') AS date
+            </when>
+            <when test="period == 'MONTHLY'">
+                DATE_FORMAT(d.created_at, '%Y-%m-01') AS date
+            </when>
+            <otherwise>
+                DATE(d.created_at) AS date
+            </otherwise>
+        </choose>,
+        CASE
+        WHEN #{warehouseId} IS NOT NULL THEN w.warehouse_name
+        WHEN #{franchiseId} IS NOT NULL THEN f.franchise_name
+        ELSE '전체'
+        END AS targetName,
+        SUM(d.quantity) AS disposalQty,
+
+        <choose>
+            <when test="warehouseId != null">
+                (SELECT SUM(i.unit_quantity)
+                FROM warehouse_inbound i
+                WHERE i.warehouse_id = #{warehouseId}
+                AND DATE(i.inbounded_at) = DATE(d.created_at)) AS totalQty
+            </when>
+            <when test="franchiseId != null">
+                (SUM(d.quantity) +
+                (SELECT COALESCE(SUM(sd.quantity), 0)
+                FROM sales s
+                JOIN sales_detail sd ON s.sales_id = sd.sales_id
+                WHERE s.franchise_id = #{franchiseId}
+                AND DATE(s.sold_at) = DATE(d.created_at))) AS totalQty
+            </when>
+            <otherwise>
+                (SUM(d.quantity) +
+                (SELECT COALESCE(SUM(i.unit_quantity), 0)
+                FROM warehouse_inbound i
+                WHERE DATE(i.inbounded_at) = DATE(d.created_at)) +
+                (SELECT COALESCE(SUM(sd.quantity), 0)
+                FROM sales s
+                JOIN sales_detail sd ON s.sales_id = sd.sales_id
+                WHERE DATE(s.sold_at) = DATE(d.created_at))) AS totalQty
+            </otherwise>
+        </choose>,
+
+        ROUND(
+        SUM(d.quantity) / NULLIF(
+        <choose>
+            <when test="warehouseId != null">
+                (SELECT SUM(i.unit_quantity)
+                FROM warehouse_inbound i
+                WHERE i.warehouse_id = #{warehouseId}
+                AND DATE(i.inbounded_at) = DATE(d.created_at))
+            </when>
+            <when test="franchiseId != null">
+                (SUM(d.quantity) +
+                (SELECT COALESCE(SUM(sd.quantity), 0)
+                FROM sales s
+                JOIN sales_detail sd ON s.sales_id = sd.sales_id
+                WHERE s.franchise_id = #{franchiseId}
+                AND DATE(s.sold_at) = DATE(d.created_at)))
+            </when>
+            <otherwise>
+                (SUM(d.quantity) +
+                (SELECT COALESCE(SUM(i.unit_quantity), 0)
+                FROM warehouse_inbound i
+                WHERE DATE(i.inbounded_at) = DATE(d.created_at)) +
+                (SELECT COALESCE(SUM(sd.quantity), 0)
+                FROM sales s
+                JOIN sales_detail sd ON s.sales_id = sd.sales_id
+                WHERE DATE(s.sold_at) = DATE(d.created_at)))
+            </otherwise>
+        </choose>,
+        0) * 100, 2
+        ) AS disposalRate
+
+        FROM disposal d
+        LEFT JOIN warehouse w ON d.warehouse_id = w.warehouse_id
+        LEFT JOIN franchise f ON d.franchise_id = f.franchise_id
+        WHERE d.created_at BETWEEN #{startDate} AND #{endDate}
+        <if test="warehouseId != null">
+            AND d.warehouse_id = #{warehouseId}
+        </if>
+        <if test="franchiseId != null">
+            AND d.franchise_id = #{franchiseId}
+        </if>
+        <choose>
+            <when test="period == 'WEEKLY'">
+                GROUP BY YEAR(d.created_at), WEEK(d.created_at)
+            </when>
+            <when test="period == 'MONTHLY'">
+                GROUP BY DATE_FORMAT(d.created_at, '%Y-%m')
+            </when>
+            <otherwise>
+                GROUP BY DATE(d.created_at)
+            </otherwise>
+        </choose>
+        ORDER BY date ASC
+        LIMIT 7
+    </select>
+
 
 </mapper>
