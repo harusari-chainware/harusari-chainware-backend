@@ -74,3 +74,8 @@ server:
       force: true
   error:
     include-stacktrace: never
+
+app:
+  cookie:
+    secure: true
+    same-site: None
