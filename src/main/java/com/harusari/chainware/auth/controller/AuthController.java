@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -28,10 +29,15 @@ public class AuthController {
 
     private static final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
     private static final String COOKIE_PATH = "/";
-    private static final String SAME_SITE_STRICT = "Strict";
     private static final boolean HTTP_ONLY = true;
     private static final long REFRESH_TOKEN_EXPIRATION_DAYS = 7L;
     private static final long COOKIE_DELETE_MAX_AGE = 0L;
+
+    @Value("${app.cookie.secure:true}")
+    private boolean secure;
+
+    @Value("${app.cookie.same-site:none}")
+    private String sameSite;
 
     private final AuthService authService;
 
@@ -99,10 +105,10 @@ public class AuthController {
     private ResponseCookie createRefreshTokenCookie(String refreshToken) {
         return ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, refreshToken)
                 .httpOnly(HTTP_ONLY)
-                .secure(false)
+                .secure(secure)
                 .path(COOKIE_PATH)
                 .maxAge(Duration.ofDays(REFRESH_TOKEN_EXPIRATION_DAYS))
-                .sameSite(SAME_SITE_STRICT)
+                .sameSite(sameSite)
                 .build();
     }
 
@@ -110,10 +116,10 @@ public class AuthController {
     private ResponseCookie createDeleteRefreshTokenCookie() {
         return ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, "")
                 .httpOnly(HTTP_ONLY)
-                .secure(false)
+                .secure(secure)
                 .path(COOKIE_PATH)
                 .maxAge(COOKIE_DELETE_MAX_AGE)
-                .sameSite(SAME_SITE_STRICT)
+                .sameSite(sameSite)
                 .build();
     }
 
