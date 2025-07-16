@@ -35,9 +35,10 @@ public class WarehouseInbound {
     private LocalDateTime inboundedAt;
 
     @Builder
-    public WarehouseInbound(Long inboundId, Long purchaseOrderId, Long warehouseId,
-                            Long productId, int unitQuantity, LocalDate expirationDate, LocalDateTime inboundedAt
-                         ) {
+    public WarehouseInbound(
+            Long inboundId, Long purchaseOrderId, Long warehouseId,
+            Long productId, int unitQuantity, LocalDate expirationDate, LocalDateTime inboundedAt
+    ) {
         this.inboundId = inboundId;
         this.purchaseOrderId = purchaseOrderId;
         this.warehouseId = warehouseId;
