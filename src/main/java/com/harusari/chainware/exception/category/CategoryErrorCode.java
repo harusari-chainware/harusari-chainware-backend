@@ -18,7 +18,6 @@ public enum CategoryErrorCode {
     CATEGORY_NAME_ALREADY_EXISTS("21001", "이미 존재하는 카테고리 이름입니다.", HttpStatus.CONFLICT),
     CATEGORY_CANNOT_DELETE_HAS_PRODUCTS("21002", "카테고리에 연결된 제품이 있어 삭제할 수 없습니다.", HttpStatus.BAD_REQUEST),
 
-
     ;
 
     private final String errorCode;
