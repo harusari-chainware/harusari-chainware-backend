@@ -211,7 +211,10 @@ public class RequisitionCommandServiceImpl implements RequisitionCommandService 
                 .contains(requisition.getRequisitionStatus())) {
             throw new RequisitionException(RequisitionErrorCode.REQUISITION_INVALID_STATUS_DELETE);
         }
+        // 자식 먼저 삭제
+        requisitionDetailRepository.deleteByRequisitionId(requisitionId);
 
+        // 부모 삭제
         requisitionRepository.delete(requisition);
     }
 }
