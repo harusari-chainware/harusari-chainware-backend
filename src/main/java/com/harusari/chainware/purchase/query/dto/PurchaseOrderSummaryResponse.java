@@ -16,6 +16,7 @@ public class PurchaseOrderSummaryResponse {
     private String purchaseOrderCode;
     private PurchaseOrderStatus status;
 
+    private String drafterName;
     private String vendorName;
 
     private int productCount;

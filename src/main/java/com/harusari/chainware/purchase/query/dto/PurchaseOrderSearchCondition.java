@@ -13,6 +13,7 @@ public class PurchaseOrderSearchCondition {
     private PurchaseOrderStatus status;
     private Long requesterId;
     private Long vendorMemberId;
+    private String drafterName;
     private String vendorName;
     private Long warehouseId;
     private LocalDate startDate;
