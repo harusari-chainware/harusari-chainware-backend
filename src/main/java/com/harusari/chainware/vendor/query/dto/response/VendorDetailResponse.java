@@ -6,12 +6,14 @@ import com.harusari.chainware.vendor.command.domain.aggregate.VendorType;
 import lombok.Builder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Builder
 public record VendorDetailResponse(
         Long vendorId, String vendorName, Address vendorAddress, Long memberId,
-        String vendorMangerName, String phoneNumber, VendorType vendorType, String vendorTaxId,
+        String vendorManagerName, String phoneNumber, VendorType vendorType, String vendorTaxId,
         String vendorMemo, VendorStatus vendorStatus, String agreementOriginalFileName,
-        Long agreementFileSize, LocalDate vendorStartDate, LocalDate vendorEndDate
+        Long agreementFileSize, LocalDate vendorStartDate, LocalDate vendorEndDate,
+        LocalDateTime createdAt, LocalDateTime modifiedAt
 ) {
 }

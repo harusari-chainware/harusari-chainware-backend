@@ -46,7 +46,7 @@ public class Vendor {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "vendor_status")
-    private VendorStatus vendorStatus;
+    private VendorStatus vendorStatus = VendorStatus.IN_PROGRESS;
 
     @Column(name = "agreement_file_path")
     private String agreementFilePath;
@@ -75,9 +75,8 @@ public class Vendor {
     @Builder
     public Vendor(
             Long memberId, String vendorName, VendorType vendorType, Address vendorAddress,
-            String vendorTaxId, String vendorMemo, VendorStatus vendorStatus, String agreementFilePath,
-            String agreementOriginalFileName, long agreementFileSize, LocalDateTime agreementUploadedAt,
-            LocalDate vendorStartDate, LocalDate vendorEndDate
+            String vendorTaxId, String vendorMemo, String agreementFilePath, String agreementOriginalFileName,
+            long agreementFileSize, LocalDateTime agreementUploadedAt, LocalDate vendorStartDate, LocalDate vendorEndDate
     ) {
         this.memberId = memberId;
         this.vendorName = vendorName;
@@ -85,7 +84,6 @@ public class Vendor {
         this.vendorAddress = vendorAddress;
         this.vendorTaxId = vendorTaxId;
         this.vendorMemo = vendorMemo;
-        this.vendorStatus = vendorStatus;
         this.agreementFilePath = agreementFilePath;
         this.agreementOriginalFileName = agreementOriginalFileName;
         this.agreementFileSize = agreementFileSize;

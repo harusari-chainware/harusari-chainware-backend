@@ -18,10 +18,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static com.harusari.chainware.franchise.command.domain.aggregate.QFranchise.franchise;
 import static com.harusari.chainware.member.command.domain.aggregate.QMember.member;
 import static com.harusari.chainware.vendor.command.domain.aggregate.QVendor.vendor;
-import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouse.warehouse;
 
 @Repository
 @RequiredArgsConstructor
@@ -47,8 +45,8 @@ public class VendorQueryRepositoryImpl implements VendorQueryRepositoryCustom {
                         vendorTypeEq(vendorSearchRequest.vendorType()),
                         vendorStatusEq(vendorSearchRequest.vendorStatus()),
                         vendorAgreementDateBetween(
-                                vendorSearchRequest.contractStartDate(),
-                                vendorSearchRequest.contractEndDate()
+                                vendorSearchRequest.vendorStartDate(),
+                                vendorSearchRequest.vendorEndDate()
                         )
                 )
                 .offset(pageable.getOffset())
@@ -66,8 +64,8 @@ public class VendorQueryRepositoryImpl implements VendorQueryRepositoryCustom {
                         vendorTypeEq(vendorSearchRequest.vendorType()),
                         vendorStatusEq(vendorSearchRequest.vendorStatus()),
                         vendorAgreementDateBetween(
-                                vendorSearchRequest.contractStartDate(),
-                                vendorSearchRequest.contractEndDate()
+                                vendorSearchRequest.vendorStartDate(),
+                                vendorSearchRequest.vendorEndDate()
                         )
                 )
                 .fetchOne();
@@ -84,7 +82,8 @@ public class VendorQueryRepositoryImpl implements VendorQueryRepositoryCustom {
                         vendor.vendorId, vendor.vendorName, vendor.vendorAddress, member.memberId,
                         member.name, member.phoneNumber, vendor.vendorType, vendor.vendorTaxId,
                         vendor.vendorMemo, vendor.vendorStatus, vendor.agreementOriginalFileName,
-                        vendor.agreementFileSize, vendor.vendorStartDate, vendor.vendorEndDate
+                        vendor.agreementFileSize, vendor.vendorStartDate, vendor.vendorEndDate,
+                        vendor.createdAt, vendor.modifiedAt
                 ))
                 .from(vendor)
                 .leftJoin(member).on(vendor.memberId.eq(member.memberId))
@@ -109,17 +108,27 @@ public class VendorQueryRepositoryImpl implements VendorQueryRepositoryCustom {
         return (vendorName != null && !vendorName.isBlank()) ? vendor.vendorName.contains(vendorName) : null;
     }
 
-    private BooleanExpression addressConditions(VendorSearchRequest vendorSearchRequest) {
+    private BooleanExpression addressConditions(VendorSearchRequest request) {
+        String zipcode = request.zipcode();
+        String road = request.addressRoad();
+        String detail = request.addressDetail();
+
         BooleanExpression condition = null;
 
-        if (vendorSearchRequest.zipcode() != null && !vendorSearchRequest.zipcode().isBlank()) {
-            condition = safeAnd(condition, franchise.franchiseAddress.zipcode.eq(vendorSearchRequest.zipcode()));
+        if (zipcode != null && !zipcode.isBlank()) {
+            condition = vendor.vendorAddress.zipcode.containsIgnoreCase(zipcode);
         }
-        if (vendorSearchRequest.addressRoad() != null && !vendorSearchRequest.addressRoad().isBlank()) {
-            condition = safeAnd(condition, franchise.franchiseAddress.addressRoad.containsIgnoreCase(vendorSearchRequest.addressRoad()));
+
+        if (road != null && !road.isBlank()) {
+            condition = condition == null
+                    ? vendor.vendorAddress.addressRoad.containsIgnoreCase(road)
+                    : condition.or(vendor.vendorAddress.addressRoad.containsIgnoreCase(road));
         }
-        if (vendorSearchRequest.addressDetail() != null && !vendorSearchRequest.addressDetail().isBlank()) {
-            condition = safeAnd(condition, franchise.franchiseAddress.addressDetail.containsIgnoreCase(vendorSearchRequest.addressDetail()));
+
+        if (detail != null && !detail.isBlank()) {
+            condition = condition == null
+                    ? vendor.vendorAddress.addressDetail.containsIgnoreCase(detail)
+                    : condition.or(vendor.vendorAddress.addressDetail.containsIgnoreCase(detail));
         }
 
         return condition;
