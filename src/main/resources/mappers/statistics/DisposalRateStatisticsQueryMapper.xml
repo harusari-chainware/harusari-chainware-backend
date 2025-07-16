@@ -79,7 +79,6 @@
         ORDER BY date ASC
     </select>
 
-    <!-- 상품별 폐기율 (입고 기준) -->
     <!-- 상품별 폐기율 (입고 기준, period 단위 지원) -->
     <select id="getProductLevelDisposalRate" resultType="com.harusari.chainware.statistics.query.dto.disposal.DisposalRateProductStatisticsResponse">
         SELECT
@@ -100,14 +99,14 @@
         SELECT SUM(i.unit_quantity)
         FROM warehouse_inbound i
         WHERE i.product_id = d.product_id
-        AND DATE(i.inbounded_at) = DATE(d.created_at)
+        AND DATE_FORMAT(i.inbounded_at, '%Y-%m') = DATE_FORMAT(d.created_at, '%Y-%m')
         ) AS totalQty,
         ROUND(
         SUM(d.quantity) / NULLIF((
         SELECT SUM(i.unit_quantity)
         FROM warehouse_inbound i
         WHERE i.product_id = d.product_id
-        AND DATE(i.inbounded_at) = DATE(d.created_at)
+        AND DATE_FORMAT(i.inbounded_at, '%Y-%m') = DATE_FORMAT(d.created_at, '%Y-%m')
         ), 0) * 100, 2
         ) AS disposalRate
         FROM disposal d
@@ -133,14 +132,14 @@
         ORDER BY date ASC
     </select>
 
-        <!-- 전체 폐기율 추이 -->
+    <!-- 전체 폐기율 추이 -->
     <select id="getTrendForTotal" resultType="com.harusari.chainware.statistics.query.dto.disposal.DisposalRateStatisticsResponse">
         SELECT
         <choose>
-            <when test='"WEEKLY".equals(period)'>
+            <when test="period == 'WEEKLY'">
                 STR_TO_DATE(CONCAT(YEAR(d.created_at), ' ', WEEK(d.created_at), ' 1'), '%X %V %w') AS date
             </when>
-            <when test='"MONTHLY".equals(period)'>
+            <when test="period == 'MONTHLY'">
                 DATE_FORMAT(d.created_at, '%Y-%m-01') AS date
             </when>
             <otherwise>
@@ -172,12 +171,12 @@
         ), 0) * 100, 2
         ) AS disposalRate
         FROM disposal d
-        WHERE d.created_at BETWEEN DATE_SUB(#{targetDate}, INTERVAL 6 DAY) AND #{targetDate}
+        WHERE d.created_at BETWEEN #{startDate} AND #{endDate}
         <choose>
-            <when test='"WEEKLY".equals(period)'>
+            <when test="period == 'WEEKLY'">
                 GROUP BY YEAR(d.created_at), WEEK(d.created_at)
             </when>
-            <when test='"MONTHLY".equals(period)'>
+            <when test="period == 'MONTHLY'">
                 GROUP BY DATE_FORMAT(d.created_at, '%Y-%m')
             </when>
             <otherwise>
@@ -185,18 +184,16 @@
             </otherwise>
         </choose>
         ORDER BY date ASC
-        LIMIT 7
     </select>
-
 
     <!-- 본사 창고 폐기율 추이 -->
     <select id="getTrendForHeadquarters" resultType="com.harusari.chainware.statistics.query.dto.disposal.DisposalRateStatisticsResponse">
         SELECT
         <choose>
-            <when test='"WEEKLY".equals(period)'>
+            <when test="period == 'WEEKLY'">
                 STR_TO_DATE(CONCAT(YEAR(d.created_at), ' ', WEEK(d.created_at), ' 1'), '%X %V %w') AS date
             </when>
-            <when test='"MONTHLY".equals(period)'>
+            <when test="period == 'MONTHLY'">
                 DATE_FORMAT(d.created_at, '%Y-%m-01') AS date
             </when>
             <otherwise>
@@ -217,12 +214,12 @@
         ) AS disposalRate
         FROM disposal d
         WHERE d.warehouse_id IS NOT NULL
-        AND d.created_at BETWEEN DATE_SUB(#{targetDate}, INTERVAL 6 DAY) AND #{targetDate}
+        AND d.created_at BETWEEN #{startDate} AND #{endDate}
         <choose>
-            <when test='"WEEKLY".equals(period)'>
+            <when test="period == 'WEEKLY'">
                 GROUP BY YEAR(d.created_at), WEEK(d.created_at)
             </when>
-            <when test='"MONTHLY".equals(period)'>
+            <when test="period == 'MONTHLY'">
                 GROUP BY DATE_FORMAT(d.created_at, '%Y-%m')
             </when>
             <otherwise>
@@ -230,18 +227,16 @@
             </otherwise>
         </choose>
         ORDER BY date ASC
-        LIMIT 7
     </select>
-
 
     <!-- 가맹점 폐기율 추이 -->
     <select id="getTrendForFranchises" resultType="com.harusari.chainware.statistics.query.dto.disposal.DisposalRateStatisticsResponse">
         SELECT
         <choose>
-            <when test='"WEEKLY".equals(period)'>
+            <when test="period == 'WEEKLY'">
                 STR_TO_DATE(CONCAT(YEAR(d.created_at), ' ', WEEK(d.created_at), ' 1'), '%X %V %w') AS date
             </when>
-            <when test='"MONTHLY".equals(period)'>
+            <when test="period == 'MONTHLY'">
                 DATE_FORMAT(d.created_at, '%Y-%m-01') AS date
             </when>
             <otherwise>
@@ -267,12 +262,12 @@
         ) AS disposalRate
         FROM disposal d
         WHERE d.franchise_id IS NOT NULL
-        AND d.created_at BETWEEN DATE_SUB(#{targetDate}, INTERVAL 6 DAY) AND #{targetDate}
+        AND d.created_at BETWEEN #{startDate} AND #{endDate}
         <choose>
-            <when test='"WEEKLY".equals(period)'>
+            <when test="period == 'WEEKLY'">
                 GROUP BY YEAR(d.created_at), WEEK(d.created_at)
             </when>
-            <when test='"MONTHLY".equals(period)'>
+            <when test="period == 'MONTHLY'">
                 GROUP BY DATE_FORMAT(d.created_at, '%Y-%m')
             </when>
             <otherwise>
@@ -280,7 +275,6 @@
             </otherwise>
         </choose>
         ORDER BY date ASC
-        LIMIT 7
     </select>
 
     <select id="getTrendForSingleTarget" resultType="com.harusari.chainware.statistics.query.dto.disposal.DisposalRateStatisticsResponse">

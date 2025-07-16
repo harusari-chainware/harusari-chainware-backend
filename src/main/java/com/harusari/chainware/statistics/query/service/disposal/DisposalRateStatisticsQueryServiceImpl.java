@@ -59,16 +59,31 @@ public class DisposalRateStatisticsQueryServiceImpl implements DisposalRateStati
     @Override
     @Transactional
     public DisposalRateTrendGroupedResponse getGroupedTrend(String period, LocalDate targetDate) {
-        LocalDate baseDate = (targetDate != null) ? targetDate : LocalDate.now().minusDays(1);
+        LocalDate baseDate = (targetDate != null) ? targetDate : LocalDate.now();
 
-        List<DisposalRateStatisticsResponse> total = mapper.getTrendForTotal(period, baseDate);
-        List<DisposalRateStatisticsResponse> headquarters = mapper.getTrendForHeadquarters(period, baseDate);
-        List<DisposalRateStatisticsResponse> franchises = mapper.getTrendForFranchises(period, baseDate);
+        LocalDate startDate;
+        LocalDate endDate;
+
+        switch (period) {
+            case "DAILY" -> {
+                endDate = baseDate;
+                startDate = baseDate.minusDays(6); // 7일
+            }
+            case "WEEKLY" -> {
+                endDate = baseDate;
+                startDate = baseDate.minusWeeks(6).with(DayOfWeek.MONDAY); // 7주, 주 시작일
+            }
+            case "MONTHLY" -> {
+                endDate = baseDate;
+                startDate = baseDate.minusMonths(6).withDayOfMonth(1); // 7개월
+            }
+            default -> throw new StatisticsException(StatisticsErrorCode.UNSUPPORTED_PERIOD);
+        }
 
         return DisposalRateTrendGroupedResponse.builder()
-                .total(total)
-                .headquarters(headquarters)
-                .franchises(franchises)
+                .total(mapper.getTrendForTotal(period, startDate, endDate))
+                .headquarters(mapper.getTrendForHeadquarters(period, startDate, endDate))
+                .franchises(mapper.getTrendForFranchises(period, startDate, endDate))
                 .build();
     }
 
