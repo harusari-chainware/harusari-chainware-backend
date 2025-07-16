@@ -89,7 +89,7 @@ public class OrderWarehouseQueryServiceImpl implements OrderWarehouseQueryServic
                             product.getProductName(),
                             product.getProductCode(),
                             inventory.getSafetyQuantity(),
-                            availableQty,
+                            availableQty-orderedQty,
                             orderedQty
                     ));
                 }

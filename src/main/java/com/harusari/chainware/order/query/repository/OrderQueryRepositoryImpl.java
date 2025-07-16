@@ -115,6 +115,7 @@ public class OrderQueryRepositoryImpl implements OrderQueryRepositoryCustom {
 
         List<OrderProductInfo> products = queryFactory
                 .select(Projections.constructor(OrderProductInfo.class,
+                        product.productId,
                         product.productCode,
                         product.productName,
                         product.unitQuantity,
