@@ -10,6 +10,6 @@ import java.time.LocalDate;
 public record VendorSearchRequest(
         String vendorName, String zipcode, String addressRoad,
         String addressDetail, VendorType vendorType, VendorStatus vendorStatus,
-        LocalDate contractStartDate, LocalDate contractEndDate
+        LocalDate vendorStartDate, LocalDate vendorEndDate
 ) {
 }

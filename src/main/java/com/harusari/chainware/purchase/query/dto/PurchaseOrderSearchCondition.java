@@ -1,6 +1,5 @@
 package com.harusari.chainware.purchase.query.dto;
 
-import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
 import com.harusari.chainware.purchase.command.domain.aggregate.PurchaseOrderStatus;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +13,8 @@ public class PurchaseOrderSearchCondition {
     private PurchaseOrderStatus status;
     private Long requesterId;
     private Long vendorMemberId;
+    private String drafterName;
+    private String vendorName;
     private Long warehouseId;
     private LocalDate startDate;
     private LocalDate endDate;

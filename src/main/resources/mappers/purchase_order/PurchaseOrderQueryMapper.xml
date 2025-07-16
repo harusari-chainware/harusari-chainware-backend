@@ -5,31 +5,38 @@
 
 <mapper namespace="com.harusari.chainware.purchase.query.mapper.PurchaseOrderQueryMapper">
 
-    <select id="findPurchaseOrders" resultType="com.harusari.chainware.purchase.query.dto.PurchaseOrderSummaryResponse">
+    <select id="findPurchaseOrders"
+            resultType="com.harusari.chainware.purchase.query.dto.PurchaseOrderSummaryResponse">
         SELECT
-        po.purchase_order_id,
-        po.purchase_order_code,
+        po.purchase_order_id AS purchaseOrderId,
+        po.purchase_order_code AS purchaseOrderCode,
         po.purchase_order_status AS status,
-        v.vendor_name,
+
+        m.name AS drafterName,
+        v.vendor_name AS vendorName,
 
         -- 품목 수: 해당 발주의 품목 개수
         (SELECT COUNT(*)
         FROM purchase_order_detail pod
-        WHERE pod.purchase_order_id = po.purchase_order_id) AS product_count,
+        WHERE pod.purchase_order_id = po.purchase_order_id) AS productCount,
 
         -- 총 수량: 품목들의 quantity 합산
         (SELECT COALESCE(SUM(pod.quantity), 0)
         FROM purchase_order_detail pod
-        WHERE pod.purchase_order_id = po.purchase_order_id) AS total_quantity,
+        WHERE pod.purchase_order_id = po.purchase_order_id) AS totalQuantity,
 
-        po.total_amount,
-        r.requisition_code,
-        po.created_at,
-        po.due_date,
-        po.shipped_at
+        po.total_amount AS totalAmount,
+        r.requisition_code AS requisitionCode,
+
+        DATE(po.created_at) AS createdAt,
+        DATE(po.due_date) AS dueDate,
+        DATE(po.shipped_at) AS shippedAt
+
         FROM purchase_order po
         LEFT JOIN vendor v ON po.vendor_id = v.vendor_id
         LEFT JOIN requisition r ON po.requisition_id = r.requisition_id
+        LEFT JOIN member m ON po.created_member_id = m.member_id
+
         WHERE 1 = 1
         <if test="condition.status != null">
             AND po.purchase_order_status = #{condition.status}
@@ -43,12 +50,19 @@
         <if test="condition.endDate != null">
             AND po.created_at &lt;= #{condition.endDate}
         </if>
+        <if test="condition.vendorName != null and condition.vendorName != ''">
+            AND v.vendor_name LIKE CONCAT('%', #{condition.vendorName}, '%')
+        </if>
+        <if test="condition.drafterName != null and condition.drafterName != ''">
+            AND m.name LIKE CONCAT('%', #{condition.drafterName}, '%')
+        </if>
         <if test="condition.vendorMemberId != null">
-            AND po.vendor_member_id = #{condition.vendorMemberId}
+            AND v.member_id = #{condition.vendorMemberId}
         </if>
         <if test="condition.warehouseId != null">
             AND po.warehouse_id = #{condition.warehouseId}
         </if>
+
         ORDER BY po.created_at DESC
         LIMIT #{condition.size}
         OFFSET #{condition.offset}
@@ -142,12 +156,15 @@
     <select id="findProductsByPurchaseOrderId" resultType="com.harusari.chainware.purchase.query.dto.PurchaseOrderProductResponse">
         SELECT
             pod.product_id,
+            p.product_code,
             p.product_name,
             pod.quantity,
-            pod.unit_price
+            pod.unit_price,
+            c.min_order_qty AS moq
         FROM
             purchase_order_detail pod
                 JOIN product p ON pod.product_id = p.product_id
+                JOIN contract c ON pod.product_id = c.product_id
         WHERE
             pod.purchase_order_id = #{purchaseOrderId}
     </select>
