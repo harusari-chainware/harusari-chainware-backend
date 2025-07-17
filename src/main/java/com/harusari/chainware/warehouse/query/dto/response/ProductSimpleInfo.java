@@ -15,12 +15,13 @@ public class ProductSimpleInfo {
     private String categoryName;
     private Integer basePrice;
     private StoreType storeType;
+    private String unitSpec;
 
     @QueryProjection
     public ProductSimpleInfo(
             Long productId, String productCode, String productName,
             String topCategoryName, String categoryName,
-            Integer basePrice, StoreType storeType
+            Integer basePrice, StoreType storeType, String unitSpec
     ) {
         this.productId = productId;
         this.productCode = productCode;
@@ -29,6 +30,7 @@ public class ProductSimpleInfo {
         this.categoryName = categoryName;
         this.basePrice = basePrice;
         this.storeType = storeType;
+        this.unitSpec = unitSpec;
     }
 
 }

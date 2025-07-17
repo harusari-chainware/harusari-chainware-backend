@@ -11,13 +11,15 @@ public class WarehouseSimpleInfo {
     private String warehouseName;
     private Address warehouseAddress;
     private boolean warehouseStatus;
+    private String contact;
 
     @QueryProjection
-    public WarehouseSimpleInfo(Long warehouseId, String warehouseName, Address warehouseAddress, boolean warehouseStatus) {
+    public WarehouseSimpleInfo(Long warehouseId, String warehouseName, Address warehouseAddress, boolean warehouseStatus, String contact) {
         this.warehouseId = warehouseId;
         this.warehouseName = warehouseName;
         this.warehouseAddress = warehouseAddress;
         this.warehouseStatus = warehouseStatus;
+        this.contact = contact;
     }
 
 }
