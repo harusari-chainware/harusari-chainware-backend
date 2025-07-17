@@ -15,6 +15,10 @@ public interface RequisitionQueryMapper {
             @Param("condition") RequisitionSearchCondition condition
     );
 
+    int countMyRequisitions(@Param("memberId") Long memberId,
+                            @Param("condition") RequisitionSearchCondition condition);
+
+
     // resultMap으로 중첩 구조 반환
     RequisitionDetailResponse findRequisitionById(
             @Param("requisitionId") Long requisitionId,

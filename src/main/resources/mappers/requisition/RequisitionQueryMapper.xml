@@ -64,6 +64,48 @@
         OFFSET #{condition.offset}
     </select>
 
+    <!-- 페이징 처리할 count 쿼리 추가 -->
+    <select id="countMyRequisitions" resultType="int">
+        SELECT COUNT(*)
+        FROM requisition r
+        LEFT JOIN vendor v ON r.vendor_id = v.vendor_id
+        LEFT JOIN member cm ON r.created_member_id = cm.member_id
+        LEFT JOIN member am ON r.approved_member_id = am.member_id
+
+        WHERE
+        <choose>
+            <when test="condition.approverView">
+                r.approved_member_id = #{memberId}
+            </when>
+            <otherwise>
+                r.created_member_id = #{memberId}
+            </otherwise>
+        </choose>
+
+        <if test="condition.status != null">
+            AND r.requisition_status = #{condition.status}
+        </if>
+
+        <if test="condition.drafterName != null and condition.drafterName != ''">
+            AND cm.name LIKE CONCAT('%', #{condition.drafterName}, '%')
+        </if>
+
+        <if test="condition.approverName != null and condition.approverName != ''">
+            AND am.name LIKE CONCAT('%', #{condition.approverName}, '%')
+        </if>
+
+        <if test="condition.vendorName != null and condition.vendorName != ''">
+            AND v.vendor_name LIKE CONCAT('%', #{condition.vendorName}, '%')
+        </if>
+
+        <if test="condition.createdFrom != null">
+            AND r.created_at &gt;= #{condition.createdFrom}
+        </if>
+
+        <if test="condition.createdTo != null">
+            AND r.created_at &lt;= #{condition.createdTo}
+        </if>
+    </select>
 
     <!-- 품의서 상세 조회 -->
     <resultMap id="RequisitionDetailResultMap" type="com.harusari.chainware.requisition.query.dto.response.RequisitionDetailResponse">

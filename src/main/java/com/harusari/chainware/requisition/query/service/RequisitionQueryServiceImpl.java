@@ -1,5 +1,6 @@
 package com.harusari.chainware.requisition.query.service;
 
+import com.harusari.chainware.common.dto.Pagination;
 import com.harusari.chainware.exception.requisition.RequisitionErrorCode;
 import com.harusari.chainware.exception.requisition.RequisitionException;
 import com.harusari.chainware.requisition.query.dto.request.RequisitionSearchCondition;
@@ -19,8 +20,20 @@ public class RequisitionQueryServiceImpl implements RequisitionQueryService {
     private final RequisitionQueryMapper requisitionQueryMapper;
 
     @Override
-    public List<RequisitionSummaryView> getMyRequisitions(Long memberId, RequisitionSearchCondition condition) {
-        return requisitionQueryMapper.findMyRequisitions(memberId, condition);
+    public RequisitionListResponse getMyRequisitions(Long memberId, RequisitionSearchCondition condition) {
+        List<RequisitionSummaryView> contents = requisitionQueryMapper.findMyRequisitions(memberId, condition);
+        int totalCount = requisitionQueryMapper.countMyRequisitions(memberId, condition);
+
+        Pagination pagination = Pagination.of(
+                condition.getPage(),
+                condition.getSize(),
+                totalCount
+        );
+
+        return RequisitionListResponse.builder()
+                .contents(contents)
+                .pagination(pagination)
+                .build();
     }
 
     @Override

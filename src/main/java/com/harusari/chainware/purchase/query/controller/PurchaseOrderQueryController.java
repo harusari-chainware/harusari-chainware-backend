@@ -4,6 +4,7 @@ package com.harusari.chainware.purchase.query.controller;
 
 import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
+import com.harusari.chainware.purchase.query.dto.PurchaseOrderListResponse;
 import com.harusari.chainware.purchase.query.dto.PurchaseOrderSearchCondition;
 import com.harusari.chainware.purchase.query.dto.PurchaseOrderDetailResponse;
 import com.harusari.chainware.purchase.query.dto.PurchaseOrderSummaryResponse;
@@ -35,7 +36,7 @@ public class PurchaseOrderQueryController {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "발주 목록 조회 성공")
     })
-    public ResponseEntity<ApiResponse<List<PurchaseOrderSummaryResponse>>> getPurchaseOrders(
+    public ResponseEntity<ApiResponse<PurchaseOrderListResponse>> getPurchaseOrders(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @ModelAttribute PurchaseOrderSearchCondition condition
     ) {
@@ -44,16 +45,13 @@ public class PurchaseOrderQueryController {
 
         if (role == MemberAuthorityType.VENDOR_MANAGER) {
             condition.setVendorMemberId(memberId);
-        }
-
-        else if (role == MemberAuthorityType.WAREHOUSE_MANAGER) {
+        } else if (role == MemberAuthorityType.WAREHOUSE_MANAGER) {
             Long warehouseId = warehouseQueryService.getWarehouseIdByManagerId(memberId);
             condition.setWarehouseId(warehouseId);
         }
-        List<PurchaseOrderSummaryResponse> result = purchaseOrderQueryService.getPurchaseOrders(memberId, condition);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponse.success(result));
+
+        PurchaseOrderListResponse result = purchaseOrderQueryService.getPurchaseOrders(memberId, condition);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     @GetMapping("/{purchaseOrderId}")
