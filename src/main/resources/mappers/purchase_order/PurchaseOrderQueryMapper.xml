@@ -69,6 +69,40 @@
     </select>
 
 
+    <select id="countPurchaseOrders" resultType="int">
+        SELECT COUNT(*)
+        FROM purchase_order po
+        LEFT JOIN vendor v ON po.vendor_id = v.vendor_id
+        LEFT JOIN requisition r ON po.requisition_id = r.requisition_id
+        LEFT JOIN member m ON po.created_member_id = m.member_id
+        WHERE 1 = 1
+        <if test="condition.status != null">
+            AND po.purchase_order_status = #{condition.status}
+        </if>
+        <if test="condition.requesterId != null">
+            AND po.created_member_id = #{condition.requesterId}
+        </if>
+        <if test="condition.startDate != null">
+            AND po.created_at &gt;= #{condition.startDate}
+        </if>
+        <if test="condition.endDate != null">
+            AND po.created_at &lt;= #{condition.endDate}
+        </if>
+        <if test="condition.vendorName != null and condition.vendorName != ''">
+            AND v.vendor_name LIKE CONCAT('%', #{condition.vendorName}, '%')
+        </if>
+        <if test="condition.drafterName != null and condition.drafterName != ''">
+            AND m.name LIKE CONCAT('%', #{condition.drafterName}, '%')
+        </if>
+        <if test="condition.vendorMemberId != null">
+            AND v.member_id = #{condition.vendorMemberId}
+        </if>
+        <if test="condition.warehouseId != null">
+            AND po.warehouse_id = #{condition.warehouseId}
+        </if>
+    </select>
+
+
 
     <!-- 상세 조회 resultMap -->
     <resultMap id="PurchaseOrderDetailMap" type="com.harusari.chainware.purchase.query.dto.PurchaseOrderDetailResponse">

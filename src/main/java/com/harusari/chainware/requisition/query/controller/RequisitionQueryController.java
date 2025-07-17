@@ -5,6 +5,7 @@ import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.member.command.domain.aggregate.MemberAuthorityType;
 import com.harusari.chainware.requisition.query.dto.request.RequisitionSearchCondition;
 import com.harusari.chainware.requisition.query.dto.response.RequisitionDetailResponse;
+import com.harusari.chainware.requisition.query.dto.response.RequisitionListResponse;
 import com.harusari.chainware.requisition.query.dto.response.RequisitionSummaryResponse;
 import com.harusari.chainware.requisition.query.dto.response.RequisitionSummaryView;
 import com.harusari.chainware.requisition.query.service.RequisitionQueryService;
@@ -31,20 +32,18 @@ public class RequisitionQueryController {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "품의 목록 조회 성공")
     })
-    public ResponseEntity<ApiResponse<List<RequisitionSummaryView>>> getMyRequisitions(
+    public ResponseEntity<ApiResponse<RequisitionListResponse>> getMyRequisitions(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @ModelAttribute RequisitionSearchCondition condition
     ) {
         Long memberId = userDetails.getMemberId();
-
         boolean isApprove = userDetails.getMemberAuthorityType() == MemberAuthorityType.SENIOR_MANAGER;
         condition.setApproverView(isApprove);
 
-        List<RequisitionSummaryView> result = requisitionQueryService.getMyRequisitions(memberId, condition);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponse.success(result));
+        RequisitionListResponse result = requisitionQueryService.getMyRequisitions(memberId, condition);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
+
 
     // 품의서 상세 조회
     @GetMapping("/{requisitionId}")

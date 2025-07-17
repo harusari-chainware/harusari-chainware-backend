@@ -17,4 +17,7 @@ public interface PurchaseOrderQueryMapper {
     List<PurchaseOrderProductResponse> findProductsByPurchaseOrderId(@Param("purchaseOrderId") Long memberId, Long purchaseOrderId);
 
     List<PurchaseOrderSummaryResponse> findPurchaseOrders(@Param("condition") Long memberId, PurchaseOrderSearchCondition condition);
+
+    int countPurchaseOrders(@Param("memberId") Long memberId,
+                            @Param("condition") PurchaseOrderSearchCondition condition);
 }
