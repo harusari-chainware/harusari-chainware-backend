@@ -17,10 +17,10 @@
         LEFT JOIN (
         SELECT product_id, AVG(quantity) AS avg_inventory
         FROM warehouse_inventory_snapshot
-        WHERE snapshot_date BETWEEN #{startDate} AND #{endDate}
+        WHERE snapshot_date = #{startDate}
         GROUP BY product_id
         ) fi ON wo.product_id = fi.product_id
-        WHERE wo.outbounded_at BETWEEN #{startDate} AND #{endDate}
+        WHERE DATE(wo.outbounded_at) = #{startDate}
         GROUP BY wo.product_id, p.product_name, fi.avg_inventory
         ORDER BY turnoverRate DESC
     </select>
@@ -192,8 +192,8 @@
         WHERE outbounded_at BETWEEN #{startDate} AND #{endDate}
         GROUP BY product_id, outbounded_at
         ) wo
-        ON ws.product_id = wo.product_id AND ws.snapshot_date = wo.outbounded_at
-        GROUP BY ws.snapshot_date
+        ON ws.product_id = wo.product_id AND DATE(ws.snapshot_date) = DATE(wo.outbounded_at)
+        GROUP BY DATE(ws.snapshot_date)
         ORDER BY date ASC
     </select>
 
@@ -250,11 +250,11 @@
         LEFT JOIN (
         SELECT product_id, AVG(quantity) AS avg_inventory
         FROM warehouse_inventory_snapshot
-        WHERE snapshot_date BETWEEN #{startDate} AND #{endDate}
+        WHERE snapshot_date = #{startDate}
         AND warehouse_id = #{warehouseId}
         GROUP BY product_id
         ) fi ON wo.product_id = fi.product_id
-        WHERE wo.outbounded_at BETWEEN #{startDate} AND #{endDate}
+        WHERE DATE(wo.outbounded_at) = #{startDate}
         AND wo.warehouse_id = #{warehouseId}
         GROUP BY wo.product_id, p.product_name, fi.avg_inventory
         ORDER BY turnoverRate DESC

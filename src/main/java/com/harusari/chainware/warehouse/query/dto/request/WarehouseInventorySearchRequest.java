@@ -1,10 +1,12 @@
 package com.harusari.chainware.warehouse.query.dto.request;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.domain.Sort;
 
 @Getter
-public class WarehouseInventorySearchRequest {
+@Setter
+public class    WarehouseInventorySearchRequest {
     private String warehouseName;
     private String warehouseAddress;
     private Boolean warehouseStatus;

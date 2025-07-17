@@ -28,17 +28,20 @@ public interface DisposalRateStatisticsQueryMapper {
 
     List<DisposalRateStatisticsResponse> getTrendForTotal(
             @Param("period") String period,
-            @Param("targetDate") LocalDate targetDate
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
     );
 
     List<DisposalRateStatisticsResponse> getTrendForHeadquarters(
             @Param("period") String period,
-            @Param("targetDate") LocalDate targetDate
-            );
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 
     List<DisposalRateStatisticsResponse> getTrendForFranchises(
             @Param("period") String period,
-            @Param("targetDate") LocalDate targetDate
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
     );
 
     List<DisposalRateStatisticsResponse> getTrendForSingleTarget(

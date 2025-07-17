@@ -24,6 +24,7 @@ import java.util.Optional;
 
 import static com.harusari.chainware.delivery.command.domain.aggregate.QDelivery.delivery;
 import static com.harusari.chainware.franchise.command.domain.aggregate.QFranchise.franchise;
+import static com.harusari.chainware.member.command.domain.aggregate.QMember.member;
 import static com.harusari.chainware.purchase.command.domain.aggregate.QPurchaseOrder.purchaseOrder;
 import static com.harusari.chainware.vendor.command.domain.aggregate.QVendor.vendor;
 import static com.harusari.chainware.category.command.domain.aggregate.QTopCategory.topCategory;
@@ -34,6 +35,8 @@ import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehou
 import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouseInbound.warehouseInbound;
 import static com.harusari.chainware.order.command.domain.aggregate.QOrder.order;
 import static com.harusari.chainware.order.command.domain.aggregate.QOrderDetail.orderDetail;
+import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouseOutbound.warehouseOutbound;
+
 
 @Repository
 @RequiredArgsConstructor
@@ -114,10 +117,12 @@ public class WarehouseInventoryQueryRepositoryImpl implements WarehouseInventory
                                 warehouse.warehouseAddress.addressRoad,
                                 warehouse.warehouseAddress.addressDetail
                         ),
-                        warehouse.warehouseStatus
+                        warehouse.warehouseStatus,
+                        member.phoneNumber
                 ))
                 .from(warehouseInventory)
                 .join(warehouse).on(warehouseInventory.warehouseId.eq(warehouse.warehouseId))
+                .join(member).on(warehouse.memberId.eq(member.memberId))
                 .where(warehouseInventory.warehouseInventoryId.eq(warehouseInventoryId))
                 .fetchOne();
 
@@ -129,7 +134,8 @@ public class WarehouseInventoryQueryRepositoryImpl implements WarehouseInventory
                         topCategory.topCategoryName,
                         category.categoryName,
                         product.basePrice,
-                        product.storeType
+                        product.storeType,
+                        product.unitSpec
                 ))
                 .from(warehouseInventory)
                 .join(product).on(warehouseInventory.productId.eq(product.productId))
@@ -184,15 +190,17 @@ public class WarehouseInventoryQueryRepositoryImpl implements WarehouseInventory
                         delivery.startedAt,
                         delivery.deliveredAt,
                         delivery.deliveryStatus,
-                        franchise.franchiseName
+                        franchise.franchiseName,
+                        warehouseOutbound.quantity
                 ))
                 .from(delivery)
                 .join(order).on(delivery.orderId.eq(order.orderId))
                 .join(orderDetail).on(order.orderId.eq(orderDetail.orderId))
                 .join(franchise).on(order.franchiseId.eq(franchise.franchiseId))
+                .join(warehouseOutbound).on(warehouseOutbound.deliveryId.eq(delivery.deliveryId))
                 .where(
                         delivery.warehouseId.eq(warehouseId),
-                        orderDetail.productId.eq(productId)
+                        warehouseOutbound.productId.eq(productId)
                 )
                 .orderBy(delivery.createdAt.desc())
                 .limit(10)

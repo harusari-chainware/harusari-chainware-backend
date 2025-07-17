@@ -16,4 +16,5 @@ public class OutboundHistory {
     private LocalDateTime deliveredAt;
     private DeliveryStatus deliveryStatus;
     private String franchiseName;
+    private Integer quantity;
 }

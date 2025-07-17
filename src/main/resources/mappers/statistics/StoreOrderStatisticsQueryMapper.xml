@@ -17,7 +17,7 @@
         JOIN store_order_detail sod ON so.store_order_id = sod.store_order_id
         JOIN franchise f ON so.franchise_id = f.franchise_id
         WHERE so.store_order_status = 'APPROVED'
-        AND so.created_at BETWEEN #{startDate} AND #{endDate}
+        AND so.created_at BETWEEN #{startDate} AND DATE_ADD(#{endDate}, INTERVAL 1 DAY)
         <if test="franchiseId != null">
             AND so.franchise_id = #{franchiseId}
         </if>
@@ -38,7 +38,7 @@
         JOIN product p ON sod.product_id = p.product_id
         JOIN franchise f ON so.franchise_id = f.franchise_id
         WHERE so.store_order_status = 'APPROVED'
-        AND so.created_at BETWEEN #{startDate} AND #{endDate}
+        AND so.created_at BETWEEN #{startDate} AND DATE_ADD(#{endDate}, INTERVAL 1 DAY)
         <if test="franchiseId != null">
             AND so.franchise_id = #{franchiseId}
         </if>
