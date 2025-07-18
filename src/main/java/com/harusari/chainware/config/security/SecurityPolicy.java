@@ -20,6 +20,7 @@ public enum SecurityPolicy {
     LOGIN_POST("/api/v1/auth/login", POST, PERMIT_ALL, List.of()), // 로그인
     REFRESH_POST("/api/v1/auth/refresh", POST, PERMIT_ALL, List.of()), // 리프레시 토큰 재발급
     HEALTH_CHECK("/api/v1/health/check", GET, PERMIT_ALL, List.of()), // 헬스 체크
+    FASTAPI_HEALTH("/api/v1/health/check/fastapi", GET, PERMIT_ALL, List.of()), // fastapi 헬스 체크
 
     // Authenticated
     LOGOUT_POST("/api/v1/auth/logout", POST, AUTHENTICATED, List.of()), // 로그아웃
