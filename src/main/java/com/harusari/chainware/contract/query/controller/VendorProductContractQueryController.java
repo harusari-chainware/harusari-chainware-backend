@@ -51,7 +51,7 @@ public class VendorProductContractQueryController {
             @Parameter(description = "페이지 크기", example = "10") @RequestParam(defaultValue = "10") int size
     ) {
         boolean isManager = switch (userDetails.getMemberAuthorityType()) {
-            case GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER -> true;
+            case GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, SUPER_ADMIN -> true;
             default -> false;
         };
         Long memberId = userDetails.getMemberId();
@@ -93,7 +93,7 @@ public class VendorProductContractQueryController {
             @Parameter(description = "조회할 계약의 ID", example = "123") @PathVariable Long contractId
     ) {
         boolean isManager = switch (userDetails.getMemberAuthorityType()) {
-            case GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER -> true;
+            case GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, SUPER_ADMIN -> true;
             default -> false;
         };
         Long memberId = userDetails.getMemberId();
