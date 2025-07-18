@@ -8,10 +8,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class FastApiProperties {
 
     private String url;
-    private String port;
 
     public String getFullUrl(String path) {
-        return url + ":" + port + path;
+        return url + path;
     }
 
 }
