@@ -69,6 +69,7 @@ public class WarehouseInventoryQueryRepositoryImpl implements WarehouseInventory
                 .join(topCategory).on(category.topCategoryId.eq(topCategory.topCategoryId))
                 .where(
                         warehouse.isDeleted.isFalse(),
+                        warehouseIdEq(request.getWarehouseId()),
                         nameContains(request.getWarehouseName()),
                         addressContains(request.getWarehouseAddress()),
                         statusEq(request.getWarehouseStatus()),
@@ -91,6 +92,7 @@ public class WarehouseInventoryQueryRepositoryImpl implements WarehouseInventory
                 .join(topCategory).on(category.topCategoryId.eq(topCategory.topCategoryId))
                 .where(
                         warehouse.isDeleted.isFalse(),
+                        warehouseIdEq(request.getWarehouseId()),          // ✅ 동일하게 추가됨
                         nameContains(request.getWarehouseName()),
                         addressContains(request.getWarehouseAddress()),
                         statusEq(request.getWarehouseStatus()),
@@ -263,6 +265,10 @@ public class WarehouseInventoryQueryRepositoryImpl implements WarehouseInventory
         }
 
         return orders.toArray(new OrderSpecifier[0]);
+    }
+
+    private BooleanExpression warehouseIdEq(Long warehouseId) {
+        return (warehouseId != null) ? warehouse.warehouseId.eq(warehouseId) : null;
     }
 
 }
