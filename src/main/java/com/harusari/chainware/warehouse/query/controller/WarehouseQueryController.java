@@ -1,5 +1,6 @@
 package com.harusari.chainware.warehouse.query.controller;
 
+import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.common.dto.PageResponse;
 import com.harusari.chainware.warehouse.query.dto.request.WarehouseInventorySearchRequest;
@@ -9,11 +10,13 @@ import com.harusari.chainware.warehouse.query.service.WarehouseQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -83,4 +86,12 @@ public class WarehouseQueryController {
         return ResponseEntity.ok(ApiResponse.success(list));
     }
 
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<Long>> getMyWarehouseId(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long memberId = userDetails.getMemberId();
+        Long warehouseId = warehouseQueryService.getWarehouseIdByManagerId(memberId);
+        return ResponseEntity.ok(ApiResponse.success(warehouseId));
+    }
 }
