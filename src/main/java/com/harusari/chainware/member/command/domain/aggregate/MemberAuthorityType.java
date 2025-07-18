@@ -13,7 +13,8 @@ public enum MemberAuthorityType {
     WAREHOUSE_MANAGER("창고 관리자"),
     FRANCHISE_MANAGER("가맹점 담당자"),
     VENDOR_MANAGER("거래처 담당자"),
-    SYSTEM("시스템");
+    SYSTEM("시스템"),
+    SUPER_ADMIN("최고 관리자");
 
     private final String authorityLabelKo;
 
