@@ -2,6 +2,7 @@ package com.harusari.chainware.takeback.query.repository;
 
 import com.harusari.chainware.delivery.query.dto.response.FranchiseInfo;
 import com.harusari.chainware.delivery.query.dto.response.WarehouseInfo;
+import com.harusari.chainware.member.command.domain.aggregate.QMember;
 import com.harusari.chainware.takeback.command.domain.aggregate.TakeBackStatus;
 import com.harusari.chainware.takeback.query.dto.request.TakeBackSearchRequest;
 import com.harusari.chainware.takeback.query.dto.response.*;
@@ -101,6 +102,10 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
     // 반품 상세 조회
     @Override
     public TakeBackDetailResponse findTakeBackDetailById(Long takeBackId) {
+        // 별칭 부여
+        QMember franchiseManager = new QMember("franchiseManager");
+        QMember warehouseManager = new QMember("warehouseManager");
+
         Tuple basic = queryFactory
                 .select(
                         takeBack.takeBackCode,
@@ -114,12 +119,12 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
                         franchise.franchiseContact,
                         franchise.franchiseStatus,
                         franchise.franchiseTaxId,
-                        member.name,
-                        member.phoneNumber,
+                        franchiseManager.name,
+                        franchiseManager.phoneNumber,
 
                         warehouse.warehouseName,
                         warehouse.warehouseAddress,
-                        member.name,
+                        warehouseManager.name, // ✅ 창고 담당자 이름 // 이놈!!!!!!!!!!!!!!!!
 
                         order.orderCode,
                         order.productCount,
@@ -129,9 +134,10 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
                 .from(takeBack)
                 .join(order).on(order.orderId.eq(takeBack.orderId))
                 .join(franchise).on(franchise.franchiseId.eq(order.franchiseId))
-                .join(member).on(franchise.memberId.eq(member.memberId))
+                .join(franchiseManager).on(franchise.memberId.eq(franchiseManager.memberId)) // 가맹점 담당자
                 .leftJoin(delivery).on(delivery.takeBackId.eq(takeBack.takeBackId))
                 .leftJoin(warehouse).on(warehouse.warehouseId.eq(delivery.warehouseId))
+                .leftJoin(warehouseManager).on(warehouse.memberId.eq(warehouseManager.memberId)) // ✅ 창고 담당자
                 .where(takeBack.takeBackId.eq(takeBackId))
                 .fetchOne();
 
@@ -166,14 +172,14 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
                 basic.get(franchise.franchiseContact),
                 basic.get(franchise.franchiseStatus),
                 basic.get(franchise.franchiseTaxId),
-                basic.get(member.name),
-                basic.get(member.phoneNumber)
+                basic.get(franchiseManager.name),
+                basic.get(franchiseManager.phoneNumber)
         );
 
         WarehouseInfo warehouseInfo = new WarehouseInfo(
                 basic.get(warehouse.warehouseName),
                 basic.get(warehouse.warehouseAddress),
-                basic.get(member.name)
+                basic.get(warehouseManager.name) // ✅ 이제 올바른 창고 담당자
         );
 
         OrderInfo orderInfo = new OrderInfo(

@@ -10,10 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -26,11 +23,13 @@ public class PredictionComparisonQueryServiceImpl implements PredictionCompariso
     public List<PredictionComparisonDto> getPredictionComparison(String predictionType, Long franchiseId) {
         LocalDate today = LocalDate.now();
 
-        LocalDate thisMonday = today.with(DayOfWeek.MONDAY);
-        LocalDate thisSunday = thisMonday.plusDays(6);
+        LocalDate thisMonday = today.with(DayOfWeek.MONDAY);      // 이번 주 월요일 (예: 2025-07-14)
+        LocalDate thisSunday = thisMonday.plusDays(6);            // 이번 주 일요일 (예: 2025-07-20)
+        LocalDate lastMonday = thisMonday.minusWeeks(1);          // 지난 주 월요일 (예: 2025-07-07)
 
-        LocalDate lastMonday = thisMonday.minusWeeks(1);
-        LocalDate lastSunday = lastMonday.plusDays(6);
+        // 실적 조회 범위: 지난 주 월요일 ~ 오늘 이전 날짜까지 포함
+        LocalDate actualStartDate = lastMonday;
+        LocalDate actualEndDateExclusive = today;  // → XML에서 < #{endDate}로 비교하므로 오늘 제외
 
         List<PredictionComparisonDto> actuals;
         List<PredictionComparisonDto> predictions;
@@ -38,8 +37,8 @@ public class PredictionComparisonQueryServiceImpl implements PredictionCompariso
         switch (predictionType) {
             case "sales" -> {
                 actuals = (franchiseId != null)
-                        ? mapper.getActualSales(lastMonday, lastSunday, franchiseId)
-                        : mapper.getActualSalesAllFranchises(lastMonday, lastSunday);
+                        ? mapper.getActualSales(actualStartDate, actualEndDateExclusive, franchiseId)
+                        : mapper.getActualSalesAllFranchises(actualStartDate, actualEndDateExclusive);
 
                 predictions = (franchiseId != null)
                         ? mapper.getPredictedSales(thisMonday, thisSunday, franchiseId)
@@ -47,32 +46,37 @@ public class PredictionComparisonQueryServiceImpl implements PredictionCompariso
             }
             case "order_quantity" -> {
                 actuals = (franchiseId != null)
-                        ? mapper.getActualOrderQuantity(lastMonday, lastSunday, franchiseId)
-                        : mapper.getActualOrderQuantityAllFranchises(lastMonday, lastSunday);
+                        ? mapper.getActualOrderQuantity(actualStartDate, actualEndDateExclusive, franchiseId)
+                        : mapper.getActualOrderQuantityAllFranchises(actualStartDate, actualEndDateExclusive);
 
                 predictions = (franchiseId != null)
                         ? mapper.getPredictedOrderQuantity(thisMonday, thisSunday, franchiseId)
                         : mapper.getPredictedOrderQuantityAllFranchises(thisMonday, thisSunday);
             }
             case "purchase_quantity" -> {
-                actuals = mapper.getActualPurchaseQuantity(lastMonday, lastSunday);
+                actuals = mapper.getActualPurchaseQuantity(actualStartDate, actualEndDateExclusive);
                 predictions = mapper.getPredictedPurchaseQuantity(thisMonday, thisSunday);
             }
             default -> throw new StatisticsException(StatisticsErrorCode.INVALID_PREDICTION_TYPE);
         }
 
-        // 오늘 이전 날짜는 실제값으로 덮어쓰기
+        // 예측값을 먼저 Map에 넣음
         Map<LocalDate, PredictionComparisonDto> predictionMap = new HashMap<>();
-        for (PredictionComparisonDto dto : predictions) {
-            predictionMap.put(dto.getDate(), dto);
+        for (PredictionComparisonDto predicted : predictions) {
+            predictionMap.put(predicted.getDate(), predicted);
         }
 
+        // 오늘 이전 날짜의 실적이 있다면 예측을 덮어씀
         for (PredictionComparisonDto actual : actuals) {
-            if (!actual.getDate().isAfter(today.minusDays(1))) {
-                predictionMap.put(actual.getDate(), actual);
+            LocalDate date = actual.getDate();
+            if (!date.isAfter(today.minusDays(1))) {
+                predictionMap.put(date, actual);
             }
         }
 
-        return new ArrayList<>(predictionMap.values());
+        // 날짜 오름차순 정렬 후 반환
+        List<PredictionComparisonDto> result = new ArrayList<>(predictionMap.values());
+        result.sort(Comparator.comparing(PredictionComparisonDto::getDate));
+        return result;
     }
 }
