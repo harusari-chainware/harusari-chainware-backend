@@ -23,7 +23,7 @@ public enum SecurityPolicy {
 
     // Authenticated
     LOGOUT_POST("/api/v1/auth/logout", POST, AUTHENTICATED, List.of()), // 로그아웃
-    PASSWORD_POST("/api/v1/auth/password", POST, AUTHENTICATED, List.of()), // 비밀번호 변경
+    PASSWORD_PUT("/api/v1/members/password", PUT, AUTHENTICATED, List.of()), // 비밀번호 변경
     MEMBERS_ME_GET("/api/v1/members/me", GET, AUTHENTICATED, List.of()), // 회원 정보 조회
     MEMBERS_ME_PUT("/api/v1/members/me", PUT, AUTHENTICATED, List.of()), // 회원 정보 수정
 

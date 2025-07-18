@@ -19,4 +19,5 @@ public class VendorProductContractListDto {
     private ContractStatus contractStatus;
     private LocalDate contractStartDate;
     private LocalDate contractEndDate;
+    private Long vendorId;
 }

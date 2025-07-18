@@ -17,6 +17,7 @@
         <result property="contractStatus" column="contract_status"/>
         <result property="contractStartDate" column="contract_start_date"/>
         <result property="contractEndDate" column="contract_end_date"/>
+        <result property="vendorId" column="vendor_id"/>
     </resultMap>
 
     <select id="findVendorProductContracts"
@@ -31,13 +32,15 @@
         c.lead_time,
         c.contract_status,
         c.contract_start_date,
-        c.contract_end_date
+        c.contract_end_date,
+        c.vendor_id
         FROM contract c
         JOIN vendor v ON c.vendor_id = v.vendor_id
         JOIN product p ON c.product_id = p.product_id
         JOIN category sc ON p.category_id = sc.category_id
         JOIN top_category tc ON sc.top_category_id = tc.top_category_id
         WHERE c.is_deleted = 0
+
         <if test="request.productName != null">
             AND p.product_name LIKE CONCAT('%', #{request.productName}, '%')
         </if>
@@ -46,9 +49,6 @@
         </if>
         <if test="request.categoryName != null">
             AND sc.category_name LIKE CONCAT('%', #{request.categoryName}, '%')
-        </if>
-        <if test="request.vendorName != null">
-            AND v.vendor_name LIKE CONCAT('%', #{request.vendorName}, '%')
         </if>
         <if test="request.vendorType != null">
             AND v.vendor_type = #{request.vendorType}
@@ -66,9 +66,21 @@
         <if test="request.contractEndDate != null">
             AND c.contract_end_date = #{request.contractEndDate}
         </if>
-        <if test="!isManager">
-            AND c.vendor_id = #{vendorId}
-        </if>
+        <choose>
+            <when test="!isManager">
+                AND c.vendor_id = #{vendorId}
+            </when>
+            <otherwise>
+                <if test="request.vendorId != null">
+                    AND v.vendor_id = #{request.vendorId}
+                </if>
+                <if test="request.vendorName != null">
+                    AND v.vendor_name LIKE CONCAT('%', #{request.vendorName}, '%')
+                </if>
+            </otherwise>
+        </choose>
+
+
         ORDER BY c.contract_id DESC
         LIMIT #{request.size} OFFSET #{request.offset}
     </select>
@@ -90,9 +102,6 @@
         <if test="request.categoryName != null">
             AND sc.category_name LIKE CONCAT('%', #{request.categoryName}, '%')
         </if>
-        <if test="request.vendorName != null">
-            AND v.vendor_name LIKE CONCAT('%', #{request.vendorName}, '%')
-        </if>
         <if test="request.vendorType != null">
             AND v.vendor_type = #{request.vendorType}
         </if>
@@ -109,9 +118,20 @@
         <if test="request.contractEndDate != null">
             AND c.contract_end_date = #{request.contractEndDate}
         </if>
-        <if test="!isManager">
-            AND c.vendor_id = #{vendorId}
-        </if>
+        <choose>
+            <when test="!isManager">
+                AND c.vendor_id = #{vendorId}
+            </when>
+            <otherwise>
+                <if test="request.vendorId != null">
+                    AND c.vendor_id = #{request.vendorId}
+                </if>
+                <if test="request.vendorName != null">
+                    AND v.vendor_name LIKE CONCAT('%', #{request.vendorName}, '%')
+                </if>
+            </otherwise>
+        </choose>
+
     </select>
 
     <select id="findVendorIdByMemberId" resultType="long">
