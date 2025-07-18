@@ -19,11 +19,11 @@ public class VendorProductContractDto {
     private Integer contractPrice;
     private Integer minOrderQty;
     private Integer leadTime;
-    private Long vendorId;
     private ContractStatus contractStatus;
     private LocalDate contractStartDate;
     private LocalDate contractEndDate;
 
+    private Long vendorId;
     private String vendorTaxId;
     private VendorStatus vendorStatus;
     private Long productId;
