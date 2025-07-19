@@ -187,20 +187,22 @@
     </select>
 
     <!-- 발주 상세 내역 조회 (상품 리스트) -->
-    <select id="findProductsByPurchaseOrderId" resultType="com.harusari.chainware.purchase.query.dto.PurchaseOrderProductResponse">
+    <select id="findProductsByPurchaseOrderId"
+            resultType="com.harusari.chainware.purchase.query.dto.PurchaseOrderProductResponse">
         SELECT
+            pod.purchase_order_detail_id,
             pod.product_id,
             p.product_code,
             p.product_name,
             pod.quantity,
             pod.unit_price,
-            c.min_order_qty AS moq
+            pod.total_price
         FROM
             purchase_order_detail pod
                 JOIN product p ON pod.product_id = p.product_id
-                JOIN contract c ON pod.product_id = c.product_id
-        WHERE
-            pod.purchase_order_id = #{purchaseOrderId}
+        WHERE pod.purchase_order_id = #{purchaseOrderId}
     </select>
+
+
 
 </mapper>
