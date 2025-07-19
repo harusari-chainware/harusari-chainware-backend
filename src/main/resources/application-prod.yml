@@ -85,4 +85,3 @@ cors:
 
 fastapi:
   url: ${FASTAPI_URL}
-  port: ${FASTAPI_SERVER_PORT}

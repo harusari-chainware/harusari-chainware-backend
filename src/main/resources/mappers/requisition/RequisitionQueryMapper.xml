@@ -229,9 +229,10 @@
             rd.unit_price,
             rd.total_price
         FROM requisition_detail rd
+                 JOIN requisition r ON rd.requisition_id = r.requisition_id
                  JOIN product p ON rd.product_id = p.product_id
-                 JOIN contract c ON rd.product_id = c.product_id
+                 JOIN contract c ON rd.contract_id = c.contract_id
+            AND c.vendor_id = r.vendor_id
         WHERE rd.requisition_id = #{requisitionId}
     </select>
-
 </mapper>
