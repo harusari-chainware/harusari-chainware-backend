@@ -6,7 +6,8 @@ import org.springframework.data.domain.Sort;
 
 @Getter
 @Setter
-public class    WarehouseInventorySearchRequest {
+public class WarehouseInventorySearchRequest {
+    private Long warehouseId;
     private String warehouseName;
     private String warehouseAddress;
     private Boolean warehouseStatus;
