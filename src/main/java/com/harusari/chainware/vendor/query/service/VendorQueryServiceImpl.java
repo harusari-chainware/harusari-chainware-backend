@@ -1,5 +1,6 @@
 package com.harusari.chainware.vendor.query.service;
 
+import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.common.infrastructure.storage.StorageDownloader;
 import com.harusari.chainware.exception.vendor.VendorAgreementNotFoundException;
 import com.harusari.chainware.exception.vendor.VendorNotFoundException;
@@ -68,6 +69,19 @@ public class VendorQueryServiceImpl implements VendorQueryService {
     @Override
     public List<VendorSimpleResponse> getAllVendors() {
         return vendorQueryRepository.findAllVendorsSimple();
+    }
+
+    @Override
+    public Page<VendorSearchResponse> searchVendors(CustomUserDetails userDetails, VendorSearchRequest request, Pageable pageable) {
+        switch (userDetails.getMemberAuthorityType()) {
+            case GENERAL_MANAGER, SENIOR_MANAGER, WAREHOUSE_MANAGER, SUPER_ADMIN -> {
+                return vendorQueryRepository.pageVendors(request, pageable);
+            }
+            case VENDOR_MANAGER -> {
+                return vendorQueryRepository.pageVendorsByMemberId(userDetails.getMemberId(), pageable);
+            }
+            default -> throw new VendorNotFoundException(VENDOR_NOT_FOUND_EXCEPTION);
+        }
     }
 
 }
