@@ -6,6 +6,7 @@ import com.harusari.chainware.member.command.domain.aggregate.QMember;
 import com.harusari.chainware.takeback.command.domain.aggregate.TakeBackStatus;
 import com.harusari.chainware.takeback.query.dto.request.TakeBackSearchRequest;
 import com.harusari.chainware.takeback.query.dto.response.*;
+import com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouse;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -38,6 +39,9 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
     // 반품 목록 조회
     @Override
     public Page<TakeBackSearchResponse> searchTakeBackList(TakeBackSearchRequest request, Pageable pageable) {
+        // 별칭 추가
+        QWarehouse fallbackWarehouse = new QWarehouse("fallbackWarehouse");
+
         List<TakeBackSearchResponse> contents = queryFactory
                 .select(new QTakeBackSearchResponse(
                         takeBack.takeBackId,
@@ -45,7 +49,7 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
                         takeBack.takeBackStatus,
                         takeBack.createdAt,
                         takeBack.modifiedAt,
-                        warehouse.warehouseName,
+                        warehouse.warehouseName.coalesce(fallbackWarehouse.warehouseName), // ✅ fallback 처리
                         franchise.franchiseName,
                         member.name,
                         order.orderCode,
@@ -56,12 +60,10 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
                 .join(order).on(takeBack.orderId.eq(order.orderId))
                 .join(franchise).on(order.franchiseId.eq(franchise.franchiseId))
                 .join(member).on(franchise.memberId.eq(member.memberId))
-                .leftJoin(delivery).on(
-                        delivery.orderId.eq(takeBack.orderId)
-                                .and(delivery.takeBackId.isNull())
-                )
+                .leftJoin(delivery).on(delivery.takeBackId.eq(takeBack.takeBackId))         // 수정된 부분
                 .leftJoin(warehouseOutbound).on(warehouseOutbound.deliveryId.eq(delivery.deliveryId))
                 .leftJoin(warehouse).on(warehouseOutbound.warehouseId.eq(warehouse.warehouseId))
+                .leftJoin(fallbackWarehouse).on(delivery.warehouseId.eq(fallbackWarehouse.warehouseId)) // fallback 조인
                 .where(
                         warehouseNameContains(request.getWarehouseName()),
                         warehouseAddressContains(request.getWarehouseAddress()),
@@ -81,12 +83,10 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
                 .join(order).on(takeBack.orderId.eq(order.orderId))
                 .join(franchise).on(order.franchiseId.eq(franchise.franchiseId))
                 .join(member).on(franchise.memberId.eq(member.memberId))
-                .leftJoin(delivery).on(
-                        delivery.orderId.eq(takeBack.orderId)
-                                .and(delivery.takeBackId.isNull())
-                )
+                .leftJoin(delivery).on(delivery.takeBackId.eq(takeBack.takeBackId))         // 수정된 부분
                 .leftJoin(warehouseOutbound).on(warehouseOutbound.deliveryId.eq(delivery.deliveryId))
                 .leftJoin(warehouse).on(warehouseOutbound.warehouseId.eq(warehouse.warehouseId))
+                .leftJoin(fallbackWarehouse).on(delivery.warehouseId.eq(fallbackWarehouse.warehouseId)) // fallback 조인
                 .where(
                         warehouseNameContains(request.getWarehouseName()),
                         warehouseAddressContains(request.getWarehouseAddress()),
@@ -98,6 +98,7 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
 
         return new PageImpl<>(contents, pageable, Optional.ofNullable(total).orElse(0L));
     }
+
 
     // 반품 상세 조회
     @Override
