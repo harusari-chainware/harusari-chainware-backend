@@ -19,8 +19,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.harusari.chainware.delivery.command.domain.aggregate.QDelivery.delivery;
 import static com.harusari.chainware.franchise.command.domain.aggregate.QFranchise.franchise;
@@ -109,7 +111,7 @@ public class WarehouseInventoryQueryRepositoryImpl implements WarehouseInventory
     // 보유 재고 상세 조회
     @Override
     public WarehouseInventoryDetailResponse findWarehouseInventoryDetail(Long warehouseInventoryId) {
-        // 1. 창고 보유 재고 기본 정보 (창고, 상품, 재고)
+        // 1. 창고 보유 재고 기본 정보
         WarehouseSimpleInfo warehouseInfo = queryFactory
                 .select(new QWarehouseSimpleInfo(
                         warehouse.warehouseId,
@@ -162,7 +164,7 @@ public class WarehouseInventoryQueryRepositoryImpl implements WarehouseInventory
         Long productId = productInfo.getProductId();
         Long warehouseId = warehouseInfo.getWarehouseId();
 
-        // 2. 입고 이력 (최근 10건)
+        // 2. 입고 이력
         List<InboundHistory> inboundHistories = queryFactory
                 .select(Projections.constructor(InboundHistory.class,
                         vendor.vendorName,
@@ -183,7 +185,7 @@ public class WarehouseInventoryQueryRepositoryImpl implements WarehouseInventory
                 .limit(10)
                 .fetch();
 
-        // 3. 배송 이력 (최근 10건)
+        // 3. 출고 이력 (중복 제거 포함)
         List<OutboundHistory> outboundHistories = queryFactory
                 .select(Projections.constructor(OutboundHistory.class,
                         delivery.trackingNumber,
@@ -197,23 +199,35 @@ public class WarehouseInventoryQueryRepositoryImpl implements WarehouseInventory
                 ))
                 .from(delivery)
                 .join(order).on(delivery.orderId.eq(order.orderId))
-                .join(orderDetail).on(order.orderId.eq(orderDetail.orderId))
                 .join(franchise).on(order.franchiseId.eq(franchise.franchiseId))
                 .join(warehouseOutbound).on(warehouseOutbound.deliveryId.eq(delivery.deliveryId))
                 .where(
                         delivery.warehouseId.eq(warehouseId),
                         warehouseOutbound.productId.eq(productId)
                 )
-                .orderBy(delivery.createdAt.desc())
-                .limit(10)
+                .orderBy(delivery.startedAt.desc())
+                .limit(20) // 넉넉히 가져온 후 중복 제거
                 .fetch();
+
+        // 중복 제거: trackingNumber + startedAt + franchise + quantity 기준
+        List<OutboundHistory> distinctOutboundHistories = outboundHistories.stream()
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toMap(
+                                h -> h.getTrackingNumber() + "_" + h.getStartedAt() + "_" + h.getFranchiseName() + "_" + h.getQuantity(),
+                                h -> h,
+                                (h1, h2) -> h1
+                        ),
+                        map -> new ArrayList<>(map.values())
+                )).stream()
+                .sorted(Comparator.comparing(OutboundHistory::getStartedAt).reversed()) // 출고일 내림차순 정렬
+                .collect(Collectors.toList());
 
         return new WarehouseInventoryDetailResponse(
                 warehouseInfo,
                 productInfo,
                 inventoryInfo,
                 inboundHistories,
-                outboundHistories
+                distinctOutboundHistories
         );
     }
 
