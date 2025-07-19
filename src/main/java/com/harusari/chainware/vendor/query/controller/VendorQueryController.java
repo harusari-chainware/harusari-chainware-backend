@@ -1,5 +1,6 @@
 package com.harusari.chainware.vendor.query.controller;
 
+import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.common.dto.ApiResponse;
 import com.harusari.chainware.common.dto.PageResponse;
 import com.harusari.chainware.vendor.query.dto.response.VendorContractInfoResponse;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,13 +40,14 @@ public class VendorQueryController {
     })
     @GetMapping("/vendors")
     public ResponseEntity<ApiResponse<PageResponse<VendorSearchResponse>>> searchVendors(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "거래처 검색 조건")
             @ModelAttribute VendorSearchRequest vendorSearchRequest,
 
             @Parameter(description = "페이지네이션 정보")
             @PageableDefault(size = 10) Pageable pageable
     ) {
-        Page<VendorSearchResponse> vendorSearchResponse = vendorQueryService.searchVendors(vendorSearchRequest, pageable);
+        Page<VendorSearchResponse> vendorSearchResponse = vendorQueryService.searchVendors(userDetails, vendorSearchRequest, pageable);
         PageResponse<VendorSearchResponse> pageResponse = PageResponse.from(vendorSearchResponse);
 
         return ResponseEntity

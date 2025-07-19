@@ -1,5 +1,6 @@
 package com.harusari.chainware.vendor.query.service;
 
+import com.harusari.chainware.auth.model.CustomUserDetails;
 import com.harusari.chainware.vendor.query.dto.response.VendorContractInfoResponse;
 import com.harusari.chainware.vendor.query.dto.response.VendorPresignedUrlResponse;
 import com.harusari.chainware.vendor.query.dto.response.VendorDetailResponse;
@@ -23,5 +24,7 @@ public interface VendorQueryService {
     List<VendorSimpleResponse> getAllVendors();
 
     VendorContractInfoResponse getVendorContractInfo(String vendorName);
+
+    Page<VendorSearchResponse> searchVendors(CustomUserDetails userDetails, VendorSearchRequest vendorSearchRequest, Pageable pageable);
 
 }

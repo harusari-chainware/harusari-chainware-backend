@@ -44,10 +44,10 @@
         <if test="request.productStatusFilter != null">
             <choose>
                 <when test="request.productStatusFilter.name() == 'ACTIVE_ONLY'">
-                    AND p.product_status = true
+                    AND p.product_status = 1
                 </when>
                 <when test="request.productStatusFilter.name() == 'INACTIVE_ONLY'">
-                    AND p.product_status = false
+                    AND p.product_status = 0
                 </when>
                 <!-- BOTH: 필터 생략 -->
             </choose>
@@ -85,10 +85,10 @@
         <if test="request.productStatusFilter != null">
             <choose>
                 <when test="request.productStatusFilter.name() == 'ACTIVE_ONLY'">
-                    AND p.product_status = true
+                    AND p.product_status = 1
                 </when>
                 <when test="request.productStatusFilter.name() == 'INACTIVE_ONLY'">
-                    AND p.product_status = false
+                    AND p.product_status = 0
                 </when>
             </choose>
         </if>

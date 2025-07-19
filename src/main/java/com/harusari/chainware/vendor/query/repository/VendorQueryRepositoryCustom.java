@@ -22,4 +22,6 @@ public interface VendorQueryRepositoryCustom {
 
     Optional<VendorContractInfoResponse> findVendorContractInfoByVendorName(String vendorName);
 
+    Page<VendorSearchResponse> pageVendorsByMemberId(Long memberId, Pageable pageable);
+
 }

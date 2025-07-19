@@ -170,4 +170,29 @@ public class VendorQueryRepositoryImpl implements VendorQueryRepositoryCustom {
                 .fetch();
     }
 
+    @Override
+    public Page<VendorSearchResponse> pageVendorsByMemberId(Long memberId, Pageable pageable) {
+        List<VendorSearchResponse> contents = queryFactory
+                .select(Projections.constructor(VendorSearchResponse.class,
+                        vendor.vendorId, vendor.vendorName, vendor.vendorAddress,
+                        member.name, member.phoneNumber, vendor.vendorType,
+                        vendor.vendorStatus, vendor.vendorStartDate, vendor.vendorEndDate
+                ))
+                .from(vendor)
+                .leftJoin(member).on(vendor.memberId.eq(member.memberId))
+                .where(vendor.memberId.eq(memberId))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(vendor.vendorEndDate.asc())
+                .fetch();
+
+        Long total = queryFactory
+                .select(vendor.count())
+                .from(vendor)
+                .where(vendor.memberId.eq(memberId))
+                .fetchOne();
+
+        return new PageImpl<>(contents, pageable, Optional.ofNullable(total).orElse(0L));
+    }
+
 }
