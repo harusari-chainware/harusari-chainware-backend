@@ -13,4 +13,6 @@ public class DeliveryDetailResponse {
     private FranchiseInfo franchiseInfo;
     private DeliveryOrderInfo orderInfo;
     private List<DeliveryProductInfo> products;
+    private DeliveryTakeBackInfo takeBackInfo;
+    private List<DeliveryTakeBackProductInfo> takeBackProducts;
 }

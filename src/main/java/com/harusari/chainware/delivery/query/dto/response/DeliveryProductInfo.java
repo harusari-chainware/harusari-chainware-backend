@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class DeliveryProductInfo {
+    private Long orderDetailId;
     private String productCode;
     private String productName;
     private String unitQuantity;

@@ -2,8 +2,12 @@ package com.harusari.chainware.delivery.query.repository;
 
 import com.harusari.chainware.delivery.query.dto.request.DeliverySearchRequest;
 import com.harusari.chainware.delivery.query.dto.response.*;
+import com.harusari.chainware.takeback.query.dto.response.QTakeBackProductInfo;
+import com.harusari.chainware.takeback.query.dto.response.TakeBackProductInfo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,6 +25,8 @@ import static com.harusari.chainware.order.command.domain.aggregate.QOrderDetail
 import static com.harusari.chainware.franchise.command.domain.aggregate.QFranchise.franchise;
 import static com.harusari.chainware.member.command.domain.aggregate.QMember.member;
 import static com.harusari.chainware.product.command.domain.aggregate.QProduct.product;
+import static com.harusari.chainware.takeback.command.domain.aggregate.QTakeBack.takeBack;
+import static com.harusari.chainware.takeback.command.domain.aggregate.QTakeBackDetail.takeBackDetail;
 import static com.harusari.chainware.warehouse.command.domain.aggregate.QWarehouse.warehouse;
 
 @Repository
@@ -118,6 +124,8 @@ public class DeliveryQueryRepositoryImpl implements DeliveryQueryRepositoryCusto
                         delivery.trackingNumber,
                         delivery.carrier,
                         delivery.deliveryStatus,
+                        delivery.deliveryMethod,
+                        delivery.createdAt,
                         delivery.startedAt,
                         delivery.deliveredAt
                 ))
@@ -173,6 +181,7 @@ public class DeliveryQueryRepositoryImpl implements DeliveryQueryRepositoryCusto
         // 5. 제품 목록
         List<DeliveryProductInfo> products = queryFactory
                 .select(Projections.constructor(DeliveryProductInfo.class,
+                        orderDetail.orderDetailId,
                         product.productCode,
                         product.productName,
                         product.unitQuantity,
@@ -189,12 +198,61 @@ public class DeliveryQueryRepositoryImpl implements DeliveryQueryRepositoryCusto
                 .where(delivery.deliveryId.eq(deliveryId))
                 .fetch();
 
+        // 6. 반품 요약 정보
+        DeliveryTakeBackInfo takeBackInfo = queryFactory
+                .select(Projections.constructor(DeliveryTakeBackInfo.class,
+                        takeBack.takeBackCode,
+                        takeBack.takeBackStatus,
+                        Expressions.asNumber(
+                                JPAExpressions.select(takeBackDetail.count())
+                                        .from(takeBackDetail)
+                                        .where(takeBackDetail.takeBackId.eq(takeBack.takeBackId))
+                        ).intValue(),
+                        Expressions.asNumber(
+                                JPAExpressions.select(takeBackDetail.quantity.sum())
+                                        .from(takeBackDetail)
+                                        .where(takeBackDetail.takeBackId.eq(takeBack.takeBackId))
+                        ).intValue(),
+                        Expressions.asNumber(
+                                JPAExpressions.select(takeBackDetail.price.sum())
+                                        .from(takeBackDetail)
+                                        .where(takeBackDetail.takeBackId.eq(takeBack.takeBackId))
+                        ).intValue()
+                ))
+                .from(delivery)
+                .join(takeBack).on(delivery.takeBackId.eq(takeBack.takeBackId))
+                .where(delivery.deliveryId.eq(deliveryId))
+                .fetchOne();
+
+        // 7. 반품 상세 제품 목록
+        List<DeliveryTakeBackProductInfo> takeBackProducts = queryFactory
+                .select(new QDeliveryTakeBackProductInfo(
+                        takeBackDetail.takeBackDetailId,
+                        product.productCode,
+                        product.productName,
+                        product.unitQuantity,
+                        product.unitSpec,
+                        product.storeType.stringValue(),
+                        takeBackDetail.quantity,
+                        takeBackDetail.price,
+                        takeBackDetail.takeBackReason,
+                        takeBackDetail.takeBackImage
+                ))
+                .from(delivery)
+                .join(takeBack).on(delivery.takeBackId.eq(takeBack.takeBackId))
+                .join(takeBackDetail).on(takeBack.takeBackId.eq(takeBackDetail.takeBackId))
+                .join(product).on(takeBackDetail.productId.eq(product.productId))
+                .where(delivery.deliveryId.eq(deliveryId))
+                .fetch();
+
         return DeliveryDetailResponse.builder()
                 .deliveryInfo(deliveryInfo)
                 .warehouseInfo(warehouseInfo)
                 .franchiseInfo(franchiseInfo)
                 .orderInfo(orderInfo)
                 .products(products)
+                .takeBackInfo(takeBackInfo)
+                .takeBackProducts(takeBackProducts)
                 .build();
     }
 
