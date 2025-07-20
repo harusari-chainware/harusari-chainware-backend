@@ -49,7 +49,7 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
                         takeBack.takeBackStatus,
                         takeBack.createdAt,
                         takeBack.modifiedAt,
-                        warehouse.warehouseName.coalesce(fallbackWarehouse.warehouseName), // ✅ fallback 처리
+                        warehouse.warehouseName.coalesce(fallbackWarehouse.warehouseName),
                         franchise.franchiseName,
                         member.name,
                         order.orderCode,
@@ -125,7 +125,7 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
 
                         warehouse.warehouseName,
                         warehouse.warehouseAddress,
-                        warehouseManager.name, // ✅ 창고 담당자 이름 // 이놈!!!!!!!!!!!!!!!!
+                        warehouseManager.name,
 
                         order.orderCode,
                         order.productCount,
@@ -135,10 +135,10 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
                 .from(takeBack)
                 .join(order).on(order.orderId.eq(takeBack.orderId))
                 .join(franchise).on(franchise.franchiseId.eq(order.franchiseId))
-                .join(franchiseManager).on(franchise.memberId.eq(franchiseManager.memberId)) // 가맹점 담당자
+                .join(franchiseManager).on(franchise.memberId.eq(franchiseManager.memberId))
                 .leftJoin(delivery).on(delivery.takeBackId.eq(takeBack.takeBackId))
                 .leftJoin(warehouse).on(warehouse.warehouseId.eq(delivery.warehouseId))
-                .leftJoin(warehouseManager).on(warehouse.memberId.eq(warehouseManager.memberId)) // ✅ 창고 담당자
+                .leftJoin(warehouseManager).on(warehouse.memberId.eq(warehouseManager.memberId))
                 .where(takeBack.takeBackId.eq(takeBackId))
                 .fetchOne();
 
@@ -170,17 +170,17 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
         FranchiseInfo franchiseInfo = new FranchiseInfo(
                 basic.get(franchise.franchiseName),
                 basic.get(franchise.franchiseAddress),
-                basic.get(franchise.franchiseContact),
-                basic.get(franchise.franchiseStatus),
                 basic.get(franchise.franchiseTaxId),
+                basic.get(franchise.franchiseStatus),
                 basic.get(franchiseManager.name),
-                basic.get(franchiseManager.phoneNumber)
+                basic.get(franchiseManager.phoneNumber),
+                basic.get(franchise.franchiseContact)
         );
 
         WarehouseInfo warehouseInfo = new WarehouseInfo(
                 basic.get(warehouse.warehouseName),
                 basic.get(warehouse.warehouseAddress),
-                basic.get(warehouseManager.name) // ✅ 이제 올바른 창고 담당자
+                basic.get(warehouseManager.name)
         );
 
         OrderInfo orderInfo = new OrderInfo(
