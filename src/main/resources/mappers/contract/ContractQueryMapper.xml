@@ -160,6 +160,7 @@
         <result property="vendorId"           column="vendor_id"/>
         <result property="vendorTaxId"           column="vendor_tax_id"/>
         <result property="vendorStatus"           column="vendor_status"/>
+        <result property="vendorType"           column="vendor_type"/>
         <result property="productId"          column="product_id"/>
         <result property="unitQuantity"       column="unit_quantity"/>
         <result property="unitSpec"           column="unit_spec"/>
@@ -190,6 +191,7 @@
         v.vendor_id,
         v.vendor_tax_id,
         v.vendor_status,
+        v.vendor_type,
         p.product_id,
         p.unit_quantity,
         p.unit_spec,
