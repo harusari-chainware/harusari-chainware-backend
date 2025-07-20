@@ -1,5 +1,6 @@
 package com.harusari.chainware.delivery.query.dto.response;
 
+import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryMethod;
 import com.harusari.chainware.delivery.command.domain.aggregate.DeliveryStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,6 +13,8 @@ public class DeliveryDetailInfo {
     private String trackingNumber;
     private String carrier;
     private DeliveryStatus deliveryStatus;
+    private DeliveryMethod deliveryMethod;
+    private LocalDateTime createdAt;
     private LocalDateTime startedAt;
     private LocalDateTime deliveredAt;
 }
