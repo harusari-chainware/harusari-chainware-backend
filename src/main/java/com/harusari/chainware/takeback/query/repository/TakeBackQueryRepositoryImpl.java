@@ -36,8 +36,10 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
 
     private final JPAQueryFactory queryFactory;
 
+    // 반품 목록 조회
     @Override
     public Page<TakeBackSearchResponse> searchTakeBackList(TakeBackSearchRequest request, Pageable pageable) {
+        // 별칭 추가
         QWarehouse fallbackWarehouse = new QWarehouse("fallbackWarehouse");
 
         BooleanExpression warehouseNameCondition = warehouseNameContains(request.warehouseName(), fallbackWarehouse);
@@ -106,8 +108,11 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
         return new PageImpl<>(contents, pageable, Optional.ofNullable(total).orElse(0L));
     }
 
+
+    // 반품 상세 조회
     @Override
     public TakeBackDetailResponse findTakeBackDetailById(Long takeBackId) {
+        // 별칭 부여
         QMember franchiseManager = new QMember("franchiseManager");
         QMember warehouseManager = new QMember("warehouseManager");
 
