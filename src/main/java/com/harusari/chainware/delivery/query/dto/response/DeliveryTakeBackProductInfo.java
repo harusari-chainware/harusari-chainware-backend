@@ -6,6 +6,7 @@ import lombok.Getter;
 
 @Getter
 public class DeliveryTakeBackProductInfo {
+    private Long takeBackDetailId;
     private String productCode;
     private String productName;
     private String unitQuantity;
@@ -18,10 +19,11 @@ public class DeliveryTakeBackProductInfo {
 
     @QueryProjection
     public DeliveryTakeBackProductInfo(
-            String productCode, String productName,
+            Long takeBackDetailId, String productCode, String productName,
             String unitQuantity, String unitSpec, String storeType,
             int quantity, int price, String takeBackReason, String takeBackImage
     ){
+        this.takeBackDetailId=takeBackDetailId;
         this.productCode=productCode;
         this.productName=productName;
         this.unitQuantity=unitQuantity;

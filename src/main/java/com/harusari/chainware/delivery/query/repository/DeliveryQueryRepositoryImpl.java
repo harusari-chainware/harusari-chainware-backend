@@ -181,6 +181,7 @@ public class DeliveryQueryRepositoryImpl implements DeliveryQueryRepositoryCusto
         // 5. 제품 목록
         List<DeliveryProductInfo> products = queryFactory
                 .select(Projections.constructor(DeliveryProductInfo.class,
+                        orderDetail.orderDetailId,
                         product.productCode,
                         product.productName,
                         product.unitQuantity,
@@ -226,6 +227,7 @@ public class DeliveryQueryRepositoryImpl implements DeliveryQueryRepositoryCusto
         // 7. 반품 상세 제품 목록
         List<DeliveryTakeBackProductInfo> takeBackProducts = queryFactory
                 .select(new QDeliveryTakeBackProductInfo(
+                        takeBackDetail.takeBackDetailId,
                         product.productCode,
                         product.productName,
                         product.unitQuantity,
