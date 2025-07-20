@@ -3,6 +3,7 @@ package com.harusari.chainware.contract.query.dto.response;
 import com.harusari.chainware.contract.command.domain.aggregate.ContractStatus;
 import com.harusari.chainware.product.command.domain.aggregate.StoreType;
 import com.harusari.chainware.vendor.command.domain.aggregate.VendorStatus;
+import com.harusari.chainware.vendor.command.domain.aggregate.VendorType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -26,6 +27,7 @@ public class VendorProductContractDto {
     private Long vendorId;
     private String vendorTaxId;
     private VendorStatus vendorStatus;
+    private VendorType vendorType;
     private Long productId;
     private String unitQuantity;
     private String unitSpec;
