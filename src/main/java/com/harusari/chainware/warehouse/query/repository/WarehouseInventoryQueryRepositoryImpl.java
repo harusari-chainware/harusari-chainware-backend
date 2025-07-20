@@ -60,6 +60,7 @@ public class WarehouseInventoryQueryRepositoryImpl implements WarehouseInventory
                         product.unitQuantity,
                         product.unitSpec,
                         warehouseInventory.quantity,
+                        warehouseInventory.safetyQuantity,
                         warehouseInventory.reservedQuantity,
                         warehouseInventory.createdAt,
                         warehouseInventory.modifiedAt
@@ -151,7 +152,8 @@ public class WarehouseInventoryQueryRepositoryImpl implements WarehouseInventory
         InventorySimpleInfo inventoryInfo = queryFactory
                 .select(new QInventorySimpleInfo(
                         warehouseInventory.quantity,
-                        warehouseInventory.reservedQuantity
+                        warehouseInventory.reservedQuantity,
+                        warehouseInventory.safetyQuantity
                 ))
                 .from(warehouseInventory)
                 .where(warehouseInventory.warehouseInventoryId.eq(warehouseInventoryId))

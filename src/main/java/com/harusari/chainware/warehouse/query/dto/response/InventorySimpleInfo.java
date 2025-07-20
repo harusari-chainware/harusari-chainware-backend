@@ -8,13 +8,15 @@ public class InventorySimpleInfo {
 
     private Integer quantity;
     private Integer reservedQuantity;
+    private Integer safetyQuantity;
 
     @QueryProjection
     public InventorySimpleInfo(
-            Integer quantity, Integer reservedQuantity
+            Integer quantity, Integer reservedQuantity, Integer safetyQuantity
     ) {
         this.quantity = quantity;
         this.reservedQuantity = reservedQuantity;
+        this.safetyQuantity = safetyQuantity;
     }
 
 }

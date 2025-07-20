@@ -17,6 +17,7 @@ public class WarehouseInventoryInfo {
     private String unitQuantity;
     private String unitSpec;
     private Integer quantity;
+    private Integer safetyQuantity;
     private Integer reservedQuantity;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
@@ -26,7 +27,7 @@ public class WarehouseInventoryInfo {
             Long warehouseInventoryId, Long warehouseId, String warehouseName,
             Long productId, String productCode, String productName,
             String unitQuantity, String unitSpec,
-            Integer quantity, Integer reservedQuantity,
+            Integer quantity,Integer safetyQuantity, Integer reservedQuantity,
             LocalDateTime createdAt, LocalDateTime modifiedAt
     ) {
         this.warehouseInventoryId = warehouseInventoryId;
@@ -38,6 +39,7 @@ public class WarehouseInventoryInfo {
         this.unitQuantity = unitQuantity;
         this.unitSpec = unitSpec;
         this.quantity = quantity;
+        this.safetyQuantity = safetyQuantity;
         this.reservedQuantity = reservedQuantity;
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
