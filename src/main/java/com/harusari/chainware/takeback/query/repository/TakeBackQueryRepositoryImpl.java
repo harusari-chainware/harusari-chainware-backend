@@ -42,6 +42,13 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
         // 별칭 추가
         QWarehouse fallbackWarehouse = new QWarehouse("fallbackWarehouse");
 
+        BooleanExpression warehouseNameCondition = warehouseNameContains(request.warehouseName(), fallbackWarehouse);
+        BooleanExpression warehouseAddressCondition = warehouseAddressContains(request.warehouseAddress());
+        BooleanExpression franchiseNameCondition = franchiseNameContains(request.franchiseName());
+        BooleanExpression takeBackStatusCondition = takeBackStatusEq(request.takeBackStatus());
+        BooleanExpression createdAtCondition = createdAtBetween(request.fromDate(), request.toDate());
+        BooleanExpression warehouseIdCondition = warehouseIdEq(request.warehouseId());
+
         List<TakeBackSearchResponse> contents = queryFactory
                 .select(new QTakeBackSearchResponse(
                         takeBack.takeBackId,
@@ -60,16 +67,17 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
                 .join(order).on(takeBack.orderId.eq(order.orderId))
                 .join(franchise).on(order.franchiseId.eq(franchise.franchiseId))
                 .join(member).on(franchise.memberId.eq(member.memberId))
-                .leftJoin(delivery).on(delivery.takeBackId.eq(takeBack.takeBackId))         // 수정된 부분
+                .leftJoin(delivery).on(delivery.takeBackId.eq(takeBack.takeBackId))
                 .leftJoin(warehouseOutbound).on(warehouseOutbound.deliveryId.eq(delivery.deliveryId))
                 .leftJoin(warehouse).on(warehouseOutbound.warehouseId.eq(warehouse.warehouseId))
-                .leftJoin(fallbackWarehouse).on(delivery.warehouseId.eq(fallbackWarehouse.warehouseId)) // fallback 조인
+                .leftJoin(fallbackWarehouse).on(delivery.warehouseId.eq(fallbackWarehouse.warehouseId))
                 .where(
-                        warehouseNameContains(request.getWarehouseName()),
-                        warehouseAddressContains(request.getWarehouseAddress()),
-                        franchiseNameContains(request.getFranchiseName()),
-                        takeBackStatusEq(request.getTakeBackStatus()),
-                        createdAtBetween(request.getFromDate(), request.getToDate())
+                        warehouseNameCondition,
+                        warehouseAddressCondition,
+                        franchiseNameCondition,
+                        takeBackStatusCondition,
+                        createdAtCondition,
+                        warehouseIdCondition
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -83,16 +91,17 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
                 .join(order).on(takeBack.orderId.eq(order.orderId))
                 .join(franchise).on(order.franchiseId.eq(franchise.franchiseId))
                 .join(member).on(franchise.memberId.eq(member.memberId))
-                .leftJoin(delivery).on(delivery.takeBackId.eq(takeBack.takeBackId))         // 수정된 부분
+                .leftJoin(delivery).on(delivery.takeBackId.eq(takeBack.takeBackId))
                 .leftJoin(warehouseOutbound).on(warehouseOutbound.deliveryId.eq(delivery.deliveryId))
                 .leftJoin(warehouse).on(warehouseOutbound.warehouseId.eq(warehouse.warehouseId))
-                .leftJoin(fallbackWarehouse).on(delivery.warehouseId.eq(fallbackWarehouse.warehouseId)) // fallback 조인
+                .leftJoin(fallbackWarehouse).on(delivery.warehouseId.eq(fallbackWarehouse.warehouseId))
                 .where(
-                        warehouseNameContains(request.getWarehouseName()),
-                        warehouseAddressContains(request.getWarehouseAddress()),
-                        franchiseNameContains(request.getFranchiseName()),
-                        takeBackStatusEq(request.getTakeBackStatus()),
-                        createdAtBetween(request.getFromDate(), request.getToDate())
+                        warehouseNameCondition,
+                        warehouseAddressCondition,
+                        franchiseNameCondition,
+                        takeBackStatusCondition,
+                        createdAtCondition,
+                        warehouseIdCondition
                 )
                 .fetchOne();
 
@@ -170,11 +179,11 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
         FranchiseInfo franchiseInfo = new FranchiseInfo(
                 basic.get(franchise.franchiseName),
                 basic.get(franchise.franchiseAddress),
-                basic.get(franchise.franchiseTaxId),
+                basic.get(franchise.franchiseContact),
                 basic.get(franchise.franchiseStatus),
+                basic.get(franchise.franchiseTaxId),
                 basic.get(franchiseManager.name),
-                basic.get(franchiseManager.phoneNumber),
-                basic.get(franchise.franchiseContact)
+                basic.get(franchiseManager.phoneNumber)
         );
 
         WarehouseInfo warehouseInfo = new WarehouseInfo(
@@ -199,8 +208,12 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
                 .build();
     }
 
-    private BooleanExpression warehouseNameContains(String name) {
-        return (name != null && !name.isBlank()) ? warehouse.warehouseName.containsIgnoreCase(name) : null;
+    private BooleanExpression warehouseNameContains(String name, QWarehouse fallbackWarehouse) {
+        if (name != null && !name.isBlank()) {
+            return warehouse.warehouseName.containsIgnoreCase(name)
+                    .or(fallbackWarehouse.warehouseName.containsIgnoreCase(name));
+        }
+        return null;
     }
 
     private BooleanExpression warehouseAddressContains(String keyword) {
@@ -227,4 +240,7 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
         return null;
     }
 
+    private BooleanExpression warehouseIdEq(Long warehouseId) {
+        return warehouseId != null ? delivery.warehouseId.eq(warehouseId) : null;
+    }
 }
