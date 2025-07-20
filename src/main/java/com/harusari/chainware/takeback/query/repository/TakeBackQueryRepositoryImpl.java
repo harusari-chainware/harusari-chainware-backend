@@ -112,7 +112,6 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
     // 반품 상세 조회
     @Override
     public TakeBackDetailResponse findTakeBackDetailById(Long takeBackId) {
-        // 별칭 부여
         QMember franchiseManager = new QMember("franchiseManager");
         QMember warehouseManager = new QMember("warehouseManager");
 
@@ -126,11 +125,11 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
 
                         franchise.franchiseName,
                         franchise.franchiseAddress,
-                        franchise.franchiseContact,
-                        franchise.franchiseStatus,
                         franchise.franchiseTaxId,
+                        franchise.franchiseStatus,
                         franchiseManager.name,
                         franchiseManager.phoneNumber,
+                        franchise.franchiseContact,
 
                         warehouse.warehouseName,
                         warehouse.warehouseAddress,
@@ -179,11 +178,11 @@ public class TakeBackQueryRepositoryImpl implements TakeBackQueryRepositoryCusto
         FranchiseInfo franchiseInfo = new FranchiseInfo(
                 basic.get(franchise.franchiseName),
                 basic.get(franchise.franchiseAddress),
-                basic.get(franchise.franchiseContact),
-                basic.get(franchise.franchiseStatus),
                 basic.get(franchise.franchiseTaxId),
+                basic.get(franchise.franchiseStatus),
                 basic.get(franchiseManager.name),
-                basic.get(franchiseManager.phoneNumber)
+                basic.get(franchiseManager.phoneNumber),
+                basic.get(franchise.franchiseContact)
         );
 
         WarehouseInfo warehouseInfo = new WarehouseInfo(
